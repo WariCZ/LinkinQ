@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+    --foreground-rgb: 0, 0, 0;
+    --background-start-rgb: 214, 219, 220;
+    --background-end-rgb: 255, 255, 255;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --foreground-rgb: 255, 255, 255;
+      --background-start-rgb: 0, 0, 0;
+      --background-end-rgb: 0, 0, 0;
+    }
+  }
+  
+  .focus\:ring-4:focus {
+    box-shadow: none !important;
+  }
+  
+  g.Completed > .djs-visual > rect, .Completed > .djs-visual > circle, .Completed > .djs-visual > polygon {
+    stroke: green !important;
+    fill: #e9f1e8 !important;
+  }
+  
+  g.Completed > .djs-visual > path {
+    stroke: green !important;
+  }
+  
+  g.Pending > .djs-visual > rect, .Pending > .djs-visual > circle, .Pending > .djs-visual > polygon {
+    stroke: orange !important;
+    fill: #dbd9a8 !important;
+  }
