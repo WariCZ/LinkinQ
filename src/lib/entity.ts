@@ -1,8 +1,9 @@
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import axios from "axios";
 import { db, MAIN_ID } from "./knex";
 import { apiError } from "./logger";
 import _ from "lodash";
+import passport from "passport";
 
 const router = express.Router();
 
@@ -16,7 +17,7 @@ type SelectEntityType = {
 };
 
 const whereQueries = ({ entity, where }: SelectEntityType) => {
-  const modelFields = global.prodigi.entityModel[entity];
+  const modelFields = (global as any).prodigi.entityModel[entity];
   if (!modelFields) {
     throw new Error(`Entity ${entity} not found in Metamodel`);
   }
@@ -119,7 +120,7 @@ const whereQueries = ({ entity, where }: SelectEntityType) => {
 
 const getQueries = ({ entity, fieldsArr, where }: SelectEntityType) => {
   if (fieldsArr[0] !== "*") {
-    const modelFields: any = global.prodigi.entityModel[entity];
+    const modelFields: any = (global as any).prodigi.entityModel[entity];
     if (!modelFields) {
       throw new Error(`Entity ${entity} not found in Metamodel`);
     }
@@ -325,54 +326,59 @@ const getData = async ({
   return data;
 };
 
-router.get("/:entity", async (req: Request, res: Response) => {
-  try {
-    if (req.user) {
-      var entity = req.params.entity;
-      if (entity) {
-        if (await db.schema.hasTable(entity)) {
-          try {
-            // res.json({
-            //   message: "This is a protected route sdawdwa",
-            //   user: req.user,
-            //   entity: req.params.entity,
-            //   query: req.query,
-            // });
-            const fields = (req.query.__fields || "*") as string;
+router.get(
+  "/:entity",
+  passport.authenticate("basic", { session: false }),
+  async (req: Request, res: Response) => {
+    try {
+      debugger;
+      if (req.user) {
+        var entity = req.params.entity;
+        if (entity) {
+          if (await db.schema.hasTable(entity)) {
+            try {
+              // res.json({
+              //   message: "This is a protected route sdawdwa",
+              //   user: req.user,
+              //   entity: req.params.entity,
+              //   query: req.query,
+              // });
+              const fields = (req.query.__fields || "*") as string;
 
-            console.log("fieldsArr", fields.split(","));
-            console.log(
-              "where",
-              _.omit(req.query as any, ["entity", "__fields"])
-            );
-            const queries = getQueries({
-              entity,
-              fieldsArr: fields.split(","),
-              where: _.omit(req.query as any, ["entity", "__fields"]),
-            });
-            console.log("queries", queries);
-            const data = await getData(queries);
+              console.log("fieldsArr", fields.split(","));
+              console.log(
+                "where",
+                _.omit(req.query as any, ["entity", "__fields"])
+              );
+              const queries = getQueries({
+                entity,
+                fieldsArr: fields.split(","),
+                where: _.omit(req.query as any, ["entity", "__fields"]),
+              });
+              console.log("queries", queries);
+              const data = await getData(queries);
 
-            console.log("data", data);
-            return res.json(data);
-          } catch (e: any) {
-            console.error(e);
-            //TODO: Stalo by za uvahu nejakym zpusobem chybu omezit aby se neposilala chyba takto detailne
-            return apiError({ res, error: e.message });
+              console.log("data", data);
+              return res.json(data);
+            } catch (e: any) {
+              console.error(e);
+              //TODO: Stalo by za uvahu nejakym zpusobem chybu omezit aby se neposilala chyba takto detailne
+              return apiError({ res, error: e.message });
+            }
+          } else {
+            apiError({ res, error: `Entity ${entity} not exists` });
           }
         } else {
-          apiError({ res, error: `Entity ${entity} not exists` });
+          apiError({ res, error: `Entity not found` });
         }
       } else {
-        apiError({ res, error: `Entity not found` });
+        res.sendStatus(401);
       }
-    } else {
-      res.sendStatus(401);
+    } catch (error) {
+      console.error("Error fetching data from external API:", error);
+      res.status(500).send("Error fetching data from external API");
     }
-  } catch (error) {
-    console.error("Error fetching data from external API:", error);
-    res.status(500).send("Error fetching data from external API");
   }
-});
+);
 
 export default router;

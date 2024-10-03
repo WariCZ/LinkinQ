@@ -46,6 +46,19 @@ async function createData({ db, data }: { db: Knex; data: Object }) {
       }
     });
   });
+
+  await db("users").insert([
+    { caption: "user1", fullname: "user1", createdby: 1, updatedby: 1 },
+    { caption: "user2", fullname: "user2", createdby: 1, updatedby: 1 },
+  ]);
+  await db("users")
+    .update({ caption: "user1 Update" })
+    .where({ caption: "user1" });
+
+  await db("users")
+    .where({ caption: "user1 Update" })
+    .orWhere({ caption: "user2" })
+    .delete();
 }
 
 export async function createEntity({ entityName }: { entityName: string }) {
@@ -128,14 +141,14 @@ export async function createField({
   const MAIN_ID = "id";
   //   console.log("columnName: ", columnName);
   if (await db.schema.hasColumn(tableName, columnName)) {
-    logger.log(
-      "info",
-      `  Sloupec ${columnName} již existuje v tabulce ${tableName}.`
-    );
+    // logger.log(
+    //   "info",
+    //   `  Sloupec ${columnName} již existuje v tabulce ${tableName}.`
+    // );
   } else {
     // const columnDef = fields[columnName];
 
-    await db.schema.alterTable(tableName, async (table) => {
+    await db.schema.alterTable(tableName, async (table: any) => {
       let column;
       if (columnDef.type == "text") {
         column = table.text(columnName);
@@ -178,7 +191,7 @@ export async function createField({
           ) {
             await db.schema.createTable(
               tableName + "2" + rel[1] + "4" + columnName,
-              (table) => {
+              (table: any) => {
                 table.bigIncrements(MAIN_ID).primary();
                 table.bigint("source");
                 table.bigint("target");
@@ -258,7 +271,7 @@ export async function createTable({
   } else {
     logger.log("info", `Tabulka ${tableName} již existuje.`);
   }
-  
+
   const fields = {
     ...defaultFields(tableName),
     ...tableFields,
@@ -303,7 +316,7 @@ async function getTablesAndColumns(db: Knex) {
       )
       .from("information_schema.columns")
       .where("table_schema", "public"); // Pokud používáte schéma, upravte podle potřeby
-      
+
     const tables: EntitySchema = {}; // Objekt pro ukládání tabulek a jejich sloupců
 
     for (const row of tableData) {
@@ -411,7 +424,6 @@ function findDifferences(
 
 export const checkSchema = async (force?: string) => {
   if (!global.prodigi || force) {
-    
     const schema = await prepareSchema(db, [defaultEntities()]);
 
     global.prodigi = {
@@ -455,7 +467,7 @@ export const prepareSchema = async (
 
   //TODO: spravne zmergovat DB a schema
   const actualDBSchema: any = await getTablesAndColumns(db);
-  
+
   const schemaDefinition = schemaDefinitions[0];
 
   const entityDef = addDefaultFields(schemaDefinition);

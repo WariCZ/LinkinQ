@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
+import { BasicStrategy } from "passport-http";
 import { db } from "../lib/knex";
 
 const router = express.Router();
@@ -11,7 +12,7 @@ const SECRET_KEY = "your_jwt_secret_key";
 router.use(passport.initialize());
 
 passport.use(
-  new LocalStrategy(async (username, password, done) => {
+  new BasicStrategy(async (username, password, done) => {
     var dbUser = await db("users")
       .select("fullname", "email", "id", "guid")
       .where({
@@ -28,7 +29,7 @@ passport.use(
       };
       return done(null, user);
     } else {
-      return done(null, false, { message: "Incorrect username or password." });
+      return done(null, false); //  { message: "Incorrect username or password." }
     }
   })
 );

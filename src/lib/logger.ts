@@ -28,7 +28,7 @@ export const apiError = ({
   userError?: string;
   res: Response;
 }) => {
-  logger.log("error", error);
+  logger.error(error);
   res.status(code || 400).json({ error: userError || error });
 };
 
