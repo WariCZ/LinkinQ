@@ -127,13 +127,11 @@ export class Entity {
     columnName,
     columnDef,
     actualDBSchema,
-    createLinks,
   }: {
     tableName: string;
     columnName: string;
     columnDef: FieldType;
     actualDBSchema: EntitySchema;
-    createLinks: boolean;
   }) {
     if (columnName == this.MAIN_ID) {
       return;
@@ -253,11 +251,7 @@ export class Entity {
           `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ ${columnDef.type}.`
         );
       }
-      //   console.log("DDD", columnName, this.MAIN_ID);
-      if (column && columnName == this.MAIN_ID) {
-        // console.log("TUX");
-        column.primary();
-      }
+
       if (column && columnDef.isUnique) {
         column.unique({
           indexName: columnName + "_ukey",
@@ -300,17 +294,7 @@ export class Entity {
     // }
   }
 
-  async createTable({
-    tableName,
-    tableFields,
-    actualDBSchema,
-    createLinks,
-  }: {
-    tableName: string;
-    tableFields?: Record<string, FieldType>;
-    actualDBSchema: EntitySchema;
-    createLinks: boolean;
-  }) {
+  async createTable({ tableName }: { tableName: string }) {
     // Zjistim zda tabulka existuje
     if (!(await this.db.schema.hasTable(tableName))) {
       await this.db.schema.createTable(tableName, async (table) => {
@@ -322,55 +306,37 @@ export class Entity {
     } else {
       // logger.info(`Tabulka ${tableName} již existuje.`);
     }
-
-    const fields = {
-      // ...defaultFields(tableName),
-      ...tableFields,
-    };
-    //
-    // Zacnu pridavat sloupce
-    // TODO: linkovane sloupce mohu delat az jsou vytvorene tabulk
-    const linksFields: Record<string, EntityType> = {};
-    for (const columnName in fields) {
-      if (!fields[columnName].type?.match(/link\(\w+\)$/) || createLinks) {
-        await this.createField({
-          tableName,
-          columnName: columnName,
-          columnDef: fields[columnName],
-          actualDBSchema: actualDBSchema,
-          createLinks: createLinks,
-        });
-      } else {
-        if (!linksFields[tableName]) {
-          linksFields[tableName] = { fields: {} };
-        }
-        linksFields[tableName].fields[columnName] = fields[columnName];
-      }
-    }
-
-    return linksFields;
   }
 
   async createTables({
     schemaDefinition,
     actualDBSchema,
-    createLinks,
   }: {
     schemaDefinition: EntitySchema;
     actualDBSchema: EntitySchema;
-    createLinks: boolean;
   }) {
-    let linksFields: Record<string, EntityType> = {};
     for (const tableName in schemaDefinition) {
-      const newLinkedFields = await this.createTable({
+      await this.createTable({
         tableName,
-        tableFields: schemaDefinition[tableName].fields,
-        actualDBSchema: actualDBSchema,
-        createLinks: createLinks,
       });
-      linksFields = _.merge(linksFields, newLinkedFields);
     }
-    return linksFields;
+
+    for (const tableName in schemaDefinition) {
+      const fields = {
+        ...schemaDefinition[tableName].fields,
+      };
+
+      // Zacnu pridavat sloupce
+      logger.info(`Kontrola sloupcu pro tabulku ${tableName}`);
+      for (const columnName in fields) {
+        await this.createField({
+          tableName,
+          columnName: columnName,
+          columnDef: fields[columnName],
+          actualDBSchema: actualDBSchema,
+        });
+      }
+    }
   }
 
   async createData({ data }: { data: Object }) {
@@ -447,19 +413,10 @@ export class Entity {
 
     const differencesAdd = findDifferences(actualDBSchema, entityDef);
 
-    const linksFields = await this.createTables({
+    await this.createTables({
       schemaDefinition: differencesAdd,
       actualDBSchema: actualDBSchema,
-      createLinks: false,
     });
-
-    if (_.keys(linksFields).length > 0) {
-      await this.createTables({
-        schemaDefinition: linksFields,
-        actualDBSchema: actualDBSchema,
-        createLinks: true,
-      });
-    }
 
     await this.createData({ data: defaultData() });
 

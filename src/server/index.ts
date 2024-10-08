@@ -68,7 +68,7 @@ export class WebApp {
         // // //
         // logger.error(e.message);
         // logger.error(e.stack);
-        //
+        // //
         logger.error(e);
       });
 
