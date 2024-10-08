@@ -35,6 +35,6 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/pages/api/entity/sse.ts"
-  ],
+, "src/lib/entity/manageEntities.ts.old"  ],
   "exclude": ["node_modules", "src/lib/bpmn-web/datastore"]
 }

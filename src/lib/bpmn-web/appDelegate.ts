@@ -13,7 +13,7 @@ const MULTI_APP_SERVICES = false;
 
 // const nodemailer = require("nodemailer");
 
-console.log("appDelegate from ", __filename);
+// logger.info("appDelegate from ", __filename);
 
 class MyAppDelegate extends DefaultAppDelegate {
   winSocket: any;
@@ -58,7 +58,7 @@ class MyAppDelegate extends DefaultAppDelegate {
       return;
     }
 
-    console.log("myserver started");
+    console.log("Bpmn-web started");
 
     var query = { "items.status": "start" };
     var list = await this.server.dataStore.findItems(query);

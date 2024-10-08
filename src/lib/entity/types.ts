@@ -5,8 +5,8 @@ export type EntityType = {
   fields: Record<string, FieldType>;
 };
 export type FieldType = {
-  type: string;
-  label: string;
+  type?: string;
+  label?: string;
   name?: string;
   description?: string;
   isRequired?: boolean;
@@ -15,4 +15,5 @@ export type FieldType = {
   isArray?: boolean;
   isUnique?: boolean;
   readonly?: boolean;
+  system?: boolean;
 };

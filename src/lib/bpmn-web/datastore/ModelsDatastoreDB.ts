@@ -160,7 +160,7 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
 
     await definition.load();
     model.parse(definition);
-    debugger;
+
     await this.db(Definition_collection)
       .where({ name: model.name })
       .update({ events: model.events });
@@ -171,9 +171,26 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
 
   async saveModel(model: IBpmnModelData, owner = null): Promise<boolean> {
     model.saved = new Date();
-    await this.db(Definition_collection)
-      .where({ name: model.name, owner: owner })
-      .update({
+
+    debugger;
+    const existingRecord = await this.db(Definition_collection)
+      .where({ name: model.name })
+      .first();
+
+    if (existingRecord) {
+      await this.db(Definition_collection)
+        .where({ name: model.name })
+        .update({
+          name: model.name,
+          owner: owner,
+          saved: model.saved,
+          source: model.source,
+          svg: model.svg,
+          processes: JSON.stringify(model.processes),
+          events: JSON.stringify(model.events),
+        });
+    } else {
+      await this.db(Definition_collection).insert({
         name: model.name,
         owner: owner,
         saved: model.saved,
@@ -182,6 +199,7 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
         processes: JSON.stringify(model.processes),
         events: JSON.stringify(model.events),
       });
+    }
     return true;
   }
 

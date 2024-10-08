@@ -17,6 +17,25 @@ const logger = winston.createLogger({
   ],
 });
 
+// Přepis console.log
+console.log = function (message) {
+  logger.info(message);
+};
+
+// Přepis console.error
+console.error = function (message) {
+  logger.error(message);
+};
+
+// Přepis dalších funkcí dle potřeby (např. console.warn, console.debug)
+console.warn = function (message) {
+  logger.warn(message);
+};
+
+console.debug = function (message) {
+  logger.debug(message);
+};
+
 export const apiError = ({
   error,
   code,

@@ -13,48 +13,27 @@ import authRoutes from "../lib/auth";
 import { EntitySchema } from "../lib/entity/types";
 import { BPMNServer, configuration } from "../lib/bpmn-web";
 
-import {
-  checkSchema,
-  createEntity,
-  deleteEntity,
-  createFieldTable,
-  createField,
-} from "../lib/entity/manageEntities";
-
 import { up } from "../lib/bpmn-web/migration";
+import { Entity } from "../lib/entity/";
 
 dotenv.config();
 
-// declare global {
-//   var prodigi: {
-//     entityModel: EntitySchema;
-//   };
-// }
-
 // const schema = checkSchema();
 // console.log("schema", schema);
-
-// const app = express();
-// const PORT = parseInt(process.env.PORT || "3131", 10);
-
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(cookieParser());
 
 // app.use("/", authRoutes);
 
 // app.use("/entity", entityRoutes);
 
-// app.get("/protected2", (req: Request, res: Response) => {
-//   res.json({ message: "This is a protected route", user: req.user });
-// });
-
-// ViteExpress.listen(app, PORT, () =>
-//   console.log(`Server is listening port ${PORT}...`)
-// );
+declare global {
+  var prodigi: {
+    entityModel: EntitySchema;
+  };
+}
 
 export class WebApp {
   app: Express;
+  entity: Entity;
   // userManager;
   bpmnServer: any;
   packageJson;
@@ -66,7 +45,7 @@ export class WebApp {
     if (fs.existsSync(configPath)) {
       this.packageJson = JSON.parse(fs.readFileSync(configPath, "utf8"));
       var _version = this.packageJson["version"];
-      console.log("Prodigi-node version " + _version);
+      logger.info("Prodigi-node version " + _version);
     }
 
     this.app = this.initExpress();
@@ -74,11 +53,31 @@ export class WebApp {
     // this.userManager = new UserManager(this.app);
 
     // this.userManager.init();
-    console.log(configuration);
-    this.bpmnServer = new BPMNServer(configuration);
-    // this.bpmnServer.appDelegate..winSocket = null;
+    this.bpmnServer = new BPMNServer(configuration, logger as any);
 
-    this.setupExpress();
+    this.entity = new Entity();
+
+    this.entity
+      .setSchema()
+      .then((schema) => {
+        logger.debug("Call setupExpress");
+        this.setupExpress();
+      })
+      .catch((e) => {
+        debugger;
+        // // //
+        // logger.error(e.message);
+        // logger.error(e.stack);
+        //
+        logger.error(e);
+      });
+
+    //
+    // this.bpmnServer.appDelegate..winSocket = null;
+    // checkSchema().then((schema) => {
+    //   logger.debug("Call setupExpress");
+    //   this.setupExpress();
+    // });
   }
 
   initExpress() {
@@ -95,7 +94,7 @@ export class WebApp {
 
     app.use(bodyParser.json({ limit: "200mb" }));
     app.use(bodyParser.urlencoded({ limit: "200mb", extended: true }));
-    // app.use(cookieParser());
+    app.use(cookieParser());
 
     // app.use(busboy());
 
@@ -114,30 +113,32 @@ export class WebApp {
       // only use in development
     } else {
       app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-        console.error(err);
+        logger.error(err);
         res.status(500).send("Server Error");
       });
     }
 
-    // up(db).then(() => {
     ViteExpress.listen(app, app.get("port"), () => {
-      console.log(
+      logger.info(
         "App is running at http://localhost:%s in %s mode",
         app.get("port"),
         app.get("env")
       );
-      console.log("  Press CTRL-C to stop\n");
+      logger.info("  Press CTRL-C to stop\n");
     });
-    // });
 
     return app;
   }
 
   setupRoutes() {
-    var router = express.Router();
     var root = path.join(__dirname, "../");
 
-    router.get("/protected2", (req: Request, res: Response) => {
+    const app = this.app;
+
+    app.use("/", authRoutes);
+    app.use("/entity", entityRoutes);
+
+    app.get("/protected2", (req: Request, res: Response) => {
       res.json({ message: "This is a protected route", user: req.user });
     });
   }
@@ -151,7 +152,6 @@ export class WebApp {
 function setupEnvVars() {
   dotenv.config();
   var argv = process.argv;
-  var args = {};
   for (let i = 2; i < argv.length; i++) {
     const key = argv[i];
     const val = argv[++i];
