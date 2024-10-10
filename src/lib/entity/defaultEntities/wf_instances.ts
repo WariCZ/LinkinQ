@@ -1,0 +1,198 @@
+import { EntitySchema } from "../types";
+const entityFields: EntitySchema = {
+  wf_instances: {
+    system: true,
+    withoutDefaultFields: true,
+    fields: {
+      id: {
+        type: "uuid",
+        isRequired: true,
+        label: "Unique ID",
+        description: "Unique Identifier for the record",
+        system: true,
+      },
+      itemKey: {
+        type: "text",
+        label: "Item Key",
+        description: "Application assigned key",
+        system: true,
+      },
+      elementId: {
+        type: "text",
+        label: "Element ID",
+        description: "BPMN element identifier",
+        system: true,
+      },
+      name: {
+        type: "text",
+        label: "Name",
+        description: "Name of BPMN element",
+        system: true,
+      },
+      type: {
+        type: "text",
+        label: "Type",
+        description: "BPMN element type",
+        system: true,
+      },
+      instanceId: {
+        type: "text",
+        label: "Instance ID",
+        description: "Instance ID of the item",
+        system: true,
+      },
+      processName: {
+        type: "text",
+        label: "Process Name",
+        description: "Process name associated with the item",
+        system: true,
+      },
+      tokenId: {
+        type: "text",
+        label: "Token ID",
+        description: "Execution Token",
+        system: true,
+      },
+      userName: {
+        type: "text",
+        label: "User Name",
+        description: "Name of the user",
+        system: true,
+      },
+      startedAt: {
+        type: "datetime",
+        label: "Start Time",
+        description: "Date and time when the item started",
+        system: true,
+      },
+      endedAt: {
+        type: "datetime",
+        label: "End Time",
+        description: "Date and time when the item ended",
+        system: true,
+      },
+      seq: {
+        type: "text",
+        label: "Sequence",
+        description: "Sequence of the element",
+        system: true,
+      },
+      timeDue: {
+        type: "datetime",
+        label: "Due Time",
+        description: "Due date and time",
+        system: true,
+      },
+      status: {
+        type: "text",
+        label: "Status",
+        description: "Status of the element",
+        system: true,
+      },
+      messageId: {
+        type: "text",
+        label: "Message ID",
+        description: "Identifier for messages",
+        system: true,
+      },
+      signalId: {
+        type: "text",
+        label: "Signal ID",
+        description: "Identifier for signals",
+        system: true,
+      },
+      vars: {
+        type: "jsonb",
+        label: "Variables",
+        description: "JSON data for variables",
+        system: true,
+      },
+      items: {
+        type: "jsonb",
+        label: "Items",
+        description: "JSON data for items",
+        system: true,
+      },
+      data: {
+        type: "jsonb",
+        label: "Data",
+        description: "Additional JSON data",
+        system: true,
+      },
+      assignee: {
+        type: "text",
+        label: "Assignee",
+        description: "User assigned to the task",
+        system: true,
+      },
+      candidateGroups: {
+        type: "text",
+        label: "Candidate Groups",
+        description: "Groups eligible for the task",
+        system: true,
+      },
+      candidateUsers: {
+        type: "text",
+        label: "Candidate Users",
+        description: "Users eligible for the task",
+        system: true,
+      },
+      version: {
+        type: "text",
+        label: "Version",
+        description: "Version of the item",
+        system: true,
+      },
+      tokens: {
+        type: "text",
+        label: "Tokens",
+        description: "Tokens associated with the element",
+        system: true,
+      },
+      loops: {
+        type: "jsonb",
+        label: "Loops",
+        description: "JSON data for loops",
+        system: true,
+      },
+      logs: {
+        type: "jsonb",
+        label: "Logs",
+        description: "JSON data for logs",
+        system: true,
+      },
+      savePoints: {
+        type: "jsonb",
+        label: "Save Points",
+        description: "JSON data for save points",
+        system: true,
+      },
+      saved: {
+        type: "datetime",
+        label: "Save Time",
+        description: "Date and time when the item was saved",
+        system: true,
+      },
+      dueDate: {
+        type: "datetime",
+        label: "Due Date",
+        description: "Due date for the task",
+        system: true,
+      },
+      followUpDate: {
+        type: "datetime",
+        label: "Follow-Up Date",
+        description: "Follow-up date for the task",
+        system: true,
+      },
+      priority: {
+        type: "text",
+        label: "Priority",
+        description: "Priority level",
+        system: true,
+      },
+    },
+  },
+};
+
+export default entityFields;

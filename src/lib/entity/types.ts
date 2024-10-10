@@ -2,6 +2,8 @@ export type EntitySchema = Record<string, EntityType>;
 
 export type EntityType = {
   system?: boolean;
+  withoutDefaultFields?: boolean;
+  workflow?: boolean;
   fields: Record<string, FieldType>;
 };
 export type FieldType = {
@@ -17,3 +19,5 @@ export type FieldType = {
   readonly?: boolean;
   system?: boolean;
 };
+
+export type DbSchemaType = { tables: EntitySchema; foreignKeys: string[] };

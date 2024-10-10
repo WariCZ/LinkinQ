@@ -17,23 +17,32 @@ const logger = winston.createLogger({
   ],
 });
 
+const printArgv = (argv: any) => {
+  return argv.map((a: any) => {
+    if (typeof a == "object") {
+      return JSON.stringify(a);
+    } else {
+      return a;
+    }
+  });
+};
 // Přepis console.log
-console.log = function (message) {
-  logger.info(message);
+console.log = function (...argv) {
+  logger.info(printArgv(argv));
 };
 
 // Přepis console.error
-console.error = function (message) {
-  logger.error(message);
+console.error = function (...argv) {
+  logger.error(printArgv(argv));
 };
 
 // Přepis dalších funkcí dle potřeby (např. console.warn, console.debug)
-console.warn = function (message) {
-  logger.warn(message);
+console.warn = function (...argv) {
+  logger.warn(printArgv(argv));
 };
 
-console.debug = function (message) {
-  logger.debug(message);
+console.debug = function (...argv) {
+  logger.debug(printArgv(argv));
 };
 
 export const apiError = ({

@@ -1,4 +1,12 @@
-import { FieldType, EntitySchema } from "./types";
+import { FieldType, EntitySchema } from "../types";
+
+import users from "./users";
+import userroles from "./userroles";
+import wf_events from "./wf_events";
+import wf_instances from "./wf_instances";
+import wf_locks from "./wf_locks";
+import wf_model from "./wf_models";
+import lov from "./lov";
 
 export const defaultExecute = () => {
   return ['CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'];
@@ -28,7 +36,7 @@ export const defaultFields = (entity: string): Record<string, FieldType> => ({
     system: true,
   },
   id: {
-    type: "bigIncrements",
+    type: "bigint",
     isRequired: true,
     label: "ID",
     description: "ID record",
@@ -86,70 +94,36 @@ export const defaultFields = (entity: string): Record<string, FieldType> => ({
     system: true,
     default: "now()",
   },
-  // workflow: {
-  //   type: "text",
-  //   label: "Workflow",
-  //   description: "Workflow name",
-  // },
-  // workflowInstance: {
-  //   type: "text",
-  //   label: "Workflow instance",
-  //   description: "Workflow instance",
-  // },
 });
 
-export const defaultEntities = (): EntitySchema => ({
-  users: {
-    system: true,
-    fields: {
-      fullname: {
-        type: "text",
-        label: "Fullname",
-        isRequired: true,
-        description: "Fullname",
-      },
-      password: {
-        type: "password",
-        label: "Password",
-        description: "Password",
-      },
-      email: {
-        type: "text",
-        label: "Email",
-        description: "Email",
-      },
-      roles: {
-        type: `link(roles)`,
-        label: "Roles",
-        description: "Roles",
-      },
-    },
+export const workflowFields = (): Record<string, FieldType> => ({
+  workflow: {
+    type: "text",
+    label: "Workflow",
+    description: "Workflow name",
   },
-  roles: {
-    system: true,
-    fields: {
-      key: {
-        type: "text",
-        label: "Key",
-        isRequired: true,
-        description: "Key",
-      },
-    },
+  workflowInstance: {
+    type: "text",
+    label: "Workflow instance",
+    description: "Workflow instance",
   },
 });
+
+export const defaultEntities = (): EntitySchema => {
+  return {
+    ...users.entityFields,
+    ...userroles,
+    ...lov.entityFields,
+    ...wf_events,
+    ...wf_instances,
+    ...wf_locks,
+    ...wf_model,
+  };
+};
 
 export const defaultData = () => {
   return {
-    users: [
-      {
-        guid: "9500b584-fa8a-4a3c-8f94-92f2221db78b",
-        caption: "admin",
-        fullname: "admin",
-        email: "admin@admin.cz",
-        password: "Vorvan5678x",
-        createdby: 1,
-        updatedby: 1,
-      },
-    ],
+    ...users.defaultData,
+    ...lov.defaultData,
   };
 };

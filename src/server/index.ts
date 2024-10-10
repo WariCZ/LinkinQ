@@ -7,13 +7,11 @@ import dotenv from "dotenv";
 import path from "path";
 
 import logger from "../lib/logger";
-import { db } from "../lib/knex";
 import entityRoutes from "../lib/entity";
 import authRoutes from "../lib/auth";
 import { EntitySchema } from "../lib/entity/types";
 import { BPMNServer, configuration } from "../lib/bpmn-web";
 
-import { up } from "../lib/bpmn-web/migration";
 import { Entity } from "../lib/entity/";
 
 dotenv.config();
@@ -53,23 +51,23 @@ export class WebApp {
     // this.userManager = new UserManager(this.app);
 
     // this.userManager.init();
-    this.bpmnServer = new BPMNServer(configuration, logger as any);
 
     this.entity = new Entity();
 
     this.entity
       .setSchema()
       .then((schema) => {
-        logger.debug("Call setupExpress");
+        logger.debug("Call setupExpress -------------------");
+        this.bpmnServer = new BPMNServer(configuration, logger as any);
         this.setupExpress();
       })
       .catch((e) => {
         debugger;
         // // //
         // logger.error(e.message);
-        // logger.error(e.stack);
-        // //
         logger.error(e);
+        if (e.stack) logger.error(e.stack);
+        // //
       });
 
     //
