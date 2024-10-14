@@ -7,7 +7,7 @@ import dotenv from "dotenv";
 import path from "path";
 
 import logger from "../lib/logger";
-import entityRoutes from "../lib/entity";
+import { EntityRoutes } from "../lib/entity/routes";
 import authRoutes from "../lib/auth";
 import { EntitySchema } from "../lib/entity/types";
 import { BPMNServer, configuration } from "../lib/bpmn-web";
@@ -31,7 +31,7 @@ declare global {
 
 export class WebApp {
   app: Express;
-  entity: Entity;
+  entity: EntityRoutes;
   // userManager;
   bpmnServer: any;
   packageJson;
@@ -52,10 +52,10 @@ export class WebApp {
 
     // this.userManager.init();
 
-    this.entity = new Entity();
+    this.entity = new EntityRoutes();
 
     this.entity
-      .setSchema()
+      .initSchema()
       .then((schema) => {
         logger.debug("Call setupExpress -------------------");
         this.bpmnServer = new BPMNServer(configuration, logger as any);
@@ -134,7 +134,7 @@ export class WebApp {
     const app = this.app;
 
     app.use("/", authRoutes);
-    app.use("/entity", entityRoutes);
+    app.use("/entity", this.entity.config());
 
     app.get("/protected2", (req: Request, res: Response) => {
       res.json({ message: "This is a protected route", user: req.user });

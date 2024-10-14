@@ -7,7 +7,7 @@ export type EntityType = {
   fields: Record<string, FieldType>;
 };
 export type FieldType = {
-  type?: string;
+  type: string;
   label?: string;
   name?: string;
   description?: string;

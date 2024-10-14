@@ -13,12 +13,11 @@ import { defaultData, defaultEntities, defaultFields } from "./defaultEntities";
 import logger from "../logger";
 
 export class Entity {
-  schema: EntitySchema;
   db: Knex;
   MAIN_ID: string = "id";
+  GUID_ID: string = "guid";
 
   constructor() {
-    this.schema = {};
     this.db = knexDB;
   }
 
@@ -416,8 +415,7 @@ export class Entity {
     }
   }
 
-  //
-  async setSchema() {
+  async prepareSchema() {
     await this.defaultExecute().map(async (e) => {
       await this.db.raw(e);
     });
@@ -435,20 +433,6 @@ export class Entity {
     // return;
     // debugger;
     //
-    // let column: Knex.ColumnBuilder | undefined = undefined;
-    // await this.db.schema.alterTable("users", async (table) => {
-    //   // await this.db.schema.alterTable(tableName, async (table) => {
-    //   // Vytvoříme sloupec
-    //   column = table.text("fullname");
-
-    //   // Přidáme komentář, pokud máme definici komentáře
-    //   column.comment("DDDWQCVEDVV dwae ");
-
-    //   // Zavoláme alter, abychom sloupec upravili
-    //   // column.alter();
-    // });
-    // debugger;
-
     const schemaDefinition = defaultEntities();
 
     const entityDef = addDefaultFields(schemaDefinition);
@@ -463,13 +447,10 @@ export class Entity {
       schemaDefinition: differencesAdd,
       actualDBSchema: actualDBSchema,
     });
-    console.log("After Call createTables");
-    // await wait(5000);
-    console.log("Call createData");
     await this.createData({ data: defaultData(), entityDef });
 
-    console.log("After Call createData");
-    await wait(5000); // //
-    return actualDBSchema;
+    await wait(2000); // //
+
+    return entityDef;
   }
 }

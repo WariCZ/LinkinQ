@@ -106,7 +106,7 @@ export const findDifferences = (
             // differences[key] = diff;
             if (!differences[tableName])
               differences[tableName] = { fields: {} };
-            differences[tableName].fields[key] = { ...diff };
+            differences[tableName].fields[key] = { ...diff } as any;
           }
         }
       });

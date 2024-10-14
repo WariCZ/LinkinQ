@@ -5,6 +5,20 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { BasicStrategy } from "passport-http";
 import { db } from "../lib/knex";
 
+export type User = {
+  id: number;
+  fullname: string;
+  email: string;
+  name: string;
+  guid: string;
+  // další vlastnosti podle potřeby
+};
+
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: User;
+  }
+}
 const router = express.Router();
 
 const SECRET_KEY = "your_jwt_secret_key";
@@ -20,7 +34,7 @@ passport.use(
         email: username,
       });
     if (dbUser.length > 0) {
-      const user = {
+      const user: User = {
         id: dbUser[0].id,
         name: dbUser[0].fullname,
         fullname: dbUser[0].fullname,
