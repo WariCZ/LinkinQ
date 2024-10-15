@@ -5,7 +5,7 @@ const entityFields: EntitySchema = {
     withoutDefaultFields: true,
     fields: {
       id: {
-        type: "uuid",
+        type: "bigint",
         isRequired: true,
         label: "Unique ID",
         description: "Unique Identifier for the record",

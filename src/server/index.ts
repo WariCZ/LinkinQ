@@ -54,8 +54,9 @@ export class WebApp {
 
     this.entity = new EntityRoutes();
 
+    // //
     this.entity
-      .initSchema()
+      .prepareSchema()
       .then((schema) => {
         logger.debug("Call setupExpress -------------------");
         this.bpmnServer = new BPMNServer(configuration, logger as any);
@@ -63,7 +64,6 @@ export class WebApp {
       })
       .catch((e) => {
         debugger;
-        // // //
         // logger.error(e.message);
         logger.error(e);
         if (e.stack) logger.error(e.stack);

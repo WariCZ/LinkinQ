@@ -7,6 +7,7 @@ import wf_instances from "./wf_instances";
 import wf_locks from "./wf_locks";
 import wf_model from "./wf_models";
 import lov from "./lov";
+import journal from "./journal";
 
 export const defaultExecute = () => {
   return ['CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'];
@@ -118,6 +119,7 @@ export const defaultEntities = (): EntitySchema => {
     ...wf_instances,
     ...wf_locks,
     ...wf_model,
+    ...journal,
   };
 };
 

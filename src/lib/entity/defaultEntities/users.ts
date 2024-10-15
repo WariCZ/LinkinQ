@@ -2,6 +2,7 @@ import { EntitySchema } from "../types";
 const entityFields: EntitySchema = {
   users: {
     system: true,
+    journal: true,
     fields: {
       fullname: {
         type: "text",

@@ -148,9 +148,10 @@ class DataStore extends ServerComponent implements IDataStore {
 
       instance.saved = new Date();
 
-      await db(Instance_collection).insert(instance);
+      await db(Instance_collection).setUser({ id: 1 }).insert(instance);
     } else {
       await db(Instance_collection)
+        .setUser({ id: 1 })
         .where({ id: instance.id })
         .update(saveObject);
     }
@@ -195,6 +196,7 @@ class DataStore extends ServerComponent implements IDataStore {
     const { conditions, values } = prepareConditions(query);
 
     const records = await db(Instance_collection)
+      .setUser({ id: 1 })
       .select(projection || "*")
       .whereRaw(conditions.join(" AND "), values);
     //   .orderBy(sort); TODO: Translate to knex
@@ -206,9 +208,10 @@ class DataStore extends ServerComponent implements IDataStore {
     // const y = trans.translateCriteria(query);
     const { conditions, values } = prepareConditions(query);
 
-    const result = db.raw(conditions.join(" AND "), values);
+    const result = db.raw(conditions.join(" AND "), values).setUser({ id: 1 });
     const projection = ["id", "data", "name", "version", "items", "tokens"];
     const records = await db(Instance_collection)
+      .setUser({ id: 1 })
       .select(projection)
       .where(result);
     const items = this.getItemsFromInstances(records, result, trans);
@@ -216,28 +219,35 @@ class DataStore extends ServerComponent implements IDataStore {
   }
 
   async deleteInstances(query) {
-    await db(Instance_collection).where(query).del();
+    await db(Instance_collection).setUser({ id: 1 }).where(query).del();
   }
 
   async install() {
-    await db.schema.createTableIfNotExists(Instance_collection, (table) => {
-      table.increments("id").primary();
-      table.json("items");
-      table.json("tokens");
-      table.string("status");
-      table.timestamps(true, true);
-    });
+    await db.schema
+      .setUser({ id: 1 })
+      .createTableIfNotExists(Instance_collection, (table) => {
+        table.increments("id").primary();
+        table.json("items");
+        table.json("tokens");
+        table.string("status");
+        table.timestamps(true, true);
+      });
 
-    await db.schema.createTableIfNotExists(Locks_collection, (table) => {
-      table.increments("id").primary();
-    });
+    await db.schema
+      .setUser({ id: 1 })
+      .createTableIfNotExists(Locks_collection, (table) => {
+        table.increments("id").primary();
+      });
   }
 
   async archive(query) {
     debugger;
-    let docs = await db(Instance_collection).where(query).select();
+    let docs = await db(Instance_collection)
+      .setUser({ id: 1 })
+      .where(query)
+      .select();
     if (docs.length > 0) {
-      await db(Archive_collection).insert(docs);
+      await db(Archive_collection).setUser({ id: 1 }).insert(docs);
       await this.deleteInstances(query);
     }
 

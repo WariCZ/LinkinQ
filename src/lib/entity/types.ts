@@ -3,6 +3,7 @@ export type EntitySchema = Record<string, EntityType>;
 export type EntityType = {
   system?: boolean;
   withoutDefaultFields?: boolean;
+  journal?: boolean;
   workflow?: boolean;
   fields: Record<string, FieldType>;
 };

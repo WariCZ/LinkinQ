@@ -1,5 +1,5 @@
 import { Knex } from "knex";
-import _ from "lodash";
+import _, { update } from "lodash";
 import { DbSchemaType, EntitySchema, EntityType, FieldType } from "./types";
 import { db as knexDB } from "../knex";
 import {
@@ -16,6 +16,7 @@ export class Entity {
   db: Knex;
   MAIN_ID: string = "id";
   GUID_ID: string = "guid";
+  schema: EntitySchema = {};
 
   constructor() {
     this.db = knexDB;
@@ -36,6 +37,7 @@ export class Entity {
           "is_nullable",
           "column_default"
         )
+        .setUser({ id: 1 })
         .from("information_schema.columns")
         .where("table_schema", "public")
         .orderBy(["table_name", "column_name"]);
@@ -61,6 +63,7 @@ export class Entity {
 
         const foreignKeys = await this.db
           .select("constraint_name")
+          .setUser({ id: 1 })
           .from("information_schema.key_column_usage")
           .where("table_schema", "public")
           .where("table_name", table_name)
@@ -96,13 +99,15 @@ export class Entity {
 
         // get description
         // console.log([table_name, column_name, table_name]);
-        // debugger;
-        const desc_result = await this.db.raw(
-          `SELECT col_description(?::regclass::oid,
+
+        const desc_result = await this.db
+          .raw(
+            `SELECT col_description(?::regclass::oid,
       (SELECT attnum FROM pg_attribute
        WHERE attname = ? AND attrelid = ?::regclass))`,
-          [table_name, column_name, table_name]
-        );
+            [table_name, column_name, table_name]
+          )
+          .setUser({ id: 1 });
 
         // if (column_name == "guid") debugger;
 
@@ -159,149 +164,155 @@ export class Entity {
     let actualDBColumn: FieldType | undefined;
 
     // if (columnName == "id") debugger;
-    if (await this.db.schema.hasColumn(tableName, columnName)) {
+    if (
+      await this.db.schema.setUser({ id: 1 }).hasColumn(tableName, columnName)
+    ) {
       columnExists = true;
       actualDBColumn = actualDBSchema.tables[tableName]?.fields[columnName];
     }
 
-    await this.db.schema.alterTable(tableName, async (table) => {
-      let column: Knex.ColumnBuilder | undefined = undefined;
+    await this.db.schema
+      .setUser({ id: 1 })
+      .alterTable(tableName, async (table) => {
+        let column: Knex.ColumnBuilder | undefined = undefined;
 
-      if (
-        columnExists &&
-        columnDef.type &&
-        actualDBColumn &&
-        actualDBColumn?.type !== columnDef.type
-      ) {
-        logger.error(
-          `Pretypovani sloupce ${columnName} v entite ${tableName} z typu ${actualDBColumn?.type} na typ ${columnDef.type} není možný.`
-        );
-        return;
-      } else {
-        if (columnExists) {
-          columnDef = { ...actualDBColumn, ...columnDef };
+        if (
+          columnExists &&
+          columnDef.type &&
+          actualDBColumn &&
+          actualDBColumn?.type !== columnDef.type
+        ) {
+          logger.error(
+            `Pretypovani sloupce ${columnName} v entite ${tableName} z typu ${actualDBColumn?.type} na typ ${columnDef.type} není možný.`
+          );
+          return;
+        } else {
+          if (columnExists) {
+            columnDef = { ...actualDBColumn, ...columnDef };
+          }
         }
-      }
-      //
+        //
 
-      if (columnDef.type == "text") {
-        column = table.text(columnName);
-      } else if (columnDef.type == "integer") {
-        column = table.integer(columnName);
-      } else if (columnDef.type == "uuid") {
-        column = table
-          .uuid(columnName)
-          .defaultTo(this.db.raw("uuid_generate_v4()"));
-      } else if (columnDef.type == "bigint") {
-        column = table.bigint(columnName);
-      } else if (columnDef.type == "datetime") {
-        column = table.datetime(columnName);
-      } else if (columnDef.type == "json") {
-        column = table.json(columnName);
-      } else if (columnDef.type == "jsonb") {
-        column = table.jsonb(columnName);
-      } else if (columnDef.type == "boolean") {
-        column = table.boolean(columnName);
-      } else if (columnDef.type == "password") {
-        column = table.string(columnName);
-      } else if (columnDef.type?.match(/^link\(\w+\)$/)) {
-        column = table.bigint(columnName);
-        const rel = columnDef.type.match(/^link\((\w+)\)$/);
+        if (columnDef.type == "text") {
+          column = table.text(columnName);
+        } else if (columnDef.type == "integer") {
+          column = table.integer(columnName);
+        } else if (columnDef.type == "uuid") {
+          column = table
+            .uuid(columnName)
+            .defaultTo(this.db.raw("uuid_generate_v4()"));
+        } else if (columnDef.type == "bigint") {
+          column = table.bigint(columnName);
+        } else if (columnDef.type == "datetime") {
+          column = table.datetime(columnName);
+        } else if (columnDef.type == "json") {
+          column = table.json(columnName);
+        } else if (columnDef.type == "jsonb") {
+          column = table.jsonb(columnName);
+        } else if (columnDef.type == "boolean") {
+          column = table.boolean(columnName);
+        } else if (columnDef.type == "password") {
+          column = table.string(columnName);
+        } else if (columnDef.type?.match(/^link\(\w+\)$/)) {
+          column = table.bigint(columnName);
+          const rel = columnDef.type.match(/^link\((\w+)\)$/);
 
-        if (rel) {
-          const foreignKey = rel[1] + "_" + columnName + "_foreign";
-          if (actualDBSchema.foreignKeys.indexOf(foreignKey) == -1) {
-            table.foreign(columnName).references(rel[1] + "." + this.MAIN_ID);
+          if (rel) {
+            const foreignKey = rel[1] + "_" + columnName + "_foreign";
+            if (actualDBSchema.foreignKeys.indexOf(foreignKey) == -1) {
+              table.foreign(columnName).references(rel[1] + "." + this.MAIN_ID);
+            }
+          } else {
+            logger.info(
+              `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ link ${columnDef.type}.`
+            );
+          }
+        } else if (columnDef.type?.match(/^nlink\(\w+\)$/)) {
+          // return;
+          const rel = columnDef.type.match(/^nlink\((\w+)\)$/);
+          if (rel) {
+            if (
+              !(await this.db.schema
+                .setUser({ id: 1 })
+                .hasTable(tableName + "2" + rel[1] + "4" + columnName))
+            ) {
+              // debugger;
+              await this.db.schema.createTable(
+                tableName + "2" + rel[1] + "4" + columnName,
+                (table: any) => {
+                  table.bigint(this.MAIN_ID).primary();
+                  table.bigint("source");
+                  table.bigint("target");
+
+                  table
+                    .foreign("source")
+                    .references(tableName + "." + this.MAIN_ID);
+                  //TODO: musi se provest az uplne na konci Conclusion nema taky :-)
+
+                  table
+                    .foreign("target")
+                    .references(rel[1] + "." + this.MAIN_ID);
+                }
+              );
+            } else {
+              logger.info(
+                `Tabulka ${
+                  tableName + "2" + rel[1] + "4" + columnName
+                } již existuje.`
+              );
+            }
+          } else {
+            logger.error(
+              `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ nlink ${columnDef.type}.`
+            );
           }
         } else {
-          logger.info(
-            `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ link ${columnDef.type}.`
+          logger.error(
+            `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ ${columnDef.type}.`
           );
         }
-      } else if (columnDef.type?.match(/^nlink\(\w+\)$/)) {
-        // return;
-        const rel = columnDef.type.match(/^nlink\((\w+)\)$/);
-        if (rel) {
-          if (
-            !(await this.db.schema.hasTable(
-              tableName + "2" + rel[1] + "4" + columnName
-            ))
-          ) {
-            // debugger;
-            await this.db.schema.createTable(
-              tableName + "2" + rel[1] + "4" + columnName,
-              (table: any) => {
-                table.bigint(this.MAIN_ID).primary();
-                table.bigint("source");
-                table.bigint("target");
 
-                table
-                  .foreign("source")
-                  .references(tableName + "." + this.MAIN_ID);
-                //TODO: musi se provest az uplne na konci Conclusion nema taky :-)
+        if (column && columnDef.isUnique) {
+          column.unique({
+            indexName: columnName + "_ukey",
+          });
+        }
+        if (column && columnDef.isRequired) {
+          column.notNullable();
+        }
 
-                table.foreign("target").references(rel[1] + "." + this.MAIN_ID);
-              }
+        if (column && columnDef.default) {
+          if (columnDef.default == "now()") {
+            column.defaultTo(this.db.fn.now());
+          }
+        }
+
+        if (column && columnDef.description) {
+          column.comment(columnDef.description);
+        }
+
+        if (column && columnExists) {
+          column.alter();
+        }
+
+        if (column) {
+          if (columnExists) {
+            logger.info(
+              `  Sloupec ${columnName} byl upraven v tabulce ${tableName}.`
             );
           } else {
             logger.info(
-              `Tabulka ${
-                tableName + "2" + rel[1] + "4" + columnName
-              } již existuje.`
+              `  Sloupec ${columnName} (${columnDef.type}) byl vytvořen v tabulce ${tableName}.`
             );
           }
+          //
         } else {
-          logger.error(
-            `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ nlink ${columnDef.type}.`
-          );
+          if (columnDef.type?.indexOf("nlink(") == -1)
+            logger.error(
+              `  Sloupec ${columnName} pro tabulku ${tableName} nebyl vytvoren a ma prazdny column.`
+            );
         }
-      } else {
-        logger.error(
-          `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ ${columnDef.type}.`
-        );
-      }
-
-      if (column && columnDef.isUnique) {
-        column.unique({
-          indexName: columnName + "_ukey",
-        });
-      }
-      if (column && columnDef.isRequired) {
-        column.notNullable();
-      }
-
-      if (column && columnDef.default) {
-        if (columnDef.default == "now()") {
-          column.defaultTo(this.db.fn.now());
-        }
-      }
-
-      if (column && columnDef.description) {
-        column.comment(columnDef.description);
-      }
-
-      if (column && columnExists) {
-        column.alter();
-      }
-
-      if (column) {
-        if (columnExists) {
-          logger.info(
-            `  Sloupec ${columnName} byl upraven v tabulce ${tableName}.`
-          );
-        } else {
-          logger.info(
-            `  Sloupec ${columnName} (${columnDef.type}) byl vytvořen v tabulce ${tableName}.`
-          );
-        }
-        //
-      } else {
-        if (columnDef.type?.indexOf("nlink(") == -1)
-          logger.error(
-            `  Sloupec ${columnName} pro tabulku ${tableName} nebyl vytvoren a ma prazdny column.`
-          );
-      }
-    });
+      });
     // }
   }
 
@@ -312,19 +323,22 @@ export class Entity {
     tableName: string;
     schemaDefinition: EntitySchema;
   }) {
+    //
     // Zjistim zda tabulka existuje
-    if (!(await this.db.schema.hasTable(tableName))) {
-      await this.db.schema.createTable(tableName, async (table) => {
-        // nastavim defaultni sloupce
-        const column = table.increments(this.MAIN_ID);
-        table.primary([this.MAIN_ID]);
-        if (schemaDefinition[tableName].fields[this.MAIN_ID].description) {
-          column.comment(
-            schemaDefinition[tableName].fields[this.MAIN_ID].description ||
-              "ID record"
-          );
-        }
-      });
+    if (!(await this.db.schema.setUser({ id: 1 }).hasTable(tableName))) {
+      await this.db.schema
+        .setUser({ id: 1 })
+        .createTable(tableName, async (table) => {
+          // nastavim defaultni sloupce
+          const column = table.bigIncrements(this.MAIN_ID);
+          table.primary([this.MAIN_ID]);
+          if (schemaDefinition[tableName].fields[this.MAIN_ID].description) {
+            column.comment(
+              schemaDefinition[tableName].fields[this.MAIN_ID].description ||
+                "ID record"
+            );
+          }
+        });
       logger.info(`Tabulka ${tableName} vytvořena.`);
     } else {
       // logger.info(`Tabulka ${tableName} již existuje.`);
@@ -375,7 +389,10 @@ export class Entity {
       );
 
       for (const d of dataArray) {
-        var rows = await this.db(name).select().where("guid", d.guid);
+        var rows = await this.db(name)
+          .setUser({ id: 1 })
+          .select()
+          .where("guid", d.guid);
         if (rows.length === 0) {
           for (const key of linksFields) {
             if (typeof d[key] === "string") {
@@ -384,6 +401,7 @@ export class Entity {
               const rel = columnDef.type?.match(/^link\((\w+)\)$/);
               if (rel && rel[1]) {
                 var rows = await this.db(rel[1])
+                  .setUser({ id: 1 })
                   .select(this.MAIN_ID)
                   .where("guid", d[key]);
                 if (rows.length === 1) {
@@ -409,30 +427,29 @@ export class Entity {
             }
           }
 
-          await this.db(name).insert([d]);
+          await this.db(name).setUser({ id: 1 }).insert([d]);
         }
       }
     }
   }
 
+  // async initSchema() {
+  //   this.schema = await this.prepareSchema();
+  // }
+
+  getSchema() {
+    return this.schema;
+  }
+  setSchema(schema: EntitySchema) {
+    return (this.schema = schema);
+  }
+
   async prepareSchema() {
     await this.defaultExecute().map(async (e) => {
-      await this.db.raw(e);
+      await this.db.raw(e).setUser({ id: 1 });
     });
+    this.registerTriggers();
 
-    // debugger;
-    // await this.db.schema.alterTable("users", async (table) => {
-    //   table
-    //     .bigint("id")
-    //     // .primary()
-    //     // .notNullable()
-    //     .comment("Toto je můj komentářd")
-    //     .alter();
-    // });
-    // debugger;
-    // return;
-    // debugger;
-    //
     const schemaDefinition = defaultEntities();
 
     const entityDef = addDefaultFields(schemaDefinition);
@@ -441,16 +458,175 @@ export class Entity {
     const differencesAdd = findDifferences(actualDBSchema, entityDef);
     console.log("differencesAdd", differencesAdd);
 
-    // await wait(5000);
-    console.log("Call createTables");
+    console.log("Create tables");
     await this.createTables({
       schemaDefinition: differencesAdd,
       actualDBSchema: actualDBSchema,
     });
     await this.createData({ data: defaultData(), entityDef });
 
-    await wait(2000); // //
+    await wait(2000);
 
+    this.schema = entityDef;
     return entityDef;
+  }
+
+  async addToJournal({
+    entity,
+    fields_old,
+    fields_new,
+    operation,
+    user,
+    entityid,
+    entityguid,
+  }: {
+    entity: string;
+    fields_old: Object;
+    fields_new: Object;
+    operation?: "C" | "D" | "U";
+    user: number;
+    entityid: number;
+    entityguid: string;
+  }) {
+    await this.db("journal").setUser({ id: 1 }).insert({
+      caption: entity,
+      entity,
+      fields_old,
+      fields_new,
+      operation,
+      entityid,
+      entityguid,
+      createdby: user,
+      updatedby: user,
+    });
+  }
+  registerTriggers() {
+    const that = this;
+    this.db.registerTriggers({
+      before: async function (runner) {
+        if (!runner.builder?._user?.id) {
+          debugger;
+          return false;
+        }
+
+        if (["insert", "update", "del"].indexOf(runner.builder._method) > -1) {
+          const table = runner.builder._single.table;
+          if (table == "journal") return;
+
+          let beforeData;
+
+          if (
+            runner.builder._method == "update" ||
+            runner.builder._method == "del"
+          ) {
+            const sqlObj = runner.builder.toSQL() as any;
+            const w = sqlObj.sql.match(/where(.*?)(returning|$)/i);
+            if (w && w[1]) {
+              const whereRaw = w[1].replace("where ", "");
+              const bindsLength = _.countBy(sqlObj.sql)["?"] || 0;
+              const whereBindsLength = _.countBy(whereRaw)["?"] || 0;
+              const selectBinds = sqlObj.bindings.slice(
+                bindsLength - whereBindsLength
+              );
+
+              beforeData = await that
+                .db(table)
+                .setUser({ id: 1 })
+                .select("*")
+                .whereRaw(whereRaw, selectBinds);
+            }
+          }
+
+          if (
+            runner.builder._method == "insert" ||
+            runner.builder._method == "update"
+          ) {
+            if (runner.builder._single.insert) {
+              runner.builder._single.returning = ["id", "guid"];
+
+              if (Array.isArray(runner.builder._single.insert)) {
+                runner.builder._single.insert =
+                  runner.builder._single.insert.map((ins: any) => {
+                    return {
+                      ...ins,
+                      createdby: runner.builder?._user.id,
+                      updatedby: runner.builder?._user.id,
+                    };
+                  });
+              } else {
+                runner.builder._single.insert = {
+                  ...runner.builder._single.insert,
+                  createdby: runner.builder?._user.id,
+                  updatedby: runner.builder?._user.id,
+                };
+              }
+            }
+          }
+          return beforeData;
+        }
+        //
+      },
+      after: async function (runner, afterData, beforeData) {
+        if (["insert", "update", "del"].indexOf(runner.builder._method) > -1) {
+          console.log("after", afterData, beforeData);
+          const table = runner.builder._single.table;
+          if (table == "journal") return;
+
+          let operation;
+          // let afterData;
+          if (runner.builder._method == "insert") {
+            operation = "C";
+            // afterData = runner.builder._single.insert;
+          }
+          if (runner.builder._method == "update") operation = "U";
+          if (runner.builder._method == "del") operation = "D";
+
+          if (Array.isArray(beforeData)) {
+            beforeData.map((data) => {
+              debugger;
+            });
+          } else {
+            debugger;
+            that.addToJournal({
+              entity: table,
+              fields_new: { test: "sda" },
+              fields_old: beforeData,
+              entityid: beforeData?.id || afterData[0]?.id,
+              entityguid: beforeData?.guid || afterData[0]?.guid,
+              operation: operation as "C" | "U" | "D",
+              user: runner.builder?._user?.id,
+            });
+          }
+          return;
+
+          // const afterData = { id: 1, guid: "daq-dwa" };
+          // let operation;
+          // if (runner.builder._method == "insert") operation = "C";
+          // if (runner.builder._method == "update") operation = "U";
+          // if (runner.builder._method == "del") operation = "D";
+          // that.addToJournal({
+          //   entity: table,
+          //   fields_new: { test: "sda" },
+          //   fields_old: beforeData,
+          //   entityid: beforeData.id || afterData.id,
+          //   entityguid: beforeData.guid || afterData.guid,
+          //   operation: operation as "C" | "U" | "D",
+          //   user: 1,
+          // });
+        }
+        //
+        //
+        //   console.log("runner", runner);
+        //   debugger;
+        //   var ret = await db("users").insert({ username: "rrrrr" }).returning("id");
+
+        //   console.log("ret", ret);
+        //   return;
+      },
+      // after: async function (runner) {
+      //   debugger;
+      //   return await db("users").select("username").where({ id: 3 });
+      // },
+    });
   }
 }

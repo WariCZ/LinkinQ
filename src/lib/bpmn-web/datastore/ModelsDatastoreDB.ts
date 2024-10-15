@@ -32,12 +32,16 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
   }
 
   async get(query = {}): Promise<object[]> {
-    const list = await this.db(Definition_collection).where(query).select("*");
+    const list = await this.db(Definition_collection)
+      .setUser({ id: 1 })
+      .where(query)
+      .select("*");
     return list;
   }
 
   async getList(query = {}): Promise<string[]> {
     const records = await this.db(Definition_collection)
+      .setUser({ id: 1 })
       .where(query)
       .select("name");
 
@@ -71,6 +75,7 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
    */
   async loadModel(name: string, owner = null): Promise<BpmnModelData> {
     const records = await this.db(Definition_collection)
+      .setUser({ id: 1 })
       .where({ name: name })
       .select("*");
 
@@ -109,10 +114,11 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
 
       const { conditions, values } = prepareConditions(query);
 
-      newQuery = db.raw(conditions.join(" AND "), values);
+      newQuery = db.raw(conditions.join(" AND ").setUser({ id: 1 }), values);
     }
 
     const records = await this.db(Events_collection)
+      .setUser({ id: 1 })
       .where(newQuery)
       .select("*");
 
@@ -136,21 +142,20 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
   async install() {
     debugger;
     // Use Knex to create indexes or tables if necessary
-    await this.db.schema.createTableIfNotExists(
-      Definition_collection,
-      (table) => {
+    await this.db.schema
+      .setUser({ id: 1 })
+      .createTableIfNotExists(Definition_collection, (table) => {
         table.string("name").unique();
         table.json("source");
         table.json("svg");
         table.timestamps(true, true);
-      }
-    );
+      });
 
     this.logger.log("Database installation complete.");
   }
 
   async import(data: Object, owner = null) {
-    return await this.db(Definition_collection).insert(data);
+    return await this.db(Definition_collection).setUser({ id: 1 }).insert(data);
   }
 
   async updateTimer(name: string, owner = null): Promise<boolean> {
@@ -162,6 +167,7 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
     model.parse(definition);
 
     await this.db(Definition_collection)
+      .setUser({ id: 1 })
       .where({ name: model.name })
       .update({ events: model.events });
 
@@ -172,13 +178,14 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
   async saveModel(model: IBpmnModelData, owner = null): Promise<boolean> {
     model.saved = new Date();
 
-    debugger;
     const existingRecord = await this.db(Definition_collection)
+      .setUser({ id: 1 })
       .where({ name: model.name })
       .first();
 
     if (existingRecord) {
       await this.db(Definition_collection)
+        .setUser({ id: 1 })
         .where({ name: model.name })
         .update({
           name: model.name,
@@ -190,25 +197,31 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
           events: JSON.stringify(model.events),
         });
     } else {
-      await this.db(Definition_collection).insert({
-        name: model.name,
-        owner: owner,
-        saved: model.saved,
-        source: model.source,
-        svg: model.svg,
-        processes: JSON.stringify(model.processes),
-        events: JSON.stringify(model.events),
-      });
+      await this.db(Definition_collection)
+        .setUser({ id: 1 })
+        .insert({
+          name: model.name,
+          owner: owner,
+          saved: model.saved,
+          source: model.source,
+          svg: model.svg,
+          processes: JSON.stringify(model.processes),
+          events: JSON.stringify(model.events),
+        });
     }
     return true;
   }
 
   async deleteModel(name: string, owner = null) {
-    await this.db(Definition_collection).where({ name: name }).del();
+    await this.db(Definition_collection)
+      .setUser({ id: 1 })
+      .where({ name: name })
+      .del();
   }
 
   async renameModel(name: string, newName: string, owner = null) {
     await this.db(Definition_collection)
+      .setUser({ id: 1 })
       .where({ name: name })
       .update({ name: newName });
 

@@ -1,6 +1,6 @@
 import winston from "winston";
 import { Response } from "express";
-import { stringify } from "flatted";
+import { parse, stringify } from "flatted";
 
 const { combine, timestamp, label, printf } = winston.format;
 
@@ -21,7 +21,7 @@ const logger = winston.createLogger({
 const printArgv = (argv: any) => {
   return argv.map((a: any) => {
     if (typeof a == "object") {
-      return stringify(a);
+      return JSON.stringify(parse(stringify(a)));
     } else {
       return a;
     }

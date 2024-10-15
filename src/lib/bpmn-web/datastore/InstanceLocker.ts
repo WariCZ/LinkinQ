@@ -79,7 +79,7 @@ class InstanceLocker {
     };
 
     try {
-      await this.dataStore.db(COLLECTION).insert(lock);
+      await this.dataStore.db(COLLECTION).setUser({ id: 1 }).insert(lock);
     } catch (err) {
       return false; // Locking failed, possibly due to a duplicate entry.
     }
@@ -89,13 +89,17 @@ class InstanceLocker {
 
   async release(id) {
     const query = { id: id };
-    return await this.dataStore.db(COLLECTION).where(query).del();
+    return await this.dataStore
+      .db(COLLECTION)
+      .setUser({ id: 1 })
+      .where(query)
+      .del();
   }
 
   async delete(filter) {
     const conditions = this.translateFilterToKnex(filter);
 
-    const query = this.dataStore.db(COLLECTION);
+    const query = this.dataStore.db(COLLECTION).setUser({ id: 1 });
     conditions.forEach((condition) => {
       query.where(condition.column, condition.operator, condition.value);
     });
@@ -104,7 +108,7 @@ class InstanceLocker {
   }
 
   async list() {
-    return await this.dataStore.db(COLLECTION).select("*");
+    return await this.dataStore.db(COLLECTION).setUser({ id: 1 }).select("*");
   }
 
   async delay(time, result) {

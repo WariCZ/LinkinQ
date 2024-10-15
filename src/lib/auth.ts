@@ -28,6 +28,7 @@ router.use(passport.initialize());
 passport.use(
   new BasicStrategy(async (username, password, done) => {
     var dbUser = await db("users")
+      .setUser({ id: 1 })
       .select("fullname", "email", "id", "guid")
       .where({
         password: password,

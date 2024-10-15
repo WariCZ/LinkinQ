@@ -49,9 +49,9 @@ export const translateDataTypesDBtoSchema = ({
     return "datetime";
   }
 
-  if (type === "integer" && column_name == "id") {
-    return "bigint";
-  }
+  // if (type === "bigint" && column_name == "id") {
+  //   return "uuid";
+  // }
 
   if (type === "bigint") {
     const type =
@@ -104,6 +104,7 @@ export const findDifferences = (
           );
           if (!_.isEmpty(diff)) {
             // differences[key] = diff;
+            //
             if (!differences[tableName])
               differences[tableName] = { fields: {} };
             differences[tableName].fields[key] = { ...diff } as any;
