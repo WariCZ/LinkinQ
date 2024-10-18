@@ -16,6 +16,7 @@ import { MdTask } from "react-icons/md";
 import { RiFileList2Fill } from "react-icons/ri";
 import { FaTools } from "react-icons/fa";
 import { TbTableOptions, TbTable } from "react-icons/tb";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 
 export default function DashboardSidebar() {
   // const context = useContext(sidebarContext);
@@ -34,20 +35,26 @@ export default function DashboardSidebar() {
     };
   }, []);
 
+  const navigate = useNavigate();
+
+  const handleClick = (path: string) => {
+    debugger;
+    //navigate(path);
+  };
   return (
     <Sidebar
       className={`h-full border-r dark:border-r dark:border-gray-700 border-gray-200`}
     >
       <Sidebar.Items>
         <Sidebar.ItemGroup>
-          <Sidebar.Item href="/" icon={IoMdHome}>
-            Home
+          <Sidebar.Item icon={IoMdHome}>
+            <Link to="/">Home</Link>
           </Sidebar.Item>
-          <Sidebar.Item href="#" icon={HiInboxArrowDown}>
-            Inbox
+          <Sidebar.Item icon={HiInboxArrowDown}>
+            <Link to="/protected">Inbox</Link>
           </Sidebar.Item>
-          <Sidebar.Item href="#" icon={BsKanban}>
-            Kanban
+          <Sidebar.Item icon={BsKanban}>
+            <Link to="/public2">Kanban</Link>
           </Sidebar.Item>
           <Sidebar.Item href="#" icon={FaAddressBook}>
             Uživatelé
@@ -63,6 +70,14 @@ export default function DashboardSidebar() {
             <Sidebar.Item href="#">Otevřené</Sidebar.Item>
             <Sidebar.Item href="#">Vyřízené</Sidebar.Item>
             <Sidebar.Item href="#">Archivované</Sidebar.Item>
+            <Sidebar.Collapse
+              label="Spisy"
+              icon={HiFolderOpen}
+              className="pl-2"
+            >
+              <Sidebar.Item href="#">Otevřené</Sidebar.Item>
+              <Sidebar.Item href="#">Vyřízené</Sidebar.Item>
+            </Sidebar.Collapse>
           </Sidebar.Collapse>
           <Sidebar.Collapse label="Spisy" icon={HiFolderOpen}>
             <Sidebar.Item href="#">Otevřené</Sidebar.Item>

@@ -48,6 +48,57 @@ passport.use(
     }
   })
 );
+passport.use(
+  "local",
+  new LocalStrategy(async (username, password, done) => {
+    var dbUser = await db("users")
+      .setUser({ id: 1 })
+      .select("fullname", "email", "id", "guid")
+      .where({
+        password: password,
+        email: username,
+      });
+    if (dbUser.length > 0) {
+      const user: User = {
+        id: dbUser[0].id,
+        name: dbUser[0].fullname,
+        fullname: dbUser[0].fullname,
+        email: dbUser[0].email,
+        guid: dbUser[0].guid,
+      };
+      return done(null, user);
+    } else {
+      return done(null, false); //  { message: "Incorrect username or password." }
+    }
+  })
+);
+
+export const authenticateWithMultipleStrategies = (strategies: string[]) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    const tryStrategy = async (index: number) => {
+      if (index >= strategies.length) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const strategy = strategies[index];
+
+      passport.authenticate(
+        strategy,
+        { session: false },
+        (err: Error | null, user: User, info: any) => {
+          if (err || !user) {
+            return tryStrategy(index + 1);
+          }
+          req.user = user;
+          next();
+        }
+      )(req, res, next);
+    };
+
+    // Start with the first strategy
+    await tryStrategy(0);
+  };
+};
 
 router.post("/login", (req: Request, res: Response, next: NextFunction) => {
   passport.authenticate("local", (err: any, user: any, info: any) => {
@@ -79,9 +130,13 @@ const authenticateJWT = (req: Request, res: Response, next: NextFunction) => {
   const token = req.cookies.jwt;
   if (token) {
     jwt.verify(token, SECRET_KEY, (err: any, user: any) => {
-      if (err) return res.sendStatus(403);
-      req.user = user;
-      next();
+      if (err) {
+        next();
+        // return res.sendStatus(403);
+      } else {
+        req.user = user;
+        next();
+      }
     });
   } else {
     next();

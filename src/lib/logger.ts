@@ -48,16 +48,24 @@ console.debug = function (...argv) {
 
 export const apiError = ({
   error,
+  type,
   code,
   userError,
   res,
 }: {
   error: string;
+  type?: "debug" | "error" | "warn";
   code?: number;
   userError?: string;
   res: Response;
 }) => {
-  logger.error(error);
+  if (type == "debug") {
+    logger.debug(error);
+  } else if (type == "warn") {
+    logger.warn(error);
+  } else {
+    logger.error(error);
+  }
   res.status(code || 400).json({ error: userError || error });
 };
 

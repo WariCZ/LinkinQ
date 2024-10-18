@@ -12,8 +12,6 @@ import authRoutes from "../lib/auth";
 import { EntitySchema } from "../lib/entity/types";
 import { BPMNServer, configuration } from "../lib/bpmn-web";
 
-import { Entity } from "../lib/entity/";
-
 dotenv.config();
 
 // const schema = checkSchema();
@@ -35,8 +33,10 @@ export class WebApp {
   // userManager;
   bpmnServer: any;
   packageJson;
+  viteRunning: boolean;
 
   constructor() {
+    this.viteRunning = false;
     const fs = require("fs");
 
     const configPath = __dirname + "/../package.json";
@@ -99,11 +99,39 @@ export class WebApp {
     return app;
   }
 
+  waitForViteMiddleware = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const maxRetries = 10; // Maximální počet pokusů
+    const retryDelay = 1000; // Zpoždění mezi pokusy v milisekundách
+
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        if (this.viteRunning) {
+          return next();
+        } else {
+          console.log(`Waiting for Vite server... (${i + 1}/${maxRetries})`);
+          // Čekáme před dalším pokusem
+          await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        }
+      } catch (error: any) {
+        console.error(error.stack);
+      }
+    }
+
+    // Pokud se nepodaří Vite server nastartovat, ukončíme požadavek s chybou
+    res
+      .status(500)
+      .send("Vite server failed to start within the expected time.");
+  };
+
   setupExpress() {
     const app = this.app;
 
     this.setupRoutes();
-
+    //
     /**
      * Error Handler.
      */
@@ -122,6 +150,7 @@ export class WebApp {
         app.get("port"),
         app.get("env")
       );
+      this.viteRunning = true;
       logger.info("  Press CTRL-C to stop\n");
     });
 
@@ -133,8 +162,11 @@ export class WebApp {
 
     const app = this.app;
 
+    if (process.env.NODE_ENV === "development") {
+      app.use(this.waitForViteMiddleware);
+    }
     app.use("/", authRoutes);
-    app.use("/entity", this.entity.config());
+    app.use("/api", this.entity.config());
 
     app.get("/protected2", (req: Request, res: Response) => {
       res.json({ message: "This is a protected route", user: req.user });

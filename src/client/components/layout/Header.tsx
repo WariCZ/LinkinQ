@@ -18,7 +18,9 @@ import { useContext, type FC } from "react";
 import { HiMenuAlt1, HiX } from "react-icons/hi";
 // import { sidebarContext } from "../sidebarProvider";
 // import NotificationButton from "../notifications/notificationButton";
+
 import logo from "../../static/logo.png";
+// const logo = require("../../static/logo.png");
 
 const isSmallScreen = () => {
   return false;
@@ -44,9 +46,10 @@ const UserAvatar = () => {
   if (!user) return null;
   return (
     <Dropdown
-      className="w-44"
+      className="w-40"
       label={
         <Avatar
+          size="sm"
           placeholderInitials={
             user?.fullname ? getUserInitials(user.fullname) : ""
           }
@@ -78,7 +81,7 @@ export const DashboardHeader: FC<Record<string, never>> = function () {
         fluid
         className="fixed top-0 z-30 w-full border-b border-gray-200 bg-white p-0 dark:border-gray-700 dark:bg-gray-800 sm:p-0"
       >
-        <div className="w-full p-3 pr-4">
+        <div className="w-full p-0 pr-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <button
@@ -106,7 +109,7 @@ export const DashboardHeader: FC<Record<string, never>> = function () {
 
             <div className="flex gap-5">
               {/* <NotificationButton /> */}
-              <DarkThemeToggle />
+              <DarkThemeToggle className="p-1" />
               <div className="hidden md:block">
                 <UserAvatar />
               </div>

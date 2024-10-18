@@ -2,19 +2,45 @@ import express from "express";
 import type { NextFunction, Request, Response } from "express";
 import { getData, getQueries } from "./methodsDB";
 
-import axios from "axios";
 import passport from "passport";
 import { apiError } from "../logger";
 import _ from "lodash";
 import { Entity } from ".";
+import { authenticateWithMultipleStrategies } from "../auth";
 
 export class EntityRoutes extends Entity {
+  validateEntityBody({ body }: { body: any }) {
+    if (Array.isArray(body)) {
+      return "Array is not supported";
+    }
+
+    return;
+  }
+
   config() {
     const router = express.Router();
 
+    // Route pro Server-Sent Events
+    router.get("/events", (req: Request, res: Response) => {
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+      res.setHeader("Content-Encoding", "none");
+
+      this.eventsOnEntities.on("afterTrigger", (msg) => {
+        res.write(`data: ${JSON.stringify(msg)}\n\n`);
+      });
+
+      // Vyčistění interval po ukončení spojení
+      req.on("close", () => {
+        res.end();
+      });
+    });
+
     router.get(
-      "/:entity",
-      passport.authenticate("basic", { session: false }),
+      "/entity/:entity",
+      authenticateWithMultipleStrategies(["local", "basic"]),
+      // passport.authenticate("basic", { session: false }),
       async (req: Request, res: Response) => {
         try {
           if (req.user) {
@@ -72,49 +98,56 @@ export class EntityRoutes extends Entity {
     );
 
     router.post(
-      "/:entity",
-      passport.authenticate("basic", { session: false }),
+      "/entity/:entity",
+      authenticateWithMultipleStrategies(["local", "basic"]),
+      // passport.authenticate("basic", { session: false }),
       async (req: Request, res: Response) => {
         try {
           if (req.user) {
-            var entity = req.params.entity;
+            const entity = req.params.entity;
             if (entity) {
               if (this.schema[entity]) {
                 const body = req.body;
-                // Update
-                if (body.guid) {
-                  const updatedRows = await this.db(entity)
-                    .setUser(req.user)
-                    .where({ guid: body.guid })
-                    .update(body)
-                    .returning(this.MAIN_ID);
 
-                  return res.json(updatedRows);
+                const errMsg = this.validateEntityBody({ body });
+                if (!errMsg) {
+                  // Update
+                  if (body.guid) {
+                    const updatedRows = await this.db(entity)
+                      .setUser(req.user)
+                      .where({ guid: body.guid })
+                      .update(body)
+                      .returning(this.MAIN_ID);
+
+                    return res.json(updatedRows);
+                  } else {
+                    //
+                    //Insert
+
+                    // if (body.workflow) {
+                    //   const res = await fetch(
+                    //     process.env.BPMN_SERVER_URL +
+                    //       "/api/engine/start/" +
+                    //       body.workflow,
+                    //     {
+                    //       method: "POST",
+                    //       headers: {
+                    //         "Content-Type": "application/json",
+                    //         "x-api-key": process.env.BPMN_SERVER_KEY,
+                    //       } as any,
+                    //     }
+                    //   ).then((response) => response.json());
+
+                    //   data.workflowInstance = res.id;
+                    // }
+                    const insertedRows = await this.db(entity)
+                      .setUser(req.user)
+                      .insert(body);
+
+                    return res.json(insertedRows);
+                  }
                 } else {
-                  //Insert
-
-                  // if (body.workflow) {
-                  //   const res = await fetch(
-                  //     process.env.BPMN_SERVER_URL +
-                  //       "/api/engine/start/" +
-                  //       body.workflow,
-                  //     {
-                  //       method: "POST",
-                  //       headers: {
-                  //         "Content-Type": "application/json",
-                  //         "x-api-key": process.env.BPMN_SERVER_KEY,
-                  //       } as any,
-                  //     }
-                  //   ).then((response) => response.json());
-
-                  //   data.workflowInstance = res.id;
-                  // }
-                  const insertedRows = await this.db(entity)
-                    .setUser(req.user)
-                    .insert(body);
-
-                  debugger;
-                  return res.json(insertedRows);
+                  apiError({ res, error: errMsg });
                 }
               } else {
                 apiError({ res, error: `Entity ${entity} not exists` });
@@ -134,8 +167,9 @@ export class EntityRoutes extends Entity {
     );
 
     router.delete(
-      "/:entity",
-      passport.authenticate("basic", { session: false }),
+      "/entity/:entity",
+      authenticateWithMultipleStrategies(["local", "basic"]),
+      // passport.authenticate("basic", { session: false }),
       async (req: Request, res: Response) => {
         try {
           if (req.user) {
@@ -144,7 +178,6 @@ export class EntityRoutes extends Entity {
               if (this.schema[entity]) {
                 const body = req.body;
                 if (body.guid) {
-                  debugger;
                   const deletedRows = await this.db(entity)
                     .setUser(req.user)
                     .where({ guid: body.guid })

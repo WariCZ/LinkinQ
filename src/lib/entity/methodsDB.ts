@@ -245,10 +245,12 @@ export const getData = async ({
     fieldsArrJoin.push(nJoin + ".source");
     query = db(entity)
       .select(fieldsArrJoin)
+      .setUser({ id: 1 })
+      .setUser({ id: 1 })
       .innerJoin(nJoin, entity + ".id", nJoin + ".target")
       .whereIn(nJoin + ".source", where ? (where.id as any) : [-1]);
   } else {
-    query = db(entity).select(fieldsArr);
+    query = db(entity).select(fieldsArr).setUser({ id: 1 });
 
     // Pridam WHERE
     if (where && Object.keys(where).length > 0) {

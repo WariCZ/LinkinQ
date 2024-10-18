@@ -27,7 +27,7 @@ const entityFields: EntitySchema = {
       operation: {
         type: "text",
         label: "Operation",
-        description: "Operation of the record  (c, u, d)",
+        description: "Operation of the record  (C, U, D)",
         system: true,
       },
       user: {
