@@ -123,6 +123,7 @@ function useDataApi<T, U>(
     refresh: (params?: { fields?: string[]; filter?: Object }) => void;
     fields: string[];
     filter: Object;
+    highlightedRow: string[];
   }
 ] {
   const [data, setData] = useState(initialState as T);
@@ -130,6 +131,7 @@ function useDataApi<T, U>(
   const [error, setError] = useState<string | null>(null);
   const [fieldsEntity, setFieldsEntity] = useState(param.fields || []);
   const [filter, setFilter] = useState(param.filter || {});
+  const [highlightedRow, setHighlightedRow] = useState([]);
 
   useEffect(() => {
     const eventSource = new EventSource("/api/events");
@@ -160,11 +162,17 @@ function useDataApi<T, U>(
     });
     setData((prevData) => {
       if (Array.isArray(prevData)) {
-        return [...prevData, ...response.data] as any;
+        setHighlightedRow(response.data.map((d: any) => d.guid));
+        return [...response.data, ...prevData] as any;
       } else {
         setData(response.data[0]);
       }
     });
+
+    // Plynulé zmizení po 2 sekundách
+    setTimeout(() => {
+      setHighlightedRow([]);
+    }, 700);
   };
 
   const fetchData = async ({
@@ -280,6 +288,7 @@ function useDataApi<T, U>(
       createRecord,
       deleteRecord,
       filter,
+      highlightedRow,
     },
   ];
 }

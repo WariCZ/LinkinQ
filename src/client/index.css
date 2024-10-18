@@ -34,6 +34,7 @@
     fill: #dbd9a8 !important;
   }
 
-  .transition-height {
-    transition: height 0.5s ease; /* 0.5s je doba animace */
+  .highlight {
+    background-color: #ec8fcc; /* Barva zvýraznění */
+    transition: background-color 0.2s ease-in-out; /* Plynulé zmizení */
   }

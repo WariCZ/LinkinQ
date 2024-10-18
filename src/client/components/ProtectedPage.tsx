@@ -17,6 +17,7 @@ const ProtectedPage: React.FC = () => {
       deleteRecord,
       filter,
       createRecord,
+      highlightedRow,
     },
   ] = useDataApi(
     {
@@ -45,7 +46,10 @@ const ProtectedPage: React.FC = () => {
         Add
       </Button>
       {data?.map((d, i) => (
-        <p key={i}>
+        <p
+          key={i}
+          className={highlightedRow.indexOf(d.guid) > -1 ? "highlight" : ""}
+        >
           Welcome, {d?.fullname}! {d?.guid}
           <span onClick={() => deleteRecord(d.guid)}>Smazat</span>
         </p>
