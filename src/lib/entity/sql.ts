@@ -61,10 +61,16 @@ export class Sql {
     }
   };
 
-  insert = async ({ entity, data }: { entity: string; data: any }) => {
+  insert = async ({
+    entity,
+    data,
+  }: {
+    entity: string;
+    data: Object | Object[];
+  }) => {
     if (entity) {
       if (this.#schema[entity]) {
-        const ret = this.#db.from(entity).insert(data); //.returning("*");
+        const ret = await this.#db.from(entity).insert(data); //.returning("*");
 
         return ret;
       } else {
@@ -86,7 +92,11 @@ export class Sql {
   }) => {
     if (entity) {
       if (this.#schema[entity]) {
-        const ret = this.#db.from(entity).where(where).update(data); //.returning("*");
+        const ret = await this.#db
+          .from(entity)
+          .where(where)
+          .update(data)
+          .returning("*");
 
         return ret;
       } else {
@@ -100,7 +110,11 @@ export class Sql {
   delete = async ({ entity, where }: { entity: string; where: Object }) => {
     if (entity) {
       if (this.#schema[entity]) {
-        const ret = this.#db.from(entity).where(where).delete(); //.returning("*");
+        const ret = await this.#db
+          .from(entity)
+          .where(where)
+          .delete()
+          .returning("*");
 
         return ret;
       } else {

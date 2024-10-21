@@ -158,64 +158,25 @@ export class EntityRoutes extends Entity {
       }
     );
 
+    // INSERT
     router.post(
       "/entity/:entity",
       authenticateWithMultipleStrategies(["local", "basic"]),
-      // passport.authenticate("basic", { session: false }),
       async (req: Request, res: Response) => {
         try {
           if (req.user) {
-            const entity = req.params.entity;
-            if (entity) {
-              if (this.schema[entity]) {
-                const body = req.body;
+            const sql = new Sql({
+              db: this.db,
+              schema: this.schema,
+              user: req.user,
+            });
 
-                const errMsg = this.validateEntityBody({ body });
-                if (!errMsg) {
-                  // Update
-                  if (body.guid) {
-                    const updatedRows = await this.db(entity)
-                      .setUser(req.user)
-                      .where({ guid: body.guid })
-                      .update(body)
-                      .returning(this.MAIN_ID);
+            const ret = await sql.insert({
+              entity: req.params.entity,
+              data: req.body,
+            });
 
-                    return res.json(updatedRows);
-                  } else {
-                    //
-                    //Insert
-
-                    // if (body.workflow) {
-                    //   const res = await fetch(
-                    //     process.env.BPMN_SERVER_URL +
-                    //       "/api/engine/start/" +
-                    //       body.workflow,
-                    //     {
-                    //       method: "POST",
-                    //       headers: {
-                    //         "Content-Type": "application/json",
-                    //         "x-api-key": process.env.BPMN_SERVER_KEY,
-                    //       } as any,
-                    //     }
-                    //   ).then((response) => response.json());
-
-                    //   data.workflowInstance = res.id;
-                    // }
-                    const insertedRows = await this.db(entity)
-                      .setUser(req.user)
-                      .insert(body);
-
-                    return res.json(insertedRows);
-                  }
-                } else {
-                  apiError({ res, error: errMsg });
-                }
-              } else {
-                apiError({ res, error: `Entity ${entity} not exists` });
-              }
-            } else {
-              apiError({ res, error: `Entity not found` });
-            }
+            return res.json(ret);
           } else {
             res.sendStatus(401);
           }
@@ -227,44 +188,60 @@ export class EntityRoutes extends Entity {
       }
     );
 
-    router.delete(
+    // UPDATE
+    router.put(
       "/entity/:entity",
       authenticateWithMultipleStrategies(["local", "basic"]),
-      // passport.authenticate("basic", { session: false }),
       async (req: Request, res: Response) => {
         try {
           if (req.user) {
-            var entity = req.params.entity;
-            if (entity) {
-              if (this.schema[entity]) {
-                const body = req.body;
-                if (body.guid) {
-                  const deletedRows = await this.db(entity)
-                    .setUser(req.user)
-                    .where({ guid: body.guid })
-                    .del()
-                    .returning(this.MAIN_ID);
-                  // .asUser(req.user);
+            const sql = new Sql({
+              db: this.db,
+              schema: this.schema,
+              user: req.user,
+            });
+            const ret = await sql.update({
+              entity: req.params.entity,
+              where: _.omit(req.query as any, ["entity", "__fields"]),
+              data: req.body,
+            });
 
-                  return res.json(deletedRows);
-                } else {
-                  return apiError({ res, error: `Guid is mandatory` });
-                }
-              } else {
-                apiError({ res, error: `Entity ${entity} not exists` });
-              }
-            } else {
-              apiError({ res, error: `Entity not found` });
-            }
+            return res.json(ret);
           } else {
             res.sendStatus(401);
           }
         } catch (error: any) {
           debugger;
-          console.error(
-            "Error fetching data from external API:",
-            error?.message
-          );
+          console.error("Error fetching data from external API:", error?.stack);
+          res.status(500).send("Error fetching data from external API");
+        }
+      }
+    );
+
+    // UPDATE
+    router.delete(
+      "/entity/:entity",
+      authenticateWithMultipleStrategies(["local", "basic"]),
+      async (req: Request, res: Response) => {
+        try {
+          if (req.user) {
+            const sql = new Sql({
+              db: this.db,
+              schema: this.schema,
+              user: req.user,
+            });
+            const ret = await sql.delete({
+              entity: req.params.entity,
+              where: _.omit(req.query as any, ["entity", "__fields"]),
+            });
+
+            return res.json(ret);
+          } else {
+            res.sendStatus(401);
+          }
+        } catch (error: any) {
+          debugger;
+          console.error("Error fetching data from external API:", error?.stack);
           res.status(500).send("Error fetching data from external API");
         }
       }

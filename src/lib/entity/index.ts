@@ -637,9 +637,11 @@ export class Entity {
           else if (runner.builder._method == "del") operation = "D";
           else operation = "";
 
-          let fields_new = afterData[0];
           if (runner.builder._single.insert) {
-            fields_new = { ...afterData[0], ...runner.builder._single.insert };
+            afterData[0] = {
+              ...afterData[0],
+              ...runner.builder._single.insert,
+            };
           }
 
           beforeData = Array.isArray(beforeData) ? beforeData : [beforeData];
