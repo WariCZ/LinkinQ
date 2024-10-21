@@ -2,11 +2,18 @@ import express from "express";
 import type { NextFunction, Request, Response } from "express";
 import { getData, getQueries } from "./methodsDB";
 
-import passport from "passport";
 import { apiError } from "../logger";
 import _ from "lodash";
 import { Entity } from ".";
 import { authenticateWithMultipleStrategies } from "../auth";
+import { DateTime } from "luxon";
+import { Sql } from "./sql";
+
+export type ServerSideOutputType = {
+  time: string;
+  type: "log" | "error";
+  msg: string;
+};
 
 export class EntityRoutes extends Entity {
   validateEntityBody({ body }: { body: any }) {
@@ -19,6 +26,83 @@ export class EntityRoutes extends Entity {
 
   config() {
     const router = express.Router();
+
+    router.post("/run-code", async (req: Request, res: Response) => {
+      try {
+        if (req.user) {
+          const { code } = req.body;
+
+          try {
+            const testFnc = (d: any) => {
+              return d + "-KUK";
+            };
+
+            const newCode = code.replace("console.log(", "show(");
+            const output: ServerSideOutputType[] = [];
+            const show = (...argv: any) => {
+              console.log(argv);
+
+              output.push({
+                time: DateTime.now().toFormat("dd.MM.yyyy HH:mm:ss.SSS"),
+                type: "log",
+                msg: argv.join(", "),
+              });
+            };
+
+            const sql = new Sql({
+              db: this.db,
+              schema: this.schema,
+              user: req.user,
+            });
+
+            const fnc = new Function(
+              "test",
+              "show",
+              "sql",
+              `
+          return (async () => {
+              ${newCode}
+          })();
+      `
+            );
+
+            const out = await fnc(testFnc, show, sql);
+
+            const o = typeof out ? JSON.stringify(out) : out;
+            output.push({
+              time: DateTime.now().toFormat("dd.MM.yyyy HH:mm:ss.SSS"),
+              type: "log",
+              msg: o || "Ready without output",
+            });
+            res.json({ success: true, output });
+          } catch (error: any) {
+            const errStack = error.stack || error;
+
+            let lines;
+            if (errStack) {
+              lines = [...errStack.matchAll(/<anonymous>:(\d+):(\d+)/gm)];
+              lines = lines && lines[0];
+            }
+
+            res.status(400).json({
+              success: false,
+              message: {
+                time: DateTime.now().toFormat("dd.MM.yyyy HH:mm:ss.SSS"),
+                type: "error",
+                msg: error.message || error,
+              },
+              line: (lines && lines[1]) || 1,
+              column: (lines && lines[2]) || 1,
+            });
+          }
+        } else {
+          res.sendStatus(401);
+        }
+      } catch (error) {
+        console.error("Error fetching data from external API:", error);
+        res.status(500).send("Error fetching data from external API");
+      }
+    });
 
     // Route pro Server-Sent Events
     router.get("/events", (req: Request, res: Response) => {
@@ -40,52 +124,29 @@ export class EntityRoutes extends Entity {
     router.get(
       "/entity/:entity",
       authenticateWithMultipleStrategies(["local", "basic"]),
-      // passport.authenticate("basic", { session: false }),
       async (req: Request, res: Response) => {
         try {
           if (req.user) {
-            var entity = req.params.entity;
-            if (entity) {
-              if (this.schema[entity]) {
-                try {
-                  // res.json({
-                  //   message: "This is a protected route sdawdwa",
-                  //   user: req.user,
-                  //   entity: req.params.entity,
-                  //   query: req.query,
-                  // });
-                  const fields = (req.query.__fields + ",guid" ||
-                    "*") as string;
+            try {
+              const sql = new Sql({
+                db: this.db,
+                schema: this.schema,
+                user: req.user,
+              });
 
-                  // console.log("fieldsArr", fields.split(","));
-                  // console.log(
-                  //   "where",
-                  //   _.omit(req.query as any, ["entity", "__fields"])
-                  // );
-                  const queries = getQueries({
-                    schema: this.schema,
-                    entity,
-                    fieldsArr: fields.split(","),
-                    where: _.omit(req.query as any, ["entity", "__fields"]),
-                  });
-                  // console.log("queries", queries);
-                  const data = await getData({
-                    ...queries,
-                    schema: this.schema,
-                  });
+              const fields = (req.query.__fields + ",guid" || "*").split(",");
 
-                  // console.log("data", data);
-                  return res.json(data);
-                } catch (e: any) {
-                  console.error(e);
-                  //TODO: Stalo by za uvahu nejakym zpusobem chybu omezit aby se neposilala chyba takto detailne
-                  return apiError({ res, error: e.message });
-                }
-              } else {
-                apiError({ res, error: `Entity ${entity} not exists` });
-              }
-            } else {
-              apiError({ res, error: `Entity not found` });
+              const ret = await sql.select({
+                entity: req.params.entity,
+                fields,
+                where: _.omit(req.query as any, ["entity", "__fields"]),
+              });
+              return res.json(ret);
+            } catch (e: any) {
+              debugger;
+              console.error(e);
+              //TODO: Stalo by za uvahu nejakym zpusobem chybu omezit aby se neposilala chyba takto detailne
+              return apiError({ res, error: e.message || e });
             }
           } else {
             res.sendStatus(401);

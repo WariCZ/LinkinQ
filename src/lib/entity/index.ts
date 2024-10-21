@@ -9,9 +9,16 @@ import {
   translateDataTypesDBtoSchema,
   wait,
 } from "./utils";
-import { defaultData, defaultEntities, defaultFields } from "./defaultEntities";
+import {
+  defaultData,
+  defaultEntities,
+  defaultExecute,
+  defaultFields,
+} from "./defaultEntities";
 import logger from "../logger";
 import EventEmitter from "events";
+import { getData, getQueries } from "./methodsDB";
+import { Sql } from "./sql";
 
 export class Entity {
   db: Knex;
@@ -25,9 +32,51 @@ export class Entity {
     this.eventsOnEntities = new EventEmitter();
   }
 
-  defaultExecute() {
-    return ['CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'];
-  }
+  // select = async ({
+  //   entity,
+  //   fields,
+  //   where,
+  //   orderBy,
+  //   groupBy,
+  //   limit,
+  // }: {
+  //   entity: string;
+  //   fields: string[];
+  //   where: any;
+  //   orderBy: string[];
+  //   groupBy: string[];
+  //   limit: number;
+  // }) => {
+  //   try {
+  //     if (entity) {
+  //       if (this.schema[entity]) {
+  //         const db: any = this.db().setUser({ id: req.user.id });
+  //         const queries = getQueries({
+  //           schema: this.schema,
+  //           entity,
+  //           fieldsArr: fields,
+  //           where: where,
+  //         });
+
+  //         const data = await getData({
+
+  //           ...queries,
+  //           schema: this.schema,
+  //           // orderBy: orderBy,
+  //           // groupBy: groupBy
+  //         });
+
+  //         return data;
+  //       } else {
+  //         return `Entity ${entity} not exists`;
+  //       }
+  //     } else {
+  //       return `Entity not found`;
+  //     }
+  //   } catch (e: any) {
+  //     return e.message;
+  //   }
+  // };
 
   async getTablesAndColumns(entityDef: EntitySchema) {
     try {
@@ -240,23 +289,25 @@ export class Entity {
                 .hasTable(tableName + "2" + rel[1] + "4" + columnName))
             ) {
               // debugger;
-              await this.db.schema.createTable(
-                tableName + "2" + rel[1] + "4" + columnName,
-                (table: any) => {
-                  table.bigint(this.MAIN_ID).primary();
-                  table.bigint("source");
-                  table.bigint("target");
+              await this.db.schema
+                .setUser({ id: 1 })
+                .createTable(
+                  tableName + "2" + rel[1] + "4" + columnName,
+                  (table: any) => {
+                    table.bigint(this.MAIN_ID).primary();
+                    table.bigint("source");
+                    table.bigint("target");
 
-                  table
-                    .foreign("source")
-                    .references(tableName + "." + this.MAIN_ID);
-                  //TODO: musi se provest az uplne na konci Conclusion nema taky :-)
+                    table
+                      .foreign("source")
+                      .references(tableName + "." + this.MAIN_ID);
+                    //TODO: musi se provest az uplne na konci Conclusion nema taky :-)
 
-                  table
-                    .foreign("target")
-                    .references(rel[1] + "." + this.MAIN_ID);
-                }
-              );
+                    table
+                      .foreign("target")
+                      .references(rel[1] + "." + this.MAIN_ID);
+                  }
+                );
             } else {
               logger.info(
                 `Tabulka ${
@@ -448,7 +499,7 @@ export class Entity {
   }
 
   async prepareSchema() {
-    await this.defaultExecute().map(async (e) => {
+    await defaultExecute().map(async (e) => {
       await this.db.raw(e).setUser({ id: 1 });
     });
     this.registerTriggers();
@@ -471,6 +522,7 @@ export class Entity {
     await wait(2000);
 
     this.schema = entityDef;
+
     return entityDef;
   }
 

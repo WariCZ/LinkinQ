@@ -113,7 +113,7 @@ export const workflowFields = (): Record<string, FieldType> => ({
 export const defaultEntities = (): EntitySchema => {
   return {
     ...users.entityFields,
-    ...userroles,
+    ...userroles.entityFields,
     ...lov.entityFields,
     ...wf_events,
     ...wf_instances,
@@ -125,7 +125,8 @@ export const defaultEntities = (): EntitySchema => {
 
 export const defaultData = () => {
   return {
+    // ...lov.defaultData,
     ...users.defaultData,
-    ...lov.defaultData,
+    ...userroles.defaultData,
   };
 };

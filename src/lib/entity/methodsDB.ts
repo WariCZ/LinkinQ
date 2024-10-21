@@ -1,6 +1,7 @@
-import { db, MAIN_ID } from "../knex";
+import { MAIN_ID } from "../knex";
 import _ from "lodash";
 import { EntitySchema } from "./types";
+import { Knex } from "knex";
 
 type SelectEntityType = {
   entity: string;
@@ -126,7 +127,7 @@ export const getQueries = ({
   fieldsArr,
   where,
 }: SelectEntityType & { schema: EntitySchema }) => {
-  if (fieldsArr[0] !== "*") {
+  if (fieldsArr && fieldsArr[0] !== "*") {
     const modelFields = schema[entity];
     if (!modelFields) {
       throw new Error(`Entity ${entity} not found in Metamodel`);
@@ -230,27 +231,30 @@ export const getQueries = ({
 };
 
 export const getData = async ({
+  db,
   schema,
   entity,
   fieldsArr,
   queries,
   where,
   nJoin,
-}: SelectEntityType & { schema: EntitySchema }) => {
+}: SelectEntityType & {
+  db: Knex.QueryBuilder<any, unknown[]>;
+  schema: EntitySchema;
+}) => {
   let query;
   if (nJoin) {
     // provedu join s vazebni tabulkou
 
     const fieldsArrJoin = fieldsArr.map((f) => entity + "." + f);
     fieldsArrJoin.push(nJoin + ".source");
-    query = db(entity)
+    query = db
+      .from(entity)
       .select(fieldsArrJoin)
-      .setUser({ id: 1 })
-      .setUser({ id: 1 })
       .innerJoin(nJoin, entity + ".id", nJoin + ".target")
       .whereIn(nJoin + ".source", where ? (where.id as any) : [-1]);
   } else {
-    query = db(entity).select(fieldsArr).setUser({ id: 1 });
+    query = db.from(entity).select(fieldsArr);
 
     // Pridam WHERE
     if (where && Object.keys(where).length > 0) {
@@ -269,6 +273,7 @@ export const getData = async ({
           const query = joinQueries.queries[fieldsArr[0]];
           //TODO: umi pouze jednu uroven createdby.fullname neumi uroven createdby.owner.fullname
           const d = await getData({
+            db,
             schema,
             entity: query.entity,
             fieldsArr: query.fieldsArr,
@@ -303,6 +308,7 @@ export const getData = async ({
       });
 
       const joindata = await getData({
+        db,
         schema,
         entity: query.entity,
         fieldsArr: [MAIN_ID, ...query.fieldsArr],
