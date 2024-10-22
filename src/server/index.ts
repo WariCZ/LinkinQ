@@ -53,8 +53,7 @@ export class WebApp {
     // this.userManager.init();
 
     this.entity = new EntityRoutes();
-
-    // //
+    //
     this.entity
       .prepareSchema()
       .then((schema) => {

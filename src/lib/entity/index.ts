@@ -1,5 +1,5 @@
 import { Knex } from "knex";
-import _, { update } from "lodash";
+import _ from "lodash";
 import { DbSchemaType, EntitySchema, EntityType, FieldType } from "./types";
 import { db as knexDB } from "../knex";
 import {
@@ -19,6 +19,8 @@ import logger from "../logger";
 import EventEmitter from "events";
 import { getData, getQueries } from "./methodsDB";
 import { Sql } from "./sql";
+import { Triggers } from "./triggers";
+import { DateTime } from "luxon";
 
 export class Entity {
   db: Knex;
@@ -26,57 +28,13 @@ export class Entity {
   GUID_ID: string = "guid";
   schema: EntitySchema = {};
   eventsOnEntities: EventEmitter;
+  triggers: Triggers;
 
   constructor() {
     this.db = knexDB;
     this.eventsOnEntities = new EventEmitter();
+    this.triggers = new Triggers({ db: this.db });
   }
-
-  // select = async ({
-  //   entity,
-  //   fields,
-  //   where,
-  //   orderBy,
-  //   groupBy,
-  //   limit,
-  // }: {
-  //   entity: string;
-  //   fields: string[];
-  //   where: any;
-  //   orderBy: string[];
-  //   groupBy: string[];
-  //   limit: number;
-  // }) => {
-  //   try {
-  //     if (entity) {
-  //       if (this.schema[entity]) {
-  //         const db: any = this.db().setUser({ id: req.user.id });
-  //         const queries = getQueries({
-  //           schema: this.schema,
-  //           entity,
-  //           fieldsArr: fields,
-  //           where: where,
-  //         });
-
-  //         const data = await getData({
-
-  //           ...queries,
-  //           schema: this.schema,
-  //           // orderBy: orderBy,
-  //           // groupBy: groupBy
-  //         });
-
-  //         return data;
-  //       } else {
-  //         return `Entity ${entity} not exists`;
-  //       }
-  //     } else {
-  //       return `Entity not found`;
-  //     }
-  //   } catch (e: any) {
-  //     return e.message;
-  //   }
-  // };
 
   async getTablesAndColumns(entityDef: EntitySchema) {
     try {
@@ -502,7 +460,7 @@ export class Entity {
     await defaultExecute().map(async (e) => {
       await this.db.raw(e).setUser({ id: 1 });
     });
-    this.registerTriggers();
+    // this.registerTriggers();
 
     const schemaDefinition = defaultEntities();
 
@@ -517,159 +475,14 @@ export class Entity {
       schemaDefinition: differencesAdd,
       actualDBSchema: actualDBSchema,
     });
+
+    await this.triggers.initTriggers();
+
     await this.createData({ data: defaultData(), entityDef });
 
     await wait(2000);
 
     this.schema = entityDef;
-
     return entityDef;
-  }
-
-  async addToJournal({
-    entity,
-    fields_old,
-    fields_new,
-    operation,
-    user,
-    entityid,
-    entityguid,
-  }: {
-    entity: string;
-    fields_old: Object;
-    fields_new: Object;
-    operation?: "C" | "D" | "U" | "";
-    user: number;
-    entityid: number;
-    entityguid: string;
-  }) {
-    await this.db("journal").setUser({ id: 1 }).insert({
-      caption: entity,
-      entity,
-      fields_old,
-      fields_new,
-      operation,
-      entityid,
-      entityguid,
-      createdby: user,
-      updatedby: user,
-    });
-  }
-
-  registerTriggers() {
-    const that = this;
-    this.db.registerTriggers({
-      before: async function (runner) {
-        if (!runner.builder?._user?.id) {
-          debugger;
-          return false;
-        }
-
-        if (["insert", "update", "del"].indexOf(runner.builder._method) > -1) {
-          const table = runner.builder._single.table;
-          if (table == "journal") return;
-
-          let beforeData;
-
-          if (
-            runner.builder._method == "update" ||
-            runner.builder._method == "del"
-          ) {
-            const sqlObj = runner.builder.toSQL() as any;
-            const w = sqlObj.sql.match(/where(.*?)(returning|$)/i);
-            if (w && w[1]) {
-              const whereRaw = w[1].replace("where ", "");
-              const bindsLength = _.countBy(sqlObj.sql)["?"] || 0;
-              const whereBindsLength = _.countBy(whereRaw)["?"] || 0;
-              const selectBinds = sqlObj.bindings.slice(
-                bindsLength - whereBindsLength
-              );
-
-              beforeData = await that
-                .db(table)
-                .setUser({ id: 1 })
-                .select("*")
-                .whereRaw(whereRaw, selectBinds);
-            }
-          }
-
-          if (
-            runner.builder._method == "insert" ||
-            runner.builder._method == "update"
-          ) {
-            if (runner.builder._single.insert) {
-              runner.builder._single.returning = ["id", "guid"];
-
-              if (Array.isArray(runner.builder._single.insert)) {
-                runner.builder._single.insert =
-                  runner.builder._single.insert.map((ins: any) => {
-                    return {
-                      ...ins,
-                      createdby: runner.builder?._user.id,
-                      updatedby: runner.builder?._user.id,
-                    };
-                  });
-              } else {
-                runner.builder._single.insert = {
-                  ...runner.builder._single.insert,
-                  createdby: runner.builder?._user.id,
-                  updatedby: runner.builder?._user.id,
-                };
-              }
-            }
-          }
-          return beforeData;
-        }
-        //
-      },
-      after: async function (runner, afterData, beforeData) {
-        if (["insert", "update", "del"].indexOf(runner.builder._method) > -1) {
-          // debugger;
-          console.log("after", afterData, beforeData);
-          const table = runner.builder._single.table;
-          if (table == "journal") return;
-
-          let operation: "C" | "U" | "D" | "";
-          // let afterData;
-          if (runner.builder._method == "insert") {
-            operation = "C";
-          } else if (runner.builder._method == "update") operation = "U";
-          else if (runner.builder._method == "del") operation = "D";
-          else operation = "";
-
-          if (runner.builder._single.insert) {
-            afterData[0] = {
-              ...afterData[0],
-              ...runner.builder._single.insert,
-            };
-          }
-
-          beforeData = Array.isArray(beforeData) ? beforeData : [beforeData];
-          afterData = Array.isArray(afterData) ? afterData : [afterData];
-
-          const data = [];
-
-          for (let i = 0; i < beforeData.length; i++) {
-            data.push({ beforeData: beforeData[i], afterData: afterData[i] });
-
-            await that.addToJournal({
-              entity: table,
-              fields_new: operation !== "D" ? afterData[i] : null,
-              fields_old: beforeData[i],
-              entityid: beforeData[i]?.id || afterData[i]?.id,
-              entityguid: beforeData[i]?.guid || afterData[i]?.guid,
-              operation: operation,
-              user: runner.builder?._user?.id,
-            });
-
-            that.eventsOnEntities.emit("afterTrigger", {
-              afterData: afterData[i],
-              beforeData: beforeData[i],
-              entity: table,
-            });
-          }
-        }
-      },
-    });
   }
 }
