@@ -5,7 +5,6 @@ import { getData, getQueries } from "./methodsDB";
 import { apiError } from "../logger";
 import _ from "lodash";
 import { Entity } from ".";
-import { authenticateWithMultipleStrategies } from "../auth";
 import { DateTime } from "luxon";
 import { Sql } from "./sql";
 
@@ -121,131 +120,115 @@ export class EntityRoutes extends Entity {
       });
     });
 
-    router.get(
-      "/entity/:entity",
-      authenticateWithMultipleStrategies(["local", "basic"]),
-      async (req: Request, res: Response) => {
-        try {
-          if (req.user) {
-            try {
-              const sql = new Sql({
-                db: this.db,
-                schema: this.schema,
-                user: req.user,
-              });
+    router.get("/entity/:entity", async (req: Request, res: Response) => {
+      try {
+        if (req.user) {
+          try {
+            const sql = new Sql({
+              db: this.db,
+              schema: this.schema,
+              user: req.user,
+            });
 
-              const fields = (req.query.__fields + ",guid" || "*").split(",");
+            const fields = (req.query.__fields + ",guid" || "*").split(",");
 
-              const ret = await sql.select({
-                entity: req.params.entity,
-                fields,
-                where: _.omit(req.query as any, ["entity", "__fields"]),
-              });
-              return res.json(ret);
-            } catch (e: any) {
-              debugger;
-              console.error(e);
-              //TODO: Stalo by za uvahu nejakym zpusobem chybu omezit aby se neposilala chyba takto detailne
-              return apiError({ res, error: e.message || e });
-            }
-          } else {
-            res.sendStatus(401);
+            const ret = await sql.select({
+              entity: req.params.entity,
+              fields,
+              where: _.omit(req.query as any, ["entity", "__fields"]),
+            });
+            return res.json(ret);
+          } catch (e: any) {
+            debugger;
+            console.error(e);
+            //TODO: Stalo by za uvahu nejakym zpusobem chybu omezit aby se neposilala chyba takto detailne
+            return apiError({ res, error: e.message || e });
           }
-        } catch (error) {
-          console.error("Error fetching data from external API:", error);
-          res.status(500).send("Error fetching data from external API");
+        } else {
+          res.sendStatus(401);
         }
+      } catch (error) {
+        console.error("Error fetching data from external API:", error);
+        res.status(500).send("Error fetching data from external API");
       }
-    );
+    });
 
     // INSERT
-    router.post(
-      "/entity/:entity",
-      authenticateWithMultipleStrategies(["local", "basic"]),
-      async (req: Request, res: Response) => {
-        try {
-          if (req.user) {
-            const sql = new Sql({
-              db: this.db,
-              schema: this.schema,
-              user: req.user,
-            });
+    router.post("/entity/:entity", async (req: Request, res: Response) => {
+      try {
+        if (req.user) {
+          const sql = new Sql({
+            db: this.db,
+            schema: this.schema,
+            user: req.user,
+          });
 
-            const ret = await sql.insert({
-              entity: req.params.entity,
-              data: req.body,
-            });
+          const ret = await sql.insert({
+            entity: req.params.entity,
+            data: req.body,
+          });
 
-            return res.json(ret);
-          } else {
-            res.sendStatus(401);
-          }
-        } catch (error: any) {
-          debugger;
-          console.error("Error fetching data from external API:", error?.stack);
-          res.status(500).send("Error fetching data from external API");
+          return res.json(ret);
+        } else {
+          res.sendStatus(401);
         }
+      } catch (error: any) {
+        debugger;
+        console.error("Error fetching data from external API:", error?.stack);
+        res.status(500).send("Error fetching data from external API");
       }
-    );
+    });
 
     // UPDATE
-    router.put(
-      "/entity/:entity",
-      authenticateWithMultipleStrategies(["local", "basic"]),
-      async (req: Request, res: Response) => {
-        try {
-          if (req.user) {
-            const sql = new Sql({
-              db: this.db,
-              schema: this.schema,
-              user: req.user,
-            });
-            const ret = await sql.update({
-              entity: req.params.entity,
-              where: _.omit(req.query as any, ["entity", "__fields"]),
-              data: req.body,
-            });
+    router.put("/entity/:entity", async (req: Request, res: Response) => {
+      try {
+        if (req.user) {
+          const sql = new Sql({
+            db: this.db,
+            schema: this.schema,
+            user: req.user,
+          });
+          const ret = await sql.update({
+            entity: req.params.entity,
+            where: _.omit(req.query as any, ["entity", "__fields"]),
+            data: req.body,
+          });
 
-            return res.json(ret);
-          } else {
-            res.sendStatus(401);
-          }
-        } catch (error: any) {
-          debugger;
-          console.error("Error fetching data from external API:", error?.stack);
-          res.status(500).send("Error fetching data from external API");
+          return res.json(ret);
+        } else {
+          res.sendStatus(401);
         }
+      } catch (error: any) {
+        debugger;
+        console.error("Error fetching data from external API:", error?.stack);
+        res.status(500).send("Error fetching data from external API");
       }
-    );
+    });
 
     // UPDATE
-    router.delete(
-      "/entity/:entity",
-      authenticateWithMultipleStrategies(["local", "basic"]),
-      async (req: Request, res: Response) => {
-        try {
-          if (req.user) {
-            const sql = new Sql({
-              db: this.db,
-              schema: this.schema,
-              user: req.user,
-            });
-            const ret = await sql.delete({
-              entity: req.params.entity,
-              where: _.omit(req.query as any, ["entity", "__fields"]),
-            });
+    router.delete("/entity/:entity", async (req: Request, res: Response) => {
+      try {
+        if (req.user) {
+          const sql = new Sql({
+            db: this.db,
+            schema: this.schema,
+            user: req.user,
+          });
+          const ret = await sql.delete({
+            entity: req.params.entity,
+            where: _.omit(req.query as any, ["entity", "__fields"]),
+          });
 
-            return res.json(ret);
-          } else {
-            res.sendStatus(401);
-          }
-        } catch (error: any) {
-          debugger;
-          console.error("Error fetching data from external API:", error?.stack);
-          res.status(500).send("Error fetching data from external API");
+          return res.json(ret);
+        } else {
+          res.sendStatus(401);
         }
+      } catch (error: any) {
+        debugger;
+        console.error("Error fetching data from external API:", error?.stack);
+        res.status(500).send("Error fetching data from external API");
       }
-    );
+    });
 
     return router;
   }

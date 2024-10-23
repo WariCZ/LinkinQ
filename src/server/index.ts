@@ -8,7 +8,7 @@ import path from "path";
 
 import logger from "../lib/logger";
 import { EntityRoutes } from "../lib/entity/routes";
-import authRoutes from "../lib/auth";
+import authRoutes, { authenticate } from "../lib/auth";
 import { EntitySchema } from "../lib/entity/types";
 import { BPMNServer, configuration } from "../lib/bpmn-web";
 
@@ -62,7 +62,7 @@ export class WebApp {
         this.setupExpress();
       })
       .catch((e) => {
-        debugger;
+        // debugger;
         // logger.error(e.message);
         logger.error(e);
         if (e.stack) logger.error(e.stack);
@@ -165,9 +165,9 @@ export class WebApp {
       app.use(this.waitForViteMiddleware);
     }
     app.use("/", authRoutes);
-    app.use("/api", this.entity.config());
+    app.use("/api", authenticate, this.entity.config());
 
-    app.get("/protected2", (req: Request, res: Response) => {
+    app.get("/protected2", authenticate, (req: Request, res: Response) => {
       res.json({ message: "This is a protected route", user: req.user });
     });
   }
