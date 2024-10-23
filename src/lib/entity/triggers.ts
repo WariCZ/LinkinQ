@@ -1,10 +1,8 @@
 import { Knex } from "knex";
-import { getData, getQueries } from "./methodsDB";
-import { EntitySchema } from "./types";
-import { User } from "../auth";
 import fs from "fs";
 import _ from "lodash";
 import { DateTime } from "luxon";
+import EventEmitter from "events";
 
 type TriggerItem = {
   entity: string;
@@ -17,9 +15,16 @@ export class Triggers {
   db: Knex.QueryBuilder<any, unknown[]>;
   path: string;
   definitions: Record<string, TriggerItem[]> = {};
-  constructor({ db }: { db: Knex<any, unknown[]> }) {
+  eventsOnEntities: EventEmitter;
+  constructor({
+    db,
+    eventsOnEntities,
+  }: {
+    db: Knex<any, unknown[]>;
+    eventsOnEntities: EventEmitter;
+  }) {
     this.path = process.cwd() + "/triggers/";
-
+    this.eventsOnEntities = eventsOnEntities;
     this.db = db.setUser({ id: 1 });
 
     this.registerTriggers(db);
@@ -231,11 +236,11 @@ export class Triggers {
               user: runner.builder?._user?.id,
             });
 
-            // that.eventsOnEntities.emit("afterTrigger", {
-            //   afterData: afterData[i],
-            //   beforeData: beforeData[i],
-            //   entity: table,
-            // });
+            that.eventsOnEntities.emit("afterTrigger", {
+              afterData: afterData[i],
+              beforeData: beforeData[i],
+              entity: table,
+            });
           }
         }
       },

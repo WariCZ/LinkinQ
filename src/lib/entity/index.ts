@@ -33,7 +33,10 @@ export class Entity {
   constructor() {
     this.db = knexDB;
     this.eventsOnEntities = new EventEmitter();
-    this.triggers = new Triggers({ db: this.db });
+    this.triggers = new Triggers({
+      db: this.db,
+      eventsOnEntities: this.eventsOnEntities,
+    });
   }
 
   async getTablesAndColumns(entityDef: EntitySchema) {
