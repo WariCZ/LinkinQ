@@ -1,7 +1,8 @@
-import { MAIN_ID } from "../knex";
+import { MAIN_ID, MAIN_GUID } from "../knex";
 import _ from "lodash";
 import { EntitySchema } from "./types";
 import { Knex } from "knex";
+import { dbType } from "./sql";
 
 type SelectEntityType = {
   entity: string;
@@ -10,6 +11,7 @@ type SelectEntityType = {
   queries?: Record<string, SelectEntityType>;
   nJoin?: string;
   onlyIds?: boolean;
+  orderBy?: string[];
 };
 
 export const whereQueries = ({
@@ -230,6 +232,61 @@ export const getQueries = ({
   }
 };
 
+export const addWhere = async ({
+  db,
+  query,
+  entity,
+  schema,
+  where,
+}: {
+  db: dbType;
+  query: Knex.QueryBuilder;
+  entity: string;
+  schema: EntitySchema;
+  where:
+    | Record<string, string | number | string[] | number[] | undefined>
+    | undefined;
+}) => {
+  if (where && Object.keys(where).length > 0) {
+    const joinQueries = whereQueries({
+      schema,
+      entity,
+      fieldsArr: [],
+      where: where,
+    });
+
+    for (let field in where) {
+      let val;
+      if (field.indexOf(".") > -1) {
+        const fieldWhere = field.split(".")[0];
+        const fieldsArr = field.split(".");
+        const query = joinQueries.queries[fieldsArr[0]];
+        //TODO: umi pouze jednu uroven createdby.fullname neumi uroven createdby.owner.fullname
+        const d = await getData({
+          db,
+          schema,
+          entity: query.entity,
+          fieldsArr: query.fieldsArr,
+          where: query.where,
+        });
+
+        delete where[field];
+        where[fieldWhere] = d.map((d) => d.id);
+        field = fieldWhere;
+      }
+      try {
+        val = JSON.parse(where[field] as any);
+      } catch {
+        val = where[field];
+      }
+      if (Array.isArray(val)) {
+        query = query.whereIn(field, val);
+      } else {
+        query = query.where(field, val);
+      }
+    }
+  }
+};
 export const getData = async ({
   db,
   schema,
@@ -238,67 +295,57 @@ export const getData = async ({
   queries,
   where,
   nJoin,
+  orderBy,
 }: SelectEntityType & {
-  db: Knex.QueryBuilder<any, unknown[]>;
+  db: dbType;
   schema: EntitySchema;
 }) => {
-  let query;
+  let query: Knex.QueryBuilder;
+
+  // let query: Knex.QueryBuilder<
+  //   {},
+  //   DeferredKeySelection<
+  //     {},
+  //     never,
+  //     true,
+  //     (string | undefined)[],
+  //     false,
+  //     {},
+  //     never
+  //   >[]
+  // >;
   if (nJoin) {
     // provedu join s vazebni tabulkou
 
     const fieldsArrJoin = fieldsArr.map((f) => entity + "." + f);
     fieldsArrJoin.push(nJoin + ".source");
-    query = db
-      .from(entity)
+    query = db(entity)
       .select(fieldsArrJoin)
       .innerJoin(nJoin, entity + ".id", nJoin + ".target")
       .whereIn(nJoin + ".source", where ? (where.id as any) : [-1]);
   } else {
-    query = db.from(entity).select(fieldsArr);
+    query = db(entity).select(fieldsArr);
 
-    // Pridam WHERE
-    if (where && Object.keys(where).length > 0) {
-      const joinQueries = whereQueries({
-        schema,
-        entity,
-        fieldsArr: [],
-        where: where,
-      });
-
-      for (let field in where) {
-        let val;
-        if (field.indexOf(".") > -1) {
-          const fieldWhere = field.split(".")[0];
-          const fieldsArr = field.split(".");
-          const query = joinQueries.queries[fieldsArr[0]];
-          //TODO: umi pouze jednu uroven createdby.fullname neumi uroven createdby.owner.fullname
-          const d = await getData({
-            db,
-            schema,
-            entity: query.entity,
-            fieldsArr: query.fieldsArr,
-            where: query.where,
-          });
-
-          delete where[field];
-          where[fieldWhere] = d.map((d) => d.id);
-          field = fieldWhere;
-        }
-        try {
-          val = JSON.parse(where[field] as any);
-        } catch {
-          val = where[field];
-        }
-        if (Array.isArray(val)) {
-          query = query.whereIn(field, val);
+    if (orderBy) {
+      orderBy.map((o) => {
+        if (o.indexOf("-") > -1) {
+          query.orderBy(o.replace("-", ""), "desc");
         } else {
-          query = query.where(field, val);
+          query.orderBy(o, "asc");
         }
-      }
+      });
     }
+    // Pridam WHERE
+    await addWhere({
+      db,
+      query,
+      entity,
+      schema,
+      where,
+    });
   }
 
-  let data = await query;
+  let data: any[] = await query;
 
   if (queries && Object.keys(queries).length > 0) {
     for (const field in queries) {

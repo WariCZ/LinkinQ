@@ -16,6 +16,11 @@ const entityFields: EntitySchema = {
         description: "Type (before, after)",
         isRequired: true,
       },
+      method: {
+        type: "text",
+        label: "Method",
+        description: "Type (insert, update, delete)",
+      },
       code: {
         type: `text`,
         label: "Code",

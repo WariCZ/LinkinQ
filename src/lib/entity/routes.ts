@@ -130,12 +130,24 @@ export class EntityRoutes extends Entity {
               user: req.user,
             });
 
-            const fields = (req.query.__fields + ",guid" || "*").split(",");
+            const fields = (
+              req.query.__fields ? req.query.__fields + ",guid,id" : "*"
+            ).split(",");
+
+            const orderBy =
+              req.query.__orderby && typeof req.query.__orderby === "string"
+                ? req.query.__orderby.split(",")
+                : undefined;
 
             const ret = await sql.select({
               entity: req.params.entity,
               fields,
-              where: _.omit(req.query as any, ["entity", "__fields"]),
+              orderBy,
+              where: _.omit(req.query as any, [
+                "entity",
+                "__fields",
+                "__orderby",
+              ]),
             });
             return res.json(ret);
           } catch (e: any) {
@@ -147,9 +159,11 @@ export class EntityRoutes extends Entity {
         } else {
           res.sendStatus(401);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching data from external API:", error);
-        res.status(500).send("Error fetching data from external API");
+        res
+          .status(500)
+          .send(`Error fetching data from external API: ${error?.message}`);
       }
     });
 
@@ -175,7 +189,9 @@ export class EntityRoutes extends Entity {
       } catch (error: any) {
         debugger;
         console.error("Error fetching data from external API:", error?.stack);
-        res.status(500).send("Error fetching data from external API");
+        res
+          .status(500)
+          .send(`Error fetching data from external API: ${error?.message}`);
       }
     });
 
@@ -190,8 +206,8 @@ export class EntityRoutes extends Entity {
           });
           const ret = await sql.update({
             entity: req.params.entity,
-            where: _.omit(req.query as any, ["entity", "__fields"]),
-            data: req.body,
+            where: req.body.where,
+            data: req.body.data,
           });
 
           return res.json(ret);
@@ -201,7 +217,9 @@ export class EntityRoutes extends Entity {
       } catch (error: any) {
         debugger;
         console.error("Error fetching data from external API:", error?.stack);
-        res.status(500).send("Error fetching data from external API");
+        res
+          .status(500)
+          .send(`Error fetching data from external API: ${error?.message}`);
       }
     });
 
@@ -214,9 +232,10 @@ export class EntityRoutes extends Entity {
             schema: this.schema,
             user: req.user,
           });
+          //TODO: pres API dovolit jen mazani pres GUID?
           const ret = await sql.delete({
             entity: req.params.entity,
-            where: _.omit(req.query as any, ["entity", "__fields"]),
+            where: req.body.where,
           });
 
           return res.json(ret);

@@ -3,19 +3,33 @@ import fs from "fs";
 import _ from "lodash";
 import { DateTime } from "luxon";
 import EventEmitter from "events";
+import { EntitySchema } from "./types";
+import { dbType } from "./sql";
 
-type TriggerItem = {
+export type TriggerItem = {
   entity: string;
   caption: string;
   type: "before" | "after";
-  code: Function;
+  method: "insert" | "update" | "delete";
+  code: ({
+    beforeData,
+    data,
+    afterData,
+  }: {
+    beforeData: Object;
+    data: Object;
+    afterData?: Object;
+  }) => void;
   modifytime: DateTime<true>;
 };
+
 export class Triggers {
-  db: Knex.QueryBuilder<any, unknown[]>;
+  db: dbType;
   path: string;
-  definitions: Record<string, TriggerItem[]> = {};
+  definitions: Record<string, Record<string, Record<string, TriggerItem[]>>> =
+    {};
   eventsOnEntities: EventEmitter;
+  schema: EntitySchema = {};
   constructor({
     db,
     eventsOnEntities,
@@ -25,7 +39,7 @@ export class Triggers {
   }) {
     this.path = process.cwd() + "/triggers/";
     this.eventsOnEntities = eventsOnEntities;
-    this.db = db.setUser({ id: 1 });
+    this.db = (table: string) => db(table).setUser({ id: 1 });
 
     this.registerTriggers(db);
   }
@@ -38,7 +52,8 @@ export class Triggers {
     return this.definitions;
   }
 
-  initTriggers = async () => {
+  initTriggers = async (schema: EntitySchema) => {
+    this.schema = schema;
     let triggersArray: TriggerItem[] = [];
     for (const filename of fs.readdirSync(this.path)) {
       const path = require("path");
@@ -57,31 +72,37 @@ export class Triggers {
     }
 
     for (const trigger of triggersArray) {
-      if (!this.definitions[trigger.entity]) {
-        this.definitions[trigger.entity] = [];
+      if (!this.definitions[trigger.type]) {
+        this.definitions[trigger.type] = {};
       }
-      this.definitions[trigger.entity].push(trigger);
-
+      if (!this.definitions[trigger.type][trigger.method]) {
+        this.definitions[trigger.type][trigger.method] = {};
+      }
+      if (!this.definitions[trigger.type][trigger.method][trigger.entity]) {
+        this.definitions[trigger.type][trigger.method][trigger.entity] = [];
+      }
+      this.definitions[trigger.type][trigger.method][trigger.entity].push(
+        trigger
+      );
+      //
       const dbTrigger: any = { ...trigger };
       dbTrigger.code = dbTrigger.code.toString();
       delete dbTrigger.modifytime;
 
-      const getterTrigger = this.db
+      const getterTrigger = this.db("triggers")
         .select("updatetime")
-        .from("triggers")
         .where({ caption: trigger.caption });
 
       const existsTrigger = await getterTrigger;
 
       if (existsTrigger.length == 0) {
-        await this.db.from("triggers").insert(dbTrigger);
+        await this.db("triggers").insert(dbTrigger);
       } else {
         if (
           trigger.modifytime.toMillis() >
           DateTime.fromJSDate(existsTrigger[0].updatetime).toMillis()
         ) {
-          await this.db
-            .from("triggers")
+          await this.db("triggers")
             .where({ caption: trigger.caption })
             .update(dbTrigger);
         }
@@ -89,10 +110,34 @@ export class Triggers {
     }
   };
 
+  deepDiff(obj1: Object, obj2: Object) {
+    return _.transform(obj1, (result: any, value, key) => {
+      if (!_.isEqual(value, obj2[key])) {
+        if (_.isObject(value) && _.isObject(obj2[key])) {
+          const diff = this.deepDiff(value, obj2[key]);
+          if (!_.isEmpty(diff)) {
+            result[key] = diff;
+          }
+        } else {
+          result[key] = obj2[key];
+        }
+      }
+    });
+  }
+
+  addUniqueKeys(existingKeys: string[], newObject: object): string[] {
+    const newKeys = _.keys(newObject);
+
+    const uniqueKeys = _.difference(newKeys, existingKeys);
+
+    return [...existingKeys, ...uniqueKeys];
+  }
+
   registerTriggers(db: Knex) {
     const that = this;
     db.registerTriggers({
       before: async function (runner) {
+        let beforeData: any;
         if (!runner.builder?._user?.id) {
           debugger;
           return false;
@@ -100,13 +145,11 @@ export class Triggers {
 
         if (["insert", "update", "del"].indexOf(runner.builder._method) > -1) {
           const table = runner.builder._single.table;
-          if (that.definitions[table]) {
-            that.definitions[table][0].code();
-            // debugger;
+
+          if (!that.schema[table]) {
+            return;
           }
           if (table == "journal") return;
-
-          let beforeData;
 
           if (
             runner.builder._method == "update" ||
@@ -129,42 +172,64 @@ export class Triggers {
             }
           }
 
+          const method =
+            runner.builder._method == "del" ? "delete" : runner.builder._method;
+          if (
+            that.definitions["before"] &&
+            that.definitions["before"][method] &&
+            that.definitions["before"][method][table]
+          ) {
+            const data = runner.builder._single[runner.builder._method];
+            that.definitions["before"][method][table].map((trigger) => {
+              if (trigger.code) {
+                trigger.code({
+                  beforeData,
+                  data,
+                });
+              }
+            });
+            // debugger;
+          }
+
           if (
             runner.builder._method == "insert" ||
             runner.builder._method == "update"
           ) {
+            let returningFields = ["id", "guid"];
             if (runner.builder._single.insert) {
-              runner.builder._single.returning = ["id", "guid"];
-
               if (Array.isArray(runner.builder._single.insert)) {
                 runner.builder._single.insert =
                   runner.builder._single.insert.map((ins: any) => {
-                    return {
+                    ins = {
                       ...ins,
                       createdby: runner.builder?._user.id,
+                      createtime: DateTime.now().toFormat(
+                        "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
+                      ),
                       updatedby: runner.builder?._user.id,
-                      ...(runner.builder._method == "update"
-                        ? {
-                            updatetime: DateTime.now().toFormat(
-                              "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
-                            ),
-                          }
-                        : {}),
+                      updatetime: DateTime.now().toFormat(
+                        "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
+                      ),
                     };
+                    returningFields = that.addUniqueKeys(returningFields, ins);
+                    return ins;
                   });
               } else {
                 runner.builder._single.insert = {
                   ...runner.builder._single.insert,
                   createdby: runner.builder?._user.id,
+                  createtime: DateTime.now().toFormat(
+                    "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
+                  ),
                   updatedby: runner.builder?._user.id,
-                  ...(runner.builder._method == "update"
-                    ? {
-                        updatetime: DateTime.now().toFormat(
-                          "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
-                        ),
-                      }
-                    : {}),
+                  updatetime: DateTime.now().toFormat(
+                    "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
+                  ),
                 };
+                returningFields = [
+                  ...returningFields,
+                  ..._.keys(runner.builder._single.insert),
+                ];
               }
             }
 
@@ -172,13 +237,15 @@ export class Triggers {
               if (Array.isArray(runner.builder._single.update)) {
                 runner.builder._single.update =
                   runner.builder._single.update.map((upd: any) => {
-                    return {
+                    upd = {
                       ...upd,
                       updatedby: runner.builder?._user.id,
                       updatetime: DateTime.now().toFormat(
                         "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
                       ),
                     };
+                    returningFields = that.addUniqueKeys(returningFields, upd);
+                    return upd;
                   });
               } else {
                 runner.builder._single.update = {
@@ -188,9 +255,13 @@ export class Triggers {
                     "yyyy-MM-dd HH:mm:ss.SSSZZ"
                   ),
                 };
+                returningFields = [
+                  ...returningFields,
+                  ..._.keys(runner.builder._single.update),
+                ];
               }
-              runner.builder._single.returning = "*";
             }
+            runner.builder._single.returning = returningFields;
           }
           return beforeData;
         }
@@ -201,6 +272,9 @@ export class Triggers {
           // debugger;
           console.log("after", afterData, beforeData);
           const table = runner.builder._single.table;
+          if (!that.schema[table]) {
+            return;
+          }
           if (table == "journal") return;
 
           let operation: "C" | "U" | "D" | "";
@@ -211,34 +285,74 @@ export class Triggers {
           else if (runner.builder._method == "del") operation = "D";
           else operation = "";
 
-          if (runner.builder._single.insert) {
-            afterData[0] = {
-              ...afterData[0],
-              ...runner.builder._single.insert,
-            };
+          if (
+            operation == "D" &&
+            Array.isArray(beforeData) &&
+            beforeData.length == 0
+          ) {
+            return;
           }
 
-          beforeData = Array.isArray(beforeData) ? beforeData : [beforeData];
-          afterData = Array.isArray(afterData) ? afterData : [afterData];
+          if (beforeData)
+            beforeData = Array.isArray(beforeData) ? beforeData : [beforeData];
+          if (afterData)
+            afterData = Array.isArray(afterData) ? afterData : [afterData];
 
-          const data = [];
+          //   const data = [];
 
-          for (let i = 0; i < beforeData.length; i++) {
-            data.push({ beforeData: beforeData[i], afterData: afterData[i] });
+          let dataLength = beforeData?.length || afterData?.length || 0;
+          if (beforeData?.length !== afterData?.length && operation === "U") {
+            debugger;
+            console.error(
+              "beforeData and afterData not same",
+              beforeData,
+              afterData
+            );
+            return;
+          }
+          for (let i = 0; i < dataLength; i++) {
+            const beforeDataItem = beforeData && beforeData[i];
+            const afterDataDataItem = afterData && afterData[i];
+            const diffDataItem = that.deepDiff(
+              beforeDataItem,
+              afterDataDataItem
+            );
 
             await that.addToJournal({
               entity: table,
-              fields_new: operation !== "D" ? afterData[i] : null,
-              fields_old: beforeData[i],
-              entityid: beforeData[i]?.id || afterData[i]?.id,
-              entityguid: beforeData[i]?.guid || afterData[i]?.guid,
+              fields_new: operation !== "D" ? afterDataDataItem : null,
+              fields_diff: diffDataItem,
+              fields_old: beforeDataItem,
+              entityid: beforeDataItem?.id || afterDataDataItem?.id,
+              entityguid: beforeDataItem?.guid || afterDataDataItem?.guid,
               operation: operation,
               user: runner.builder?._user?.id,
             });
 
+            const method =
+              runner.builder._method == "del"
+                ? "delete"
+                : runner.builder._method;
+            if (
+              that.definitions["after"] &&
+              that.definitions["after"][method] &&
+              that.definitions["after"][method][table]
+            ) {
+              that.definitions["after"][method][table].map((trigger) => {
+                if (trigger.code) {
+                  trigger.code({
+                    beforeData: beforeData[i],
+                    data: diffDataItem, //runner.builder._single[runner.builder._method],
+                    afterData: afterData[i],
+                  });
+                }
+              });
+            }
+
             that.eventsOnEntities.emit("afterTrigger", {
-              afterData: afterData[i],
-              beforeData: beforeData[i],
+              afterData: afterDataDataItem,
+              diffData: diffDataItem,
+              beforeData: afterDataDataItem,
               entity: table,
             });
           }
@@ -250,6 +364,7 @@ export class Triggers {
   async addToJournal({
     entity,
     fields_old,
+    fields_diff,
     fields_new,
     operation,
     user,
@@ -258,16 +373,18 @@ export class Triggers {
   }: {
     entity: string;
     fields_old: Object;
+    fields_diff: Object;
     fields_new: Object;
     operation?: "C" | "D" | "U" | "";
     user: number;
     entityid: number;
     entityguid: string;
   }) {
-    await this.db.from("journal").insert({
+    await this.db("journal").insert({
       caption: entity,
       entity,
       fields_old,
+      fields_diff,
       fields_new,
       operation,
       entityid,

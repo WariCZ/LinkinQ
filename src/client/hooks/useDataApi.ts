@@ -68,16 +68,19 @@ const getTableRecords = ({
   entity,
   fields,
   filter,
+  orderBy,
 }: {
   entity: string;
   fields: string;
   filter: Object;
+  orderBy?: string;
 }) => {
   return httpRequest({
     method: "GET",
     entity: entity,
     params: {
       __fields: fields,
+      __orderby: orderBy,
       ...filter,
     },
   });
@@ -105,7 +108,13 @@ export function idsValueInside(
 
 type EventData = any;
 function useDataApi<T, U>(
-  param: { entity: string; guid?: string; fields?: string[]; filter?: Object },
+  param: {
+    entity: string;
+    guid?: string;
+    fields?: string[];
+    filter?: Object;
+    orderby?: string[];
+  },
   // httpRequestFunction: {
   //   entity: string;
   //   fetch: (params: any) => Promise<AxiosResponse<T, any>> | undefined;
@@ -131,6 +140,7 @@ function useDataApi<T, U>(
   const [error, setError] = useState<string | null>(null);
   const [fieldsEntity, setFieldsEntity] = useState(param.fields || []);
   const [filter, setFilter] = useState(param.filter || {});
+  const [orderby, setOrderby] = useState(param.orderby || []);
   const [highlightedRow, setHighlightedRow] = useState([]);
 
   useEffect(() => {
@@ -180,11 +190,13 @@ function useDataApi<T, U>(
     guid,
     fields,
     filter,
+    orderBy,
   }: {
     entity: string;
     guid?: string;
     fields?: string[];
     filter?: Object;
+    orderBy?: string[];
   }) => {
     setLoading(true);
     setError(null);
@@ -206,6 +218,7 @@ function useDataApi<T, U>(
           entity,
           fields: fields && fields.length > 0 ? fields.join(",") : "*",
           filter: filter || {},
+          orderBy: orderBy && orderBy.join(","),
         });
         console.log("response.data", response.data, data);
         if (response) setData(response.data);
@@ -225,6 +238,7 @@ function useDataApi<T, U>(
       guid: param.guid,
       fields: fieldsEntity || undefined,
       filter: filter || undefined,
+      orderBy: orderby || undefined,
     });
   }, [param.entity, param.guid]);
 

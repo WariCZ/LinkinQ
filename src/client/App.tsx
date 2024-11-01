@@ -17,6 +17,7 @@ import { Flowbite } from "flowbite-react";
 import PublicPage2 from "./components/PublicPage2";
 import { customTheme } from "./flowbite";
 import ServerScript from "./app/ServerScript";
+import Journal from "./app/Journal";
 
 interface PrivateRouteProps {
   element: React.FC;
@@ -62,6 +63,7 @@ const App: React.FC = () => {
         <Route element={<PrivateRoute />}>
           <Route path="/" element={<PublicPage />} />
           <Route path="/public" element={<PublicPage2 />} />
+          <Route path="/journal" element={<Journal />} />
           <Route path="/protected" element={<ProtectedPage />} />
           <Route path="/protected2" element={<ProtectedPage />} />
           <Route path="/serverScript" element={<ServerScript />} />

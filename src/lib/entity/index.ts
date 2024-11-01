@@ -255,7 +255,8 @@ export class Entity {
                 .createTable(
                   tableName + "2" + rel[1] + "4" + columnName,
                   (table: any) => {
-                    table.bigint(this.MAIN_ID).primary();
+                    table.bigIncrements(this.MAIN_ID).primary([this.MAIN_ID]);
+
                     table.bigint("source");
                     table.bigint("target");
 
@@ -479,7 +480,7 @@ export class Entity {
       actualDBSchema: actualDBSchema,
     });
 
-    await this.triggers.initTriggers();
+    await this.triggers.initTriggers(entityDef);
 
     await this.createData({ data: defaultData(), entityDef });
 
