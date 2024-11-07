@@ -214,12 +214,14 @@ export class Triggers {
                 //   .groupBy(table + "." + MAIN_ID);
 
                 const beforeDataNlinks =
-                  runner.builder._params.beforeDataNlinks[link.table];
+                  runner.builder._params?.beforeDataNlinks &&
+                  runner.builder._params?.beforeDataNlinks[link.table];
 
-                beforeData = beforeData.map((bd: any) => {
-                  const d = _.find(beforeDataNlinks, { id: bd.id });
-                  return { ...bd, ...d };
-                });
+                if (beforeDataNlinks)
+                  beforeData = beforeData.map((bd: any) => {
+                    const d = _.find(beforeDataNlinks, { id: bd.id });
+                    return { ...bd, ...d };
+                  });
 
                 beforeData = that.translateIdsToNumber(table, beforeData);
               }
@@ -355,11 +357,21 @@ export class Triggers {
           }
 
           const changedData = runner.builder._params.data;
-          if (beforeData)
+          if (operation == "U") {
             beforeData = Array.isArray(beforeData) ? beforeData : [beforeData];
-          // if (afterData)
-          // afterData = Array.isArray(afterData) ? afterData : [afterData];
-          afterData = beforeData.map((b: any) => ({ ...b, ...changedData }));
+            // if (afterData)
+            // afterData = Array.isArray(afterData) ? afterData : [afterData];
+            afterData = beforeData.map((b: any) => ({ ...b, ...changedData }));
+          }
+          if (operation == "C") {
+            afterData = [
+              that.translateIdsToNumber(table, {
+                ...runner.builder._single.insert,
+                ...changedData,
+                ...afterData[0],
+              }),
+            ];
+          }
 
           //   const data = [];
 
@@ -377,16 +389,19 @@ export class Triggers {
             const beforeDataItem = beforeData && beforeData[i];
             const afterDataDataItem = afterData && afterData[i];
 
-            const diffDataItem = that.deepDiff(
-              beforeDataItem,
-              afterDataDataItem
-            );
+            const diffDataItem =
+              operation === "U"
+                ? that.deepDiff(beforeDataItem, afterDataDataItem)
+                : undefined;
 
-            if (Object.keys(diffDataItem).length === 0 && operation == "U") {
+            if (operation == "U" && Object.keys(diffDataItem).length === 0) {
               console.log("No update");
-              return;
+              continue;
             }
-            console.log(operation + " - ", diffDataItem);
+            console.log(
+              operation + " - ",
+              diffDataItem || beforeDataItem || afterDataDataItem
+            );
 
             await that.addToJournal({
               entity: table,

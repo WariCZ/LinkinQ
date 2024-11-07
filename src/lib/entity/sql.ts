@@ -124,7 +124,9 @@ export class Sql {
           let joinsIds = gl.joinsIds;
           dataItem = gl.dataItem;
 
-          const ret: any = await this.#db(entity).insert(dataItem);
+          const ret: any = await this.#db(entity)
+            .addParams({ data: gl.data })
+            .insert(dataItem);
 
           // add nlink joins
           for (let table of Object.keys(joinsIds)) {
@@ -132,7 +134,7 @@ export class Sql {
               return { source: ret[0].id, target: jid.id };
             });
 
-            await this.#db(table).addParams({ data: gl.data }).insert(joinData);
+            await this.#db(table).insert(joinData);
           }
 
           retData = retData.concat(ret);
@@ -246,7 +248,7 @@ export class Sql {
           query,
         });
 
-        const ret = await query.delete().returning("*");
+        const ret = await query.delete();
 
         return ret;
       } else {
