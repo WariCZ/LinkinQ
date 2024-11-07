@@ -5,6 +5,7 @@ export type EntityType = {
   withoutDefaultFields?: boolean;
   journal?: boolean;
   workflow?: boolean;
+  nlinkTables?: { table: string; field: string }[];
   fields: Record<string, FieldType>;
 };
 export type FieldType = {
@@ -19,6 +20,8 @@ export type FieldType = {
   isUnique?: boolean;
   readonly?: boolean;
   system?: boolean;
+  nlinkTable?: string;
+  link?: string;
 };
 
 export type DbSchemaType = { tables: EntitySchema; foreignKeys: string[] };

@@ -11,6 +11,7 @@ import { EntityRoutes } from "../lib/entity/routes";
 import authRoutes, { authenticate } from "../lib/auth";
 import { EntitySchema } from "../lib/entity/types";
 import { BPMNServer, configuration } from "../lib/bpmn-web";
+import { Sql } from "@/lib/entity/sql";
 
 dotenv.config();
 
@@ -56,10 +57,10 @@ export class WebApp {
     //
     this.entity
       .prepareSchema()
-      .then((schema) => {
+      .then(({ schema, sqlAdmin }) => {
         logger.debug("Call setupExpress -------------------");
         this.bpmnServer = new BPMNServer(configuration, logger as any);
-        this.setupExpress();
+        this.setupExpress({ schema, sqlAdmin });
       })
       .catch((e) => {
         // debugger;
@@ -126,10 +127,10 @@ export class WebApp {
       .send("Vite server failed to start within the expected time.");
   };
 
-  setupExpress() {
+  setupExpress({ schema, sqlAdmin }: { schema: EntitySchema; sqlAdmin: Sql }) {
     const app = this.app;
 
-    this.setupRoutes();
+    this.setupRoutes({ schema, sqlAdmin });
     //
     /**
      * Error Handler.
@@ -156,15 +157,13 @@ export class WebApp {
     return app;
   }
 
-  setupRoutes() {
-    var root = path.join(__dirname, "../");
-
+  setupRoutes({ schema, sqlAdmin }: { schema: EntitySchema; sqlAdmin: Sql }) {
     const app = this.app;
 
     if (process.env.NODE_ENV === "development") {
       app.use(this.waitForViteMiddleware);
     }
-    app.use("/", authRoutes);
+    app.use("/", authRoutes({ schema, sqlAdmin }));
     app.use("/api", authenticate, this.entity.config());
 
     app.get("/protected2", authenticate, (req: Request, res: Response) => {

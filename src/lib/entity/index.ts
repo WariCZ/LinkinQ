@@ -1,6 +1,6 @@
 import { Knex } from "knex";
 import _ from "lodash";
-import { DbSchemaType, EntitySchema, EntityType, FieldType } from "./types";
+import { DbSchemaType, EntitySchema, FieldType } from "./types";
 import { db as knexDB } from "../knex";
 import {
   addDefaultFields,
@@ -14,6 +14,8 @@ import {
   defaultEntities,
   defaultExecute,
   defaultFields,
+  defaultUsers,
+  updateData,
 } from "./defaultEntities";
 import logger from "../logger";
 import EventEmitter from "events";
@@ -249,7 +251,6 @@ export class Entity {
                 .setUser({ id: 1 })
                 .hasTable(tableName + "2" + rel[1] + "4" + columnName))
             ) {
-              // debugger;
               await this.db.schema
                 .setUser({ id: 1 })
                 .createTable(
@@ -262,12 +263,14 @@ export class Entity {
 
                     table
                       .foreign("source")
-                      .references(tableName + "." + this.MAIN_ID);
+                      .references(tableName + "." + this.MAIN_ID)
+                      .onDelete("CASCADE");
                     //TODO: musi se provest az uplne na konci Conclusion nema taky :-)
 
                     table
                       .foreign("target")
-                      .references(rel[1] + "." + this.MAIN_ID);
+                      .references(rel[1] + "." + this.MAIN_ID)
+                      .onDelete("CASCADE");
                   }
                 );
             } else {
@@ -394,70 +397,87 @@ export class Entity {
 
   async createData({
     data,
-    entityDef,
+    updateData,
+    sqlAdmin,
   }: {
     data: Object;
-    entityDef: EntitySchema;
+    sqlAdmin: Sql;
+    updateData?: Object;
   }) {
     for (const [name, dataArray] of Object.entries(data)) {
-      const linksFields = Object.keys(entityDef[name].fields).filter((key) =>
-        entityDef[name].fields[key]?.type?.startsWith("link")
-      );
-
       for (const d of dataArray) {
-        var rows = await this.db(name)
-          .setUser({ id: 1 })
-          .select()
-          .where("guid", d.guid);
+        var rows = await sqlAdmin.select({
+          entity: name,
+          fields: [this.MAIN_ID],
+          where: { guid: d.guid },
+        });
         if (rows.length === 0) {
-          for (const key of linksFields) {
-            if (typeof d[key] === "string") {
-              const columnDef = entityDef[name].fields[key];
+          await sqlAdmin.insert({
+            entity: name,
+            data: d,
+          });
+        }
+      }
+    }
 
-              const rel = columnDef.type?.match(/^link\((\w+)\)$/);
-              if (rel && rel[1]) {
-                var rows = await this.db(rel[1])
-                  .setUser({ id: 1 })
-                  .select(this.MAIN_ID)
-                  .where("guid", d[key]);
-                if (rows.length === 1) {
-                  d[key] = rows[0][this.MAIN_ID];
-                } else {
-                  if (rows.length === 0) {
-                    logger.error(
-                      `Dohledavany zaznam nenalezen tabulka ${name} sloupec ${key} - ${JSON.stringify(
-                        d
-                      )}`
-                    );
-                    return;
-                  } else {
-                    logger.error(
-                      `Dohledano moc zaznamu tabulka ${name} sloupec ${key} - ${JSON.stringify(
-                        d
-                      )}`
-                    );
-                    return;
-                  }
-                }
-              }
-            }
+    if (updateData) {
+      for (const [name, dataArray] of Object.entries(updateData)) {
+        for (const d of dataArray) {
+          var rows = await sqlAdmin.select({
+            entity: name,
+            fields: [this.MAIN_ID],
+            where: { guid: d.guid },
+          });
+
+          if (rows.length === 1) {
+            await sqlAdmin.update({
+              entity: name,
+              data: d,
+              where: { guid: d.guid },
+            });
+          } else {
+            console.warn("NOt found");
           }
-
-          await this.db(name).setUser({ id: 1 }).insert([d]);
         }
       }
     }
   }
-
-  // async initSchema() {
-  //   this.schema = await this.prepareSchema();
-  // }
 
   getSchema() {
     return this.schema;
   }
   setSchema(schema: EntitySchema) {
     return (this.schema = schema);
+  }
+
+  addAttributesToSchema(schema: EntitySchema) {
+    Object.keys(schema).forEach((table) => {
+      Object.keys(schema[table].fields).forEach((f) => {
+        if (schema[table]) {
+          const relTable =
+            schema[table].fields[f].type.match(/.*link\((\w+)\)/);
+          if (relTable) {
+            const isNLink = relTable[0].indexOf("nlink(");
+            if (isNLink > -1) {
+              const nlinkTable = table + "2" + relTable[1] + "4" + f;
+              schema[table].fields[f].nlinkTable = nlinkTable;
+              schema[table].fields[f].link = relTable[1];
+
+              const entity = schema[table];
+              entity.nlinkTables = entity.nlinkTables || [];
+
+              entity.nlinkTables.push({
+                table: nlinkTable,
+                field: f,
+              });
+            } else {
+              schema[table].fields[f].link = relTable[1];
+            }
+          }
+        }
+      });
+    });
+    return schema;
   }
 
   async prepareSchema() {
@@ -480,13 +500,29 @@ export class Entity {
       actualDBSchema: actualDBSchema,
     });
 
-    await this.triggers.initTriggers(entityDef);
+    this.schema = this.addAttributesToSchema(entityDef);
 
-    await this.createData({ data: defaultData(), entityDef });
+    const sqlAdmin = new Sql({
+      db: this.db,
+      schema: this.schema,
+      user: { id: 1 } as any,
+    });
+
+    await this.createData({
+      data: defaultUsers(),
+      sqlAdmin,
+    });
+
+    await this.triggers.initTriggers(this.schema);
+
+    await this.createData({
+      data: defaultData(),
+      sqlAdmin,
+      updateData: updateData(),
+    });
 
     await wait(2000);
 
-    this.schema = entityDef;
-    return entityDef;
+    return { schema: this.schema, sqlAdmin };
   }
 }

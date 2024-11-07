@@ -23,6 +23,7 @@ const Journal: React.FC = () => {
     {
       entity: "journal",
       fields: [
+        "id",
         "fields_old",
         "fields_diff",
         "fields_new",
@@ -42,6 +43,10 @@ const Journal: React.FC = () => {
   //   if (loadingData) return "Loading";
 
   const columns: any = [
+    {
+      Header: "id",
+      accessor: "id",
+    },
     {
       Header: "entity",
       accessor: "entity",

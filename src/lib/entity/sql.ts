@@ -2,11 +2,13 @@ import { Knex } from "knex";
 import { addWhere, getData, getQueries } from "./methodsDB";
 import { EntitySchema } from "./types";
 import { User } from "../auth";
-import { concat } from "lodash";
+import _, { concat } from "lodash";
+import { MAIN_ID } from "../knex";
 
 export type dbType = (table: string) => Knex.QueryBuilder<any, unknown[]>;
 export class Sql {
   #schema: EntitySchema = {};
+  #knex: Knex;
   #db: dbType; //Knex.QueryBuilder<any, unknown[]>;
 
   constructor({
@@ -19,6 +21,7 @@ export class Sql {
     user: User;
   }) {
     this.#schema = schema;
+    this.#knex = db;
     this.#db = (table: string) => db(table).setUser(user);
   }
 
@@ -63,6 +66,47 @@ export class Sql {
     }
   };
 
+  getLinks = async (entity: string, dataItem: any[]) => {
+    let joinsIds: any = {};
+    const newDataItem = { ...dataItem };
+    const data = { ...dataItem };
+    for (let d of Object.keys(newDataItem) as any) {
+      if (this.#schema[entity].fields[d].type.indexOf("link(") > -1) {
+        const match =
+          this.#schema[entity].fields[d].type.match(/.*link\((\w+)\)/);
+        if (match && match[0].indexOf("nlink") > -1 && match[1]) {
+          const joinTable = entity + "2" + match[1] + "4" + d;
+
+          const w = Array.isArray(newDataItem[d])
+            ? newDataItem[d]
+            : [newDataItem[d]];
+          const targetIds = await this.#db(match[1])
+            .select("id")
+            .whereIn("guid", w);
+          joinsIds[joinTable] = targetIds;
+          data[d] = targetIds.map((t) => parseInt(t[MAIN_ID]));
+          delete newDataItem[d];
+        } else if (match && match[0].indexOf("link") > -1 && match[1]) {
+          const targetData: any = await this.#db(match[1])
+            .select("id")
+            .where("guid", newDataItem[d]);
+
+          if (targetData.length == 1) {
+            newDataItem[d] = targetData[0].id;
+            data[d] = parseInt(targetData[0].id);
+          } else {
+            if (targetData.length > 1) {
+              throw "Nalezeno guid pro vice linku";
+            } else {
+              throw "Nenalezen guid pro link";
+            }
+          }
+        }
+      }
+    }
+    return { dataItem: newDataItem, joinsIds, data };
+  };
+
   insert = async ({
     entity,
     data,
@@ -76,26 +120,9 @@ export class Sql {
 
         let retData: any = [];
         for (let dataItem of dataArray) {
-          let joinsIds: any = {};
-          for (let d of Object.keys(data)) {
-            if (this.#schema[entity].fields[d].type.indexOf("link(") > -1) {
-              const match =
-                this.#schema[entity].fields[d].type.match(/.*link\((\w+)\)/);
-              if (match && match[0].indexOf("nlink") > -1 && match[1]) {
-                const joinTable = entity + "2" + match[1] + "4" + d;
-
-                const targetIds = await this.#db(match[1])
-                  .select("id")
-                  .whereIn(
-                    "guid",
-                    Array.isArray(dataItem[d]) ? dataItem[d] : [dataItem[d]]
-                  );
-                joinsIds[joinTable] = targetIds;
-                delete dataItem[d];
-              } else if (match && match[0].indexOf("link") > -1 && match[1]) {
-              }
-            }
-          }
+          const gl = await this.getLinks(entity, dataItem);
+          let joinsIds = gl.joinsIds;
+          dataItem = gl.dataItem;
 
           const ret: any = await this.#db(entity).insert(dataItem);
 
@@ -105,7 +132,7 @@ export class Sql {
               return { source: ret[0].id, target: jid.id };
             });
 
-            await this.#db(table).insert(joinData).returning("*");
+            await this.#db(table).addParams({ data: gl.data }).insert(joinData);
           }
 
           retData = retData.concat(ret);
@@ -133,6 +160,10 @@ export class Sql {
   }) => {
     if (entity) {
       if (this.#schema[entity]) {
+        const gl = await this.getLinks(entity, data);
+        const joinsIds = gl.joinsIds;
+        const dataItem = gl.dataItem;
+
         const query = this.#db(entity);
 
         await addWhere({
@@ -142,8 +173,56 @@ export class Sql {
           entity,
           query,
         });
+        const updateIdsData = await query.select(MAIN_ID);
 
-        const ret = await query.update(data).returning("*");
+        // add nlink joins
+        const beforeDataNlinks: any = {};
+        for (let table of Object.keys(joinsIds)) {
+          const newJoinData: any = [];
+          joinsIds[table].map((jid: any) => {
+            updateIdsData.map((u) => {
+              newJoinData.push({ source: u[MAIN_ID], target: jid[MAIN_ID] });
+            });
+          });
+
+          const uniqueSources = _.uniq(_.map(newJoinData, "source"));
+          const dbTargets = await this.#db(table)
+            .select(["source", "target"])
+            .whereIn("source", uniqueSources);
+
+          const joinField = table.split("4")[1];
+          const beforeDataTmp = _.groupBy(dbTargets, "source");
+          const beforeData = _.map(beforeDataTmp, (items, source) => ({
+            [MAIN_ID]: source,
+            [joinField]: _.map(items, "target"),
+          }));
+          beforeDataNlinks[table] = beforeData;
+
+          const targetInsert = _.differenceWith(
+            newJoinData,
+            dbTargets,
+            _.isEqual
+          );
+          const targetDelete = _.differenceWith(
+            dbTargets,
+            newJoinData,
+            _.isEqual
+          );
+          if (targetDelete.length > 0) {
+            const delQuery = this.#db(table);
+            targetDelete.map((td) => {
+              delQuery.orWhere(td);
+            });
+            await delQuery.delete();
+          }
+          if (targetInsert.length > 0) {
+            await this.#db(table).insert(targetInsert);
+          }
+        }
+
+        const ret = await query
+          .update(dataItem)
+          .addParams({ data: gl.data, beforeDataNlinks: beforeDataNlinks });
 
         return ret;
       } else {

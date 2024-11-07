@@ -5,6 +5,7 @@ import { DateTime } from "luxon";
 import EventEmitter from "events";
 import { EntitySchema } from "./types";
 import { dbType } from "./sql";
+import { MAIN_ID } from "../knex";
 
 export type TriggerItem = {
   entity: string;
@@ -90,19 +91,21 @@ export class Triggers {
       delete dbTrigger.modifytime;
 
       const getterTrigger = this.db("triggers")
+        .setUser({ id: 1 })
         .select("updatetime")
         .where({ caption: trigger.caption });
 
       const existsTrigger = await getterTrigger;
 
       if (existsTrigger.length == 0) {
-        await this.db("triggers").insert(dbTrigger);
+        await this.db("triggers").setUser({ id: 1 }).insert(dbTrigger);
       } else {
         if (
           trigger.modifytime.toMillis() >
           DateTime.fromJSDate(existsTrigger[0].updatetime).toMillis()
         ) {
           await this.db("triggers")
+            .setUser({ id: 1 })
             .where({ caption: trigger.caption })
             .update(dbTrigger);
         }
@@ -110,19 +113,17 @@ export class Triggers {
     }
   };
 
-  deepDiff(obj1: Object, obj2: Object) {
-    return _.transform(obj1, (result: any, value, key) => {
-      if (!_.isEqual(value, obj2[key])) {
-        if (_.isObject(value) && _.isObject(obj2[key])) {
-          const diff = this.deepDiff(value, obj2[key]);
-          if (!_.isEmpty(diff)) {
-            result[key] = diff;
-          }
-        } else {
-          result[key] = obj2[key];
-        }
+  deepDiff(obj1: any, obj2: any) {
+    const diff: any = {};
+
+    // Projdeme klíče prvního objektu a zkontrolujeme rozdíly v druhém objektu
+    _.forEach(obj2, (value, key) => {
+      if (!_.isEqual(value, obj1[key])) {
+        diff[key] = value;
       }
     });
+
+    return diff;
   }
 
   addUniqueKeys(existingKeys: string[], newObject: object): string[] {
@@ -131,6 +132,31 @@ export class Triggers {
     const uniqueKeys = _.difference(newKeys, existingKeys);
 
     return [...existingKeys, ...uniqueKeys];
+  }
+
+  translateIdsToNumber(table: string, data: any) {
+    const fields = this.schema?.[table].fields;
+
+    for (const d of Array.isArray(data) ? data : [data]) {
+      Object.keys(d).map((f) => {
+        if (d[f]) {
+          if (
+            fields[f].link ||
+            fields[f].type == "bigint" ||
+            fields[f].type == "integer"
+          ) {
+            if (fields[f].nlinkTable) {
+              d[f] = d[f].map((i: any) => parseInt(i));
+            } else {
+              d[f] = parseInt(d[f]);
+            }
+            // } else {
+            //   console.log("f", f, fields[f].type);
+          }
+        }
+      });
+    }
+    return data;
   }
 
   registerTriggers(db: Knex) {
@@ -142,7 +168,7 @@ export class Triggers {
           debugger;
           return false;
         }
-
+        //
         if (["insert", "update", "del"].indexOf(runner.builder._method) > -1) {
           const table = runner.builder._single.table;
 
@@ -169,6 +195,34 @@ export class Triggers {
                 .setUser({ id: 1 })
                 .select("*")
                 .whereRaw(whereRaw, selectBinds);
+
+              const link = that.schema?.[table]?.nlinkTables?.[0];
+              if (link) {
+                // const beforeIds = beforeData.map((bd: any) => bd[MAIN_ID]);
+                // const beforeDataNlinks = await db(table)
+                //   .setUser({ id: 1 })
+                //   .select(
+                //     table + "." + MAIN_ID,
+                //     db.raw("array_agg(??) AS attn", [link.table + ".target"])
+                //   )
+                //   .innerJoin(
+                //     link.table,
+                //     table + "." + MAIN_ID,
+                //     link.table + ".source"
+                //   )
+                //   .whereIn(table + "." + MAIN_ID, beforeIds)
+                //   .groupBy(table + "." + MAIN_ID);
+
+                const beforeDataNlinks =
+                  runner.builder._params.beforeDataNlinks[link.table];
+
+                beforeData = beforeData.map((bd: any) => {
+                  const d = _.find(beforeDataNlinks, { id: bd.id });
+                  return { ...bd, ...d };
+                });
+
+                beforeData = that.translateIdsToNumber(table, beforeData);
+              }
             }
           }
 
@@ -188,14 +242,13 @@ export class Triggers {
                 });
               }
             });
-            // debugger;
           }
 
           if (
             runner.builder._method == "insert" ||
             runner.builder._method == "update"
           ) {
-            let returningFields = ["id", "guid"];
+            // let returningFields = ["id", "guid"];
             if (runner.builder._single.insert) {
               if (Array.isArray(runner.builder._single.insert)) {
                 runner.builder._single.insert =
@@ -211,7 +264,7 @@ export class Triggers {
                         "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
                       ),
                     };
-                    returningFields = that.addUniqueKeys(returningFields, ins);
+                    // returningFields = that.addUniqueKeys(returningFields, ins);
                     return ins;
                   });
               } else {
@@ -226,10 +279,10 @@ export class Triggers {
                     "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
                   ),
                 };
-                returningFields = [
-                  ...returningFields,
-                  ..._.keys(runner.builder._single.insert),
-                ];
+                // returningFields = [
+                //   ...returningFields,
+                //   ..._.keys(runner.builder._single.insert),
+                // ];
               }
             }
 
@@ -244,7 +297,7 @@ export class Triggers {
                         "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
                       ),
                     };
-                    returningFields = that.addUniqueKeys(returningFields, upd);
+                    // returningFields = that.addUniqueKeys(returningFields, upd);
                     return upd;
                   });
               } else {
@@ -255,13 +308,21 @@ export class Triggers {
                     "yyyy-MM-dd HH:mm:ss.SSSZZ"
                   ),
                 };
-                returningFields = [
-                  ...returningFields,
-                  ..._.keys(runner.builder._single.update),
-                ];
+                // returningFields = [
+                //   ...returningFields,
+                //   ..._.keys(runner.builder._single.update),
+                // ];
               }
             }
-            runner.builder._single.returning = returningFields;
+            if (runner.builder._single.returning) {
+              runner.builder._single.returning = [
+                ...runner.builder._single.returning,
+                "id",
+                "guid",
+              ];
+            } else {
+              runner.builder._single.returning = ["id", "guid"];
+            }
           }
           return beforeData;
         }
@@ -270,7 +331,7 @@ export class Triggers {
       after: async function (runner, afterData, beforeData) {
         if (["insert", "update", "del"].indexOf(runner.builder._method) > -1) {
           // debugger;
-          console.log("after", afterData, beforeData);
+          // console.log("after", afterData, beforeData);
           const table = runner.builder._single.table;
           if (!that.schema[table]) {
             return;
@@ -293,10 +354,12 @@ export class Triggers {
             return;
           }
 
+          const changedData = runner.builder._params.data;
           if (beforeData)
             beforeData = Array.isArray(beforeData) ? beforeData : [beforeData];
-          if (afterData)
-            afterData = Array.isArray(afterData) ? afterData : [afterData];
+          // if (afterData)
+          // afterData = Array.isArray(afterData) ? afterData : [afterData];
+          afterData = beforeData.map((b: any) => ({ ...b, ...changedData }));
 
           //   const data = [];
 
@@ -313,10 +376,17 @@ export class Triggers {
           for (let i = 0; i < dataLength; i++) {
             const beforeDataItem = beforeData && beforeData[i];
             const afterDataDataItem = afterData && afterData[i];
+
             const diffDataItem = that.deepDiff(
               beforeDataItem,
               afterDataDataItem
             );
+
+            if (Object.keys(diffDataItem).length === 0 && operation == "U") {
+              console.log("No update");
+              return;
+            }
+            console.log(operation + " - ", diffDataItem);
 
             await that.addToJournal({
               entity: table,
