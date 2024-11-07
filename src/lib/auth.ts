@@ -90,6 +90,9 @@ const authRoutes = ({
         },
       });
 
+      if (dbUser.length > 1) {
+        throw "too many users";
+      }
       if (dbUser.length > 0) {
         const user: User = {
           id: dbUser[0].id,

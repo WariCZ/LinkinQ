@@ -70,6 +70,7 @@ export class Sql {
     let joinsIds: any = {};
     const newDataItem = { ...dataItem };
     const data = { ...dataItem };
+    console.log("getLinks", dataItem);
     for (let d of Object.keys(newDataItem) as any) {
       if (this.#schema[entity].fields[d].type.indexOf("link(") > -1) {
         const match =
@@ -80,6 +81,7 @@ export class Sql {
           const w = Array.isArray(newDataItem[d])
             ? newDataItem[d]
             : [newDataItem[d]];
+
           const targetIds = await this.#db(match[1])
             .select("id")
             .whereIn("guid", w);
@@ -87,6 +89,7 @@ export class Sql {
           data[d] = targetIds.map((t) => parseInt(t[MAIN_ID]));
           delete newDataItem[d];
         } else if (match && match[0].indexOf("link") > -1 && match[1]) {
+          console.log("getLinks", newDataItem, d);
           const targetData: any = await this.#db(match[1])
             .select("id")
             .where("guid", newDataItem[d]);
@@ -120,7 +123,9 @@ export class Sql {
 
         let retData: any = [];
         for (let dataItem of dataArray) {
+          console.log("call getLinks");
           const gl = await this.getLinks(entity, dataItem);
+          console.log("finish call getLinks");
           let joinsIds = gl.joinsIds;
           dataItem = gl.dataItem;
 

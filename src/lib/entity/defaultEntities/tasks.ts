@@ -4,6 +4,24 @@ const entityFields: EntitySchema = {
   tasks: {
     system: true,
     journal: true,
+    permissions: {
+      get: {
+        default: false,
+        rules: [
+          {
+            type: "field",
+            filter: {
+              createdby: "$user",
+            },
+          },
+          {
+            type: "role",
+            roles: ["prodigi.admin"],
+            filter: {},
+          },
+        ],
+      },
+    },
     fields: {
       description: {
         type: "text",

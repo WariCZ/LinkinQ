@@ -1,5 +1,9 @@
 export type EntitySchema = Record<string, EntityType>;
 
+export type Rule =
+  | { type: "field"; filter: Record<string, string | number> }
+  | { type: "role"; roles: string[]; filter: Record<string, string | number> };
+
 export type EntityType = {
   system?: boolean;
   withoutDefaultFields?: boolean;
@@ -7,6 +11,12 @@ export type EntityType = {
   workflow?: boolean;
   nlinkTables?: { table: string; field: string }[];
   fields: Record<string, FieldType>;
+  permissions?: {
+    get?: {
+      default: boolean;
+      rules: Rule[];
+    };
+  };
 };
 export type FieldType = {
   type: string;

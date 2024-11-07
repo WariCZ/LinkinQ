@@ -69,13 +69,6 @@ export class WebApp {
         if (e.stack) logger.error(e.stack);
         // //
       });
-
-    //
-    // this.bpmnServer.appDelegate..winSocket = null;
-    // checkSchema().then((schema) => {
-    //   logger.debug("Call setupExpress");
-    //   this.setupExpress();
-    // });
   }
 
   initExpress() {
@@ -131,7 +124,7 @@ export class WebApp {
     const app = this.app;
 
     this.setupRoutes({ schema, sqlAdmin });
-    //
+
     /**
      * Error Handler.
      */

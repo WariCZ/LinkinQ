@@ -419,7 +419,7 @@ export class Entity {
         }
       }
     }
-
+    //
     if (updateData) {
       for (const [name, dataArray] of Object.entries(updateData)) {
         for (const d of dataArray) {
@@ -508,6 +508,7 @@ export class Entity {
       user: { id: 1 } as any,
     });
 
+    console.log("Create data");
     await this.createData({
       data: defaultUsers(),
       sqlAdmin,

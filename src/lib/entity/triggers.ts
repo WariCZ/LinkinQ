@@ -4,31 +4,33 @@ import _ from "lodash";
 import { DateTime } from "luxon";
 import EventEmitter from "events";
 import { EntitySchema } from "./types";
-import { dbType } from "./sql";
+import { dbType, Sql } from "./sql";
 import { MAIN_ID } from "../knex";
 
-export type TriggerItem = {
+export type CodeType = {
+  beforeData: Record<string, any>;
+  data: Record<string, any>;
+  afterData?: Record<string, any>;
+  sql: Sql;
+};
+export type TriggerItemType = {
   entity: string;
   caption: string;
   type: "before" | "after";
   method: "insert" | "update" | "delete";
-  code: ({
-    beforeData,
-    data,
-    afterData,
-  }: {
-    beforeData: Object;
-    data: Object;
-    afterData?: Object;
-  }) => void;
+  code: ({ beforeData, data, afterData, sql }: CodeType) => void;
+};
+export type TriggerItemInternalType = TriggerItemType & {
   modifytime: DateTime<true>;
 };
 
 export class Triggers {
   db: dbType;
   path: string;
-  definitions: Record<string, Record<string, Record<string, TriggerItem[]>>> =
-    {};
+  definitions: Record<
+    string,
+    Record<string, Record<string, TriggerItemType[]>>
+  > = {};
   eventsOnEntities: EventEmitter;
   schema: EntitySchema = {};
   constructor({
@@ -55,7 +57,7 @@ export class Triggers {
 
   initTriggers = async (schema: EntitySchema) => {
     this.schema = schema;
-    let triggersArray: TriggerItem[] = [];
+    let triggersArray: TriggerItemInternalType[] = [];
     for (const filename of fs.readdirSync(this.path)) {
       const path = require("path");
       if (path.extname(filename) == ".ts") {
@@ -64,7 +66,7 @@ export class Triggers {
         const stats = await fs.promises.stat(this.getPath(name));
         const { default: triggers } = await import(this.getPath(name));
 
-        const triggersTmp = triggers.map((t: TriggerItem) => ({
+        const triggersTmp = triggers.map((t: TriggerItemInternalType) => ({
           ...t,
           modifytime: DateTime.fromJSDate(stats.mtime),
         }));
@@ -168,7 +170,18 @@ export class Triggers {
           debugger;
           return false;
         }
+        if (
+          runner.builder._method == "select" &&
+          runner.builder._single.table == "tasks"
+        ) {
+          console.log(
+            "SELECT - ",
+            runner.builder.toSQL().sql,
+            runner.builder.toSQL().bindings
+          );
+        }
         //
+
         if (["insert", "update", "del"].indexOf(runner.builder._method) > -1) {
           const table = runner.builder._single.table;
 
@@ -228,6 +241,12 @@ export class Triggers {
             }
           }
 
+          const sqlUser = new Sql({
+            db: db,
+            schema: that.schema,
+            user: { id: runner.builder?._user?.id } as any,
+          });
+
           const method =
             runner.builder._method == "del" ? "delete" : runner.builder._method;
           if (
@@ -236,14 +255,15 @@ export class Triggers {
             that.definitions["before"][method][table]
           ) {
             const data = runner.builder._single[runner.builder._method];
-            that.definitions["before"][method][table].map((trigger) => {
+            for (const trigger of that.definitions["before"][method][table]) {
               if (trigger.code) {
-                trigger.code({
+                await trigger.code({
                   beforeData,
                   data,
+                  sql: sqlUser,
                 });
               }
-            });
+            }
           }
 
           if (
@@ -414,6 +434,11 @@ export class Triggers {
               user: runner.builder?._user?.id,
             });
 
+            const sqlUser = new Sql({
+              db: db,
+              schema: that.schema,
+              user: { id: runner.builder?._user?.id } as any,
+            });
             const method =
               runner.builder._method == "del"
                 ? "delete"
@@ -429,6 +454,7 @@ export class Triggers {
                     beforeData: beforeData[i],
                     data: diffDataItem, //runner.builder._single[runner.builder._method],
                     afterData: afterData[i],
+                    sql: sqlUser,
                   });
                 }
               });

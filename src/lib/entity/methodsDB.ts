@@ -3,6 +3,7 @@ import _ from "lodash";
 import { EntitySchema } from "./types";
 import { Knex } from "knex";
 import { dbType } from "./sql";
+import { User } from "../auth";
 
 type SelectEntityType = {
   entity: string;
@@ -247,6 +248,7 @@ export const addWhere = async ({
     | Record<string, string | number | string[] | number[] | undefined>
     | undefined;
 }) => {
+  const mainWhere: Record<string, any> = {};
   if (where && Object.keys(where).length > 0) {
     const joinQueries = whereQueries({
       schema,
@@ -279,14 +281,89 @@ export const addWhere = async ({
       } catch {
         val = where[field];
       }
-      if (Array.isArray(val)) {
-        query = query.whereIn(field, val);
-      } else {
-        query = query.where(field, val);
-      }
+      mainWhere[field] = val;
+      // if (Array.isArray(val)) {
+      //   query = query.whereIn(field, val);
+      // } else {
+      //   query = query.where(field, val);
+      // }
     }
   }
+
+  //
+  let permissionsFilters: Record<string, any>[] = [];
+  if ((query as any)._user?.id !== 1) {
+    if (schema[entity].permissions?.get) {
+      const user: User = (query as any)._user;
+      const rules = schema[entity].permissions?.get?.rules || [];
+
+      for (let r of rules) {
+        if (r.type == "role") {
+          if (_.intersection(r.roles, user.roles)) {
+            debugger;
+          }
+        }
+        if (r.type == "field") {
+          const filterKeys = _.keys(r.filter);
+          if (filterKeys.length == 0) {
+            permissionsFilters = [];
+            break;
+          } else {
+            filterKeys.map((fk: any) => {
+              if (r.filter[fk] == "$user") {
+                r.filter[fk] = user.id;
+              }
+            });
+            permissionsFilters.push(r.filter);
+          }
+        }
+      }
+      //
+    }
+  }
+
+  if (permissionsFilters.length > 0) {
+    const conditions = permissionsFilters.map((pf) => {
+      return { ...mainWhere, ...pf };
+    });
+    addWhereToQuery({ query, conditions });
+  } else {
+    addWhereToQuery({ query, conditions: [mainWhere] });
+  }
 };
+
+const addWhereToQuery = ({ query, conditions }: any) => {
+  // Projdeme každou položku v poli `conditions`
+  conditions?.forEach((condition: any, index: number) => {
+    // První podmínku přidáme pomocí `where`, aby se započala správná struktura dotazu
+    if (index === 0) {
+      query.where((builder: any) => {
+        // Projdeme všechny klíče a hodnoty v podmínce
+        Object.entries(condition).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            // Použijeme `whereIn` pro hodnoty typu pole
+            builder.whereIn(key, value);
+          } else {
+            // Použijeme `where` pro jednotlivé hodnoty
+            builder.where(key, value);
+          }
+        });
+      });
+    } else {
+      // Další podmínky přidáme pomocí `orWhere`
+      query.orWhere((builder: any) => {
+        Object.entries(condition).forEach(([key, value]) => {
+          if (Array.isArray(value)) {
+            builder.whereIn(key, value);
+          } else {
+            builder.where(key, value);
+          }
+        });
+      });
+    }
+  });
+};
+
 export const getData = async ({
   db,
   schema,
