@@ -156,6 +156,13 @@ export class WebApp {
     if (process.env.NODE_ENV === "development") {
       app.use(this.waitForViteMiddleware);
     }
+
+    // app.use("/workflow", async (req: Request, res: Response) => {
+    //   debugger;
+    //   const definitions = this.bpmnServer.definitions;
+    //   const xml = await definitions.getSource("Cash Request");
+    //   console.log("xml", xml);
+    // });
     app.use("/", authRoutes({ schema, sqlAdmin }));
     app.use("/api", authenticate, this.entity.config());
 
