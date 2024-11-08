@@ -1,6 +1,6 @@
 import { MAIN_ID, MAIN_GUID } from "../knex";
 import _ from "lodash";
-import { EntitySchema } from "./types";
+import { EntitySchema, Rule } from "./types";
 import { Knex } from "knex";
 import { dbType } from "./sql";
 import { User } from "../auth";
@@ -291,36 +291,11 @@ export const addWhere = async ({
   }
 
   //
-  let permissionsFilters: Record<string, any>[] = [];
-  if ((query as any)._user?.id !== 1) {
-    if (schema[entity].permissions?.get) {
-      const user: User = (query as any)._user;
-      const rules = schema[entity].permissions?.get?.rules || [];
-
-      for (let r of rules) {
-        if (r.type == "role") {
-          if (_.intersection(r.roles, user.roles)) {
-            debugger;
-          }
-        }
-        if (r.type == "field") {
-          const filterKeys = _.keys(r.filter);
-          if (filterKeys.length == 0) {
-            permissionsFilters = [];
-            break;
-          } else {
-            filterKeys.map((fk: any) => {
-              if (r.filter[fk] == "$user") {
-                r.filter[fk] = user.id;
-              }
-            });
-            permissionsFilters.push(r.filter);
-          }
-        }
-      }
-      //
-    }
-  }
+  const permissionsFilters = getPermissionsSelect({
+    user: (query as any)._user,
+    entity,
+    schema,
+  });
 
   if (permissionsFilters.length > 0) {
     const conditions = permissionsFilters.map((pf) => {
@@ -330,6 +305,67 @@ export const addWhere = async ({
   } else {
     addWhereToQuery({ query, conditions: [mainWhere] });
   }
+};
+
+const addPermissionsFilter = ({ rule, user }: { rule: Rule; user?: User }) => {
+  const filterKeys = _.keys(rule.filter);
+  if (filterKeys.length == 0) {
+    return true;
+  } else {
+    filterKeys.map((fk: any) => {
+      if (rule.filter[fk] == "$user" && user) {
+        rule.filter[fk] = user.id;
+      }
+    });
+    return rule.filter;
+  }
+};
+
+const getPermissionsSelect = ({
+  entity,
+  user,
+  schema,
+}: {
+  user?: User;
+  entity: string;
+  schema: EntitySchema;
+}) => {
+  let permissionsFilters: Record<string, any>[] = [];
+  if ((user && user.id !== 1) || !user) {
+    if (schema[entity].permissions?.get) {
+      const rules = schema[entity].permissions?.get?.rules || [];
+
+      for (let rule of rules) {
+        if (rule.type == "role" && user) {
+          if (_.intersection(rule.roles, user.roles).length > 0) {
+            const pf = addPermissionsFilter({
+              rule,
+              user,
+            });
+            if (pf === true) {
+              permissionsFilters = [];
+              break;
+            }
+            permissionsFilters.push(pf);
+          }
+        }
+        if (rule.type == "field") {
+          const pf = addPermissionsFilter({
+            rule,
+            user,
+          });
+          if (pf === true) {
+            permissionsFilters = [];
+            break;
+          }
+          permissionsFilters.push(pf);
+        }
+      }
+      //
+    }
+  }
+
+  return permissionsFilters;
 };
 
 const addWhereToQuery = ({ query, conditions }: any) => {
