@@ -4,7 +4,6 @@ import path from "path";
 
 export default defineConfig({
   root: "./src/client/",
-  assetsInclude: ["**/*.bpmn"],
   server: {
     watch: {
       ignored: ["./src/server/**"],
