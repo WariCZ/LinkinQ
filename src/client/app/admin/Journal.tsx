@@ -1,9 +1,7 @@
 import React from "react";
-import useStore from "../store";
 import { Button } from "flowbite-react";
-import useDataApi from "../hooks/useDataApi";
-import Table from "../components/Table";
-import { Column } from "react-table";
+import useDataApi from "../../hooks/useDataApi";
+import Table from "../../components/Table";
 
 const Journal: React.FC = () => {
   console.log("call ProtectedPage");

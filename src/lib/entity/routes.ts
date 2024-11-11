@@ -188,10 +188,15 @@ export class EntityRoutes extends Entity {
         }
       } catch (error: any) {
         debugger;
-        console.error("Error fetching data from external API:", error?.stack);
+        console.error(
+          "Error fetching data from external API:",
+          error?.stack || error
+        );
         res
           .status(500)
-          .send(`Error fetching data from external API: ${error?.message}`);
+          .send(
+            `Error fetching data from external API: ${error?.message || error}`
+          );
       }
     });
 

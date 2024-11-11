@@ -279,7 +279,7 @@ function useDataApi<T, U>(
       const response = await httpRequest({
         entity: param.entity,
         method: "DELETE",
-        data: { guid: guid },
+        data: { where: { guid: guid } },
       });
       // const response = await methods.create(data);
       setData(response.data);

@@ -141,13 +141,13 @@ const Workflow = (props: any) => {
 
   const handleShown = (viewer: any) => {
     bpmnReactJs.addMarker("Activity_03i6maz", "moje");
-    debugger;
   };
   const saveXml = async () => {
     const result = await bpmnReactJs.saveXml();
 
     console.log(result?.xml);
   };
+
   console.log("xml", xml);
   return (
     <div>

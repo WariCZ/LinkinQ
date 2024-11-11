@@ -4,6 +4,7 @@ import { Button } from "flowbite-react";
 import useDataApi from "../hooks/useDataApi";
 
 import { useTranslation } from "react-i18next";
+import Protected from "./Protected";
 
 const ProtectedPage: React.FC = () => {
   const user = useStore((state) => state.user);
@@ -45,8 +46,11 @@ const ProtectedPage: React.FC = () => {
 
   return (
     <div>
+      <Protected requiredRoles={["prodigi.admin"]}>TEST</Protected>
+      <div>X</div>
       <h1>{t("welcome")}</h1>
       <p>{t("description")}</p>
+      <div>{JSON.stringify(user)}</div>
       <div>
         <button onClick={() => changeLanguage("en")}>English</button>
         <button onClick={() => changeLanguage("cs")}>Čeština</button>

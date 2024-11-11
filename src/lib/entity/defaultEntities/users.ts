@@ -56,10 +56,10 @@ const defaultData = {
 };
 const updateData = {
   users: [
-    // {
-    //   guid: "9500b584-fa8a-4a3c-8f94-92f2221db78b",
-    //   roles: ["9500b584-fa8a-4a3c-8f91-92f2221db78b"],
-    // },
+    {
+      guid: "9500b584-fa8a-4a3c-8f94-92f2221db78b",
+      roles: ["9500b584-fa8a-4a3c-8f91-92f2221db78b"],
+    },
   ],
 };
 

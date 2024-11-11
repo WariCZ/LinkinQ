@@ -41,6 +41,16 @@ export class Entity {
     });
   }
 
+  async resetPublicSchema() {
+    try {
+      await this.db.raw(`DROP SCHEMA public CASCADE`).setUser({ id: 1 });
+      await this.db.raw(`CREATE SCHEMA public`).setUser({ id: 1 });
+      console.log("Schema public bylo úspěšně resetováno.");
+    } catch (error) {
+      console.error("Chyba při resetování schematu public:", error);
+    }
+  }
+
   async getTablesAndColumns(entityDef: EntitySchema) {
     try {
       const tableData = await this.db
@@ -404,6 +414,7 @@ export class Entity {
     sqlAdmin: Sql;
     updateData?: Object;
   }) {
+    //
     for (const [name, dataArray] of Object.entries(data)) {
       for (const d of dataArray) {
         var rows = await sqlAdmin.select({
@@ -419,7 +430,7 @@ export class Entity {
         }
       }
     }
-    //
+    ////
     if (updateData) {
       for (const [name, dataArray] of Object.entries(updateData)) {
         for (const d of dataArray) {
@@ -481,6 +492,10 @@ export class Entity {
   }
 
   async prepareSchema() {
+    if (process.env.e2etest == "true") {
+      await this.resetPublicSchema();
+    }
+
     await defaultExecute().map(async (e) => {
       await this.db.raw(e).setUser({ id: 1 });
     });
@@ -508,6 +523,7 @@ export class Entity {
       user: { id: 1 } as any,
     });
 
+    //
     console.log("Create data");
     await this.createData({
       data: defaultUsers(),

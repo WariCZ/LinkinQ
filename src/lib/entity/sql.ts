@@ -2,7 +2,7 @@ import { Knex } from "knex";
 import { addWhere, getData, getQueries } from "./methodsDB";
 import { EntitySchema } from "./types";
 import { User } from "../auth";
-import _, { concat } from "lodash";
+import _ from "lodash";
 import { MAIN_ID } from "../knex";
 
 export type dbType = (table: string) => Knex.QueryBuilder<any, unknown[]>;
@@ -10,6 +10,7 @@ export class Sql {
   #schema: EntitySchema = {};
   #knex: Knex;
   #db: dbType; //Knex.QueryBuilder<any, unknown[]>;
+  user: User;
 
   constructor({
     schema,
@@ -23,6 +24,7 @@ export class Sql {
     this.#schema = schema;
     this.#knex = db;
     this.#db = (table: string) => db(table).setUser(user);
+    this.user = user;
   }
 
   select = async ({
@@ -73,35 +75,40 @@ export class Sql {
     console.log("getLinks", dataItem);
     for (let d of Object.keys(newDataItem) as any) {
       if (this.#schema[entity].fields[d].type.indexOf("link(") > -1) {
-        const match =
-          this.#schema[entity].fields[d].type.match(/.*link\((\w+)\)/);
-        if (match && match[0].indexOf("nlink") > -1 && match[1]) {
-          const joinTable = entity + "2" + match[1] + "4" + d;
+        if (this.user.id == 1 && Number.isInteger(newDataItem[d])) {
+          // admin muze zadavat pres konkretni id ostatni musi pres GUID
+          data[d] = newDataItem[d];
+        } else {
+          const match =
+            this.#schema[entity].fields[d].type.match(/.*link\((\w+)\)/);
+          if (match && match[0].indexOf("nlink") > -1 && match[1]) {
+            const joinTable = entity + "2" + match[1] + "4" + d;
 
-          const w = Array.isArray(newDataItem[d])
-            ? newDataItem[d]
-            : [newDataItem[d]];
+            const w = Array.isArray(newDataItem[d])
+              ? newDataItem[d]
+              : [newDataItem[d]];
 
-          const targetIds = await this.#db(match[1])
-            .select("id")
-            .whereIn("guid", w);
-          joinsIds[joinTable] = targetIds;
-          data[d] = targetIds.map((t) => parseInt(t[MAIN_ID]));
-          delete newDataItem[d];
-        } else if (match && match[0].indexOf("link") > -1 && match[1]) {
-          console.log("getLinks", newDataItem, d);
-          const targetData: any = await this.#db(match[1])
-            .select("id")
-            .where("guid", newDataItem[d]);
+            const targetIds = await this.#db(match[1])
+              .select("id")
+              .whereIn("guid", w);
+            joinsIds[joinTable] = targetIds;
+            data[d] = targetIds.map((t) => parseInt(t[MAIN_ID]));
+            delete newDataItem[d];
+          } else if (match && match[0].indexOf("link") > -1 && match[1]) {
+            console.log("getLinks", newDataItem, d);
+            const targetData: any = await this.#db(match[1])
+              .select("id")
+              .where("guid", newDataItem[d]);
 
-          if (targetData.length == 1) {
-            newDataItem[d] = targetData[0].id;
-            data[d] = parseInt(targetData[0].id);
-          } else {
-            if (targetData.length > 1) {
-              throw "Nalezeno guid pro vice linku";
+            if (targetData.length == 1) {
+              newDataItem[d] = targetData[0].id;
+              data[d] = parseInt(targetData[0].id);
             } else {
-              throw "Nenalezen guid pro link";
+              if (targetData.length > 1) {
+                throw "Nalezeno guid pro vice linku";
+              } else {
+                throw "Nenalezen guid pro link";
+              }
             }
           }
         }
@@ -169,7 +176,7 @@ export class Sql {
       if (this.#schema[entity]) {
         const gl = await this.getLinks(entity, data);
         const joinsIds = gl.joinsIds;
-        const dataItem = gl.dataItem;
+        const dataItem: any = gl.dataItem;
 
         const query = this.#db(entity);
 
@@ -181,6 +188,7 @@ export class Sql {
           query,
         });
         const updateIdsData = await query.select(MAIN_ID);
+        const idForDeleteIfIsJoinEmpty = updateIdsData.map((u) => u[MAIN_ID]);
 
         // add nlink joins
         const beforeDataNlinks: any = {};
@@ -195,7 +203,12 @@ export class Sql {
           const uniqueSources = _.uniq(_.map(newJoinData, "source"));
           const dbTargets = await this.#db(table)
             .select(["source", "target"])
-            .whereIn("source", uniqueSources);
+            .whereIn(
+              "source",
+              joinsIds[table].length == 0
+                ? idForDeleteIfIsJoinEmpty
+                : uniqueSources
+            );
 
           const joinField = table.split("4")[1];
           const beforeDataTmp = _.groupBy(dbTargets, "source");
@@ -227,6 +240,9 @@ export class Sql {
           }
         }
 
+        if (Object.keys(dataItem).length === 0) {
+          dataItem.guid = this.#knex.raw("??", ["guid"]);
+        }
         const ret = await query
           .update(dataItem)
           .addParams({ data: gl.data, beforeDataNlinks: beforeDataNlinks });

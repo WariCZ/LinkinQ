@@ -211,21 +211,6 @@ export class Triggers {
 
               const link = that.schema?.[table]?.nlinkTables?.[0];
               if (link) {
-                // const beforeIds = beforeData.map((bd: any) => bd[MAIN_ID]);
-                // const beforeDataNlinks = await db(table)
-                //   .setUser({ id: 1 })
-                //   .select(
-                //     table + "." + MAIN_ID,
-                //     db.raw("array_agg(??) AS attn", [link.table + ".target"])
-                //   )
-                //   .innerJoin(
-                //     link.table,
-                //     table + "." + MAIN_ID,
-                //     link.table + ".source"
-                //   )
-                //   .whereIn(table + "." + MAIN_ID, beforeIds)
-                //   .groupBy(table + "." + MAIN_ID);
-
                 const beforeDataNlinks =
                   runner.builder._params?.beforeDataNlinks &&
                   runner.builder._params?.beforeDataNlinks[link.table];

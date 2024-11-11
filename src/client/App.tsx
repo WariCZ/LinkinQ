@@ -16,9 +16,9 @@ import DashboardSidebar from "./components/layout/Sidebar";
 import { Flowbite } from "flowbite-react";
 import PublicPage2 from "./components/PublicPage2";
 import { customTheme } from "./flowbite";
-import ServerScript from "./app/ServerScript";
-import Journal from "./app/Journal";
-import Workflow from "./app/Workflow";
+import ServerScript from "./app/admin/ServerScript";
+import Journal from "./app/admin/Journal";
+import Workflow from "./app/admin/Workflow";
 
 interface PrivateRouteProps {
   element: React.FC;

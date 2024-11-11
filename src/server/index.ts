@@ -67,7 +67,7 @@ export class WebApp {
         // logger.error(e.message);
         logger.error(e);
         if (e.stack) logger.error(e.stack);
-        // //
+        //
       });
   }
 
@@ -181,8 +181,16 @@ function setupEnvVars() {
   dotenv.config();
   var argv = process.argv;
   for (let i = 2; i < argv.length; i++) {
-    const key = argv[i];
-    const val = argv[++i];
+    let key = argv[i];
+    let val;
+    if (key.indexOf("=")) {
+      const a = key.split("=");
+
+      key = a[0];
+      val = a[1];
+    } else {
+      val = argv[++i];
+    }
     process.env[key] = val;
   }
 }

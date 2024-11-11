@@ -126,6 +126,7 @@ const authRoutes = ({
           fullname: dbUser[0].fullname,
           email: dbUser[0].email,
           guid: dbUser[0].guid,
+          roles: dbUser[0].roles?.map((r: any) => r.key) || [],
         };
         return done(null, user);
       } else {
@@ -146,6 +147,7 @@ const authRoutes = ({
           id: user.id,
           email: user.email,
           fullname: user.fullname,
+          roles: user.roles,
         },
         SECRET_KEY,
         { expiresIn: "1h" }

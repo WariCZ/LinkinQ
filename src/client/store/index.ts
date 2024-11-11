@@ -1,9 +1,6 @@
 import create from "zustand";
 import axios from "axios";
-
-interface User {
-  fullname: string;
-}
+import { User } from "@/lib/auth";
 
 interface StoreState {
   user: User | null;
@@ -16,6 +13,7 @@ interface StoreState {
 
 const useStore = create<StoreState>((set) => ({
   user: null,
+  roles: [],
   loading: true,
   setUser: (user) => set({ user }),
   logout: async () => {
