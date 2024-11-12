@@ -2,6 +2,7 @@ import React from "react";
 import { Button } from "flowbite-react";
 import useDataApi from "../../hooks/useDataApi";
 import Table from "../../components/Table";
+import { ColumnDef } from "@tanstack/react-table";
 
 const Journal: React.FC = () => {
   console.log("call ProtectedPage");
@@ -40,33 +41,33 @@ const Journal: React.FC = () => {
 
   //   if (loadingData) return "Loading";
 
-  const columns: any = [
+  const columns: ColumnDef<any>[] = [
     {
-      Header: "id",
-      accessor: "id",
+      header: "id",
+      accessorKey: "id",
     },
     {
-      Header: "entity",
-      accessor: "entity",
+      header: "entity",
+      accessorKey: "entity",
     },
     {
-      Header: "operation",
-      accessor: "operation",
+      header: "operation",
+      accessorKey: "operation",
     },
     {
-      Header: "fields_old",
-      accessor: "fields_old",
-      Cell: ({ value }: any) => JSON.stringify(value),
+      header: "fields_old",
+      accessorKey: "fields_old",
+      cell: ({ value }: any) => JSON.stringify(value),
     },
     {
-      Header: "fields_diff",
-      accessor: "fields_diff",
-      Cell: ({ value }: any) => JSON.stringify(value),
+      header: "fields_diff",
+      accessorKey: "fields_diff",
+      cell: ({ value }: any) => JSON.stringify(value),
     },
     {
-      Header: "fields_new",
-      accessor: "fields_new",
-      Cell: ({ value }: any) => JSON.stringify(value),
+      header: "fields_new",
+      accessorKey: "fields_new",
+      cell: ({ value }: any) => JSON.stringify(value),
     },
   ];
 

@@ -53,4 +53,36 @@ export const customTheme: CustomFlowbiteTheme = {
       list: "space-y-1 py-1 bg-gray-100 dark:bg-gray-700",
     },
   },
+  modal: {
+    root: {
+      base: "no-transform-modal fixed inset-x-0 top-0 z-50 h-screen overflow-y-auto overflow-x-hidden md:inset-0 md:h-full",
+      show: {
+        on: "flex bg-transparent shadow-none pointer-events-none",
+      },
+    },
+    content: {
+      base: "YYY relative h-full w-full p-4 md:h-auto pointer-events-auto",
+      inner:
+        "border border-gray-200 relative flex max-h-[90dvh] flex-col rounded-sm bg-white shadow dark:bg-gray-700",
+    },
+    header: {
+      base: "flex items-start justify-between rounded-t border-b p-1 dark:border-gray-600",
+      close: {
+        base: "ml-auto inline-flex items-center rounded-md bg-transparent p-1.5 text-sm text-gray-400 hover:bg-gray-200 hover:text-gray-900 dark:hover:bg-gray-600 dark:hover:text-white",
+        icon: "h-3 w-3",
+      },
+      title: "px-2",
+    },
+    footer: {
+      base: "flex items-center space-x-2 rounded-b border-gray-200 p-2 dark:border-gray-600",
+      popup: "border-t",
+    },
+    // header: {
+    //   popup: "border-b-0 p-2",
+    // },
+    // footer: {
+    //   base: "flex items-center space-x-2 rounded-b border-gray-200 p-6 dark:border-gray-600",
+    //   popup: "border-t",
+    // },
+  },
 };

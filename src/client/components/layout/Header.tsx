@@ -16,6 +16,7 @@ import {
 // import useLocalStorage from "../../lib/useLocalStorage";
 import { useContext, type FC } from "react";
 import { HiMenuAlt1, HiX } from "react-icons/hi";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 // import { sidebarContext } from "../sidebarProvider";
 // import NotificationButton from "../notifications/notificationButton";
 
@@ -66,13 +67,16 @@ const UserAvatar = () => {
       <Dropdown.Item>Profile</Dropdown.Item>
       {/* </Link> */}
       <Dropdown.Item>Settings</Dropdown.Item>
+      <Dropdown.Item>
+        <Link to="/admin">Administration</Link>
+      </Dropdown.Item>
       <Dropdown.Divider />
       <Dropdown.Item onClick={() => logout()}>Sign out</Dropdown.Item>
     </Dropdown>
   );
 };
 
-export const DashboardHeader: FC<Record<string, never>> = function () {
+export const DashboardHeader = function (props: { admin?: boolean }) {
   // const context = useContext(sidebarContext);
 
   return (
@@ -101,6 +105,9 @@ export const DashboardHeader: FC<Record<string, never>> = function () {
               <div className="hidden md:block">
                 <Navbar.Brand href="/">
                   <img alt="Prodigi logo" src={logo} width="100" height="30" />
+                  {props.admin ? (
+                    <span className="font-bold px-2">Admin</span>
+                  ) : null}
                 </Navbar.Brand>
               </div>
 

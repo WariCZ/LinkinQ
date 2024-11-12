@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@monaco-editor/react": "^4.6.0",
+    "@tanstack/react-table": "^8.20.5",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
@@ -38,10 +39,10 @@
     "pg": "^8.12.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-draggable": "^4.4.6",
     "react-hook-form": "^7.52.1",
     "react-i18next": "^15.1.0",
     "react-router-dom": "^6.25.1",
-    "react-table": "^7.8.0",
     "vite-express": "^0.16.0",
     "winston": "^3.13.1",
     "zustand": "^4.5.4"

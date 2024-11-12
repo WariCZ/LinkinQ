@@ -5,6 +5,7 @@ import useStore from "../store";
 import { Button, Label, TextInput } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import logo from "../static/logo.png";
+import { useModalStore } from "./Modal/modalStore";
 
 const Login: React.FC = () => {
   const setUser = useStore((state) => state.setUser);
@@ -29,12 +30,14 @@ const Login: React.FC = () => {
       });
       if (response.data.message === "Login successful") {
         setUser({ username: data.email });
-        navigate("/protected");
+        navigate("/admin/protected");
       }
     } catch (error) {
       console.error("Login failed", error);
     }
   };
+
+  const { openModal } = useModalStore();
 
   return (
     <div className="relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -46,7 +49,7 @@ const Login: React.FC = () => {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">&ldquo;This is beta version.&rdquo;</p>
-            <footer className="text-sm">Prodigi team</footer>
+            <footer className="text-sm">LinkinQ team</footer>
           </blockquote>
         </div>
       </div>
@@ -92,26 +95,19 @@ const Login: React.FC = () => {
               Submit
             </Button>
           </form>
+          <button
+            onClick={() => openModal(() => <Form />)}
+            className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600"
+          >
+            Otevřít Modální Okno
+          </button>
         </div>
       </div>
     </div>
-
-    // <form onSubmit={handleLogin}>
-    //   <input
-    //     type="text"
-    //     value={username}
-    //     onChange={(e) => setUsername(e.target.value)}
-    //     placeholder="Username"
-    //   />
-    //   <input
-    //     type="password"
-    //     value={password}
-    //     onChange={(e) => setPassword(e.target.value)}
-    //     placeholder="Password"
-    //   />
-    //   <button type="submit">Login</button>
-    // </form>
   );
 };
 
+const Form = () => {
+  return <div>kukddweda</div>;
+};
 export default Login;

@@ -63,3 +63,7 @@ div:has( > span > span.errorHighlight) {
 ::-webkit-scrollbar-thumb:hover {
   background: #888; 
 }
+
+.no-transform-modal {
+  transform: none !important;
+}
