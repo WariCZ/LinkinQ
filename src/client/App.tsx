@@ -7,8 +7,8 @@ import {
   Outlet,
 } from "react-router-dom";
 import useStore from "./store";
-import Login from "./components/Login";
-// import Logout from "./components/Logout";
+import Login from "./app/Login";
+
 import ProtectedPage from "./components/ProtectedPage";
 import PublicPage from "./components/PublicPage";
 import { DashboardHeader } from "./components/layout/Header";
@@ -39,10 +39,12 @@ const PrivateRoute = (props: { admin?: boolean }) => {
   const user = useStore((state) => state.user);
   const checkAuth = useStore((state) => state.checkAuth);
   const loading = useStore((state) => state.loading);
+  const getSchema = useStore((state) => state.getSchema);
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+    getSchema();
+  }, [checkAuth, getSchema]);
 
   if (loading) {
     return <div>Loading...</div>;

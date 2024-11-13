@@ -9,6 +9,8 @@ i18n.use(initReactI18next).init({
         welcome: "Welcome to our website",
         description: "This is a multilingual website example",
         changeLanguage: "Change language",
+        "modal.close": "Close",
+        "modal.save": "Save",
       },
     },
     cs: {
@@ -16,6 +18,8 @@ i18n.use(initReactI18next).init({
         welcome: "Vítejte na naší stránce",
         description: "Toto je příklad vícejazyčného webu",
         changeLanguage: "Změnit jazyk",
+        "modal.close": "Zavřít",
+        "modal.save": "Uložit",
       },
     },
     es: {
@@ -26,7 +30,7 @@ i18n.use(initReactI18next).init({
       },
     },
   },
-  lng: "en", // Výchozí jazyk
+  lng: localStorage.getItem("language") || "cs", // Výchozí jazyk
   fallbackLng: "en",
   interpolation: {
     escapeValue: false, // React již text escapuje

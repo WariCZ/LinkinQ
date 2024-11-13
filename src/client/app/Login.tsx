@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import useStore from "../store";
 import { Button, Label, TextInput } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import logo from "../static/logo.png";
-import { useModalStore } from "./Modal/modalStore";
+import { useModalStore } from "../components/Modal/modalStore";
 
 const Login: React.FC = () => {
   const setUser = useStore((state) => state.setUser);
@@ -29,15 +29,13 @@ const Login: React.FC = () => {
         password: data.password,
       });
       if (response.data.message === "Login successful") {
-        setUser({ username: data.email });
+        setUser(data);
         navigate("/admin/protected");
       }
     } catch (error) {
       console.error("Login failed", error);
     }
   };
-
-  const { openModal } = useModalStore();
 
   return (
     <div className="relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -95,19 +93,10 @@ const Login: React.FC = () => {
               Submit
             </Button>
           </form>
-          <button
-            onClick={() => openModal(() => <Form />)}
-            className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600"
-          >
-            Otevřít Modální Okno
-          </button>
         </div>
       </div>
     </div>
   );
 };
 
-const Form = () => {
-  return <div>kukddweda</div>;
-};
 export default Login;

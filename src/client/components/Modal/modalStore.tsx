@@ -3,15 +3,17 @@ import create from "zustand";
 
 interface StoreState {
   modals: any[];
-  openModal: (modal: any, onSave?: any) => void;
+  openModal: (
+    content: React.ReactNode | ((props: any) => React.ReactNode)
+  ) => void;
   closeModal: () => void;
 }
 
 export const useModalStore = create<StoreState>((set) => ({
   modals: [],
-  openModal: (content, onSave) =>
+  openModal: (content) =>
     set((state) => ({
-      modals: [...state.modals, { content, onSave }],
+      modals: [...state.modals, { content }],
     })),
   closeModal: () => set((state) => ({ modals: state.modals.slice(0, -1) })),
 }));

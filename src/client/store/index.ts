@@ -1,7 +1,9 @@
 import create from "zustand";
 import axios from "axios";
 import { User } from "@/lib/auth";
+import { FieldType } from "@/lib/entity/types";
 
+type GuiEntitySchema = Record<string, FieldType>;
 interface StoreState {
   user: User | null;
   setUser: (user: User) => void;
@@ -9,9 +11,12 @@ interface StoreState {
   setLoading: (loading: boolean) => void;
   loading: boolean;
   checkAuth: () => void;
+  getSchema: () => void;
+  schema: GuiEntitySchema;
 }
 
 const useStore = create<StoreState>((set) => ({
+  schema: {},
   user: null,
   roles: [],
   loading: true,
@@ -37,6 +42,22 @@ const useStore = create<StoreState>((set) => ({
       }
     } catch (error) {
       set({ user: null });
+    } finally {
+      set({ loading: false });
+    }
+  },
+  getSchema: async () => {
+    try {
+      const response = await axios.get("/api/schema", {
+        withCredentials: true,
+      });
+      if (response.data) {
+        set({ schema: response.data });
+      } else {
+        set({ schema: {} });
+      }
+    } catch (error) {
+      set({ schema: {} });
     } finally {
       set({ loading: false });
     }

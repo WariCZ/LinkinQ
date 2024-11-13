@@ -46,17 +46,6 @@ const Table = <T, U>({
     },
   });
 
-  // return (
-  //   <div role="status" className="max-w-sm animate-pulse">
-  //     <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-48 mb-4"></div>
-  //     <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px] mb-2.5"></div>
-  //     <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 mb-2.5"></div>
-  //     <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[330px] mb-2.5"></div>
-  //     <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[300px] mb-2.5"></div>
-  //     <div className="h-2 bg-gray-200 rounded-full dark:bg-gray-700 max-w-[360px]"></div>
-  //     <span className="sr-only">Loading...</span>
-  //   </div>
-  // );
   return (
     <div className="overflow-x-auto">
       <table className="table-auto w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -107,11 +96,11 @@ const Table = <T, U>({
         <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
           {loading
             ? getHeaderGroups().map((headerGroup) =>
-                ["", "", ""].map(() => (
-                  <tr key={headerGroup.id} className="max-w-sm animate-pulse">
-                    {headerGroup.headers.map((header) => {
+                ["", "", ""].map((k, i) => (
+                  <tr key={i} className="max-w-sm animate-pulse">
+                    {headerGroup.headers.map((header, a) => {
                       return (
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td key={a} className="px-6 py-4 whitespace-nowrap">
                           <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full"></div>
                         </td>
                       );

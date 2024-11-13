@@ -15,14 +15,6 @@ export type ServerSideOutputType = {
 };
 
 export class EntityRoutes extends Entity {
-  validateEntityBody({ body }: { body: any }) {
-    if (Array.isArray(body)) {
-      return "Array is not supported";
-    }
-
-    return;
-  }
-
   config() {
     const router = express.Router();
 
@@ -244,6 +236,27 @@ export class EntityRoutes extends Entity {
           });
 
           return res.json(ret);
+        } else {
+          res.sendStatus(401);
+        }
+      } catch (error: any) {
+        debugger;
+        console.error("Error fetching data from external API:", error?.stack);
+        res.status(500).send("Error fetching data from external API");
+      }
+    });
+
+    router.get("/schema", async (req: Request, res: Response) => {
+      function getFields(obj: any) {
+        const newObj: any = {};
+        Object.keys(obj).map((o: any) => {
+          newObj[o] = obj[o].fields;
+        });
+        return newObj;
+      }
+      try {
+        if (req.user) {
+          return res.json(getFields(this.schema));
         } else {
           res.sendStatus(401);
         }

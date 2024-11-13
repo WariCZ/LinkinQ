@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@bpmn-io/form-js": "^1.11.3",
     "@monaco-editor/react": "^4.6.0",
     "@tanstack/react-table": "^8.20.5",
     "axios": "^1.7.2",

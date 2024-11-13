@@ -109,9 +109,6 @@ export default function DashboardSidebar() {
               Query data
             </Sidebar.Item>
           </Sidebar.Collapse>
-          {/* <Sidebar.Item href="#" icon={IoLogOutOutline}>
-            Odhlásit
-          </Sidebar.Item> */}
         </Sidebar.ItemGroup>
       </Sidebar.Items>
     </Sidebar>

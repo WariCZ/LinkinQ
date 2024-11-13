@@ -104,7 +104,11 @@ export const DashboardHeader = function (props: { admin?: boolean }) {
               </button>
               <div className="hidden md:block">
                 <Navbar.Brand href="/">
-                  <img alt="Prodigi logo" src={logo} width="100" height="30" />
+                  <img
+                    alt="Prodigi logo"
+                    src={logo}
+                    style={{ height: "25px" }}
+                  />
                   {props.admin ? (
                     <span className="font-bold px-2">Admin</span>
                   ) : null}

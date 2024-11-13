@@ -40,6 +40,7 @@ const ProtectedPage: React.FC = () => {
   // Funkce pro změnu jazyka
   const changeLanguage = (lang: string) => {
     i18n.changeLanguage(lang);
+    localStorage.setItem("language", lang);
   };
 
   if (loadingData) return "Loading";
