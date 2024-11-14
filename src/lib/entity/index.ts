@@ -1,6 +1,6 @@
 import { Knex } from "knex";
 import _ from "lodash";
-import { DbSchemaType, EntitySchema, FieldType } from "./types";
+import { DbSchemaType, EntitySchema, EntityType, FieldType } from "./types";
 import { db as knexDB } from "../knex";
 import {
   addDefaultFields,
@@ -179,7 +179,7 @@ export class Entity {
     tableName: string;
     columnName: string;
     columnDef: FieldType;
-    actualDBSchema: DbSchemaType;
+    actualDBSchema?: DbSchemaType;
   }) {
     if (columnName == this.MAIN_ID) {
       return;
@@ -193,7 +193,7 @@ export class Entity {
       await this.db.schema.setUser({ id: 1 }).hasColumn(tableName, columnName)
     ) {
       columnExists = true;
-      actualDBColumn = actualDBSchema.tables[tableName]?.fields[columnName];
+      actualDBColumn = actualDBSchema?.tables[tableName]?.fields[columnName];
     }
 
     await this.db.schema
@@ -244,7 +244,7 @@ export class Entity {
 
           if (rel) {
             const foreignKey = rel[1] + "_" + columnName + "_foreign";
-            if (actualDBSchema.foreignKeys.indexOf(foreignKey) == -1) {
+            if (actualDBSchema?.foreignKeys.indexOf(foreignKey) == -1) {
               table.foreign(columnName).references(rel[1] + "." + this.MAIN_ID);
             }
           } else {
@@ -460,6 +460,29 @@ export class Entity {
   setSchema(schema: EntitySchema) {
     return (this.schema = schema);
   }
+  //
+  addEntityFieldsFromDB(
+    schema: EntitySchema,
+    diff: Record<string, EntityType>
+  ) {
+    Object.keys(diff).forEach((table) => {
+      if (table.match(/\w+2\w+4\w+/gm)) {
+        //nlink tables ignore
+        return;
+      }
+      if (!schema[table]) {
+        console.warn(`Entity ${table} not exist in schema`);
+        schema[table] = { fields: {} };
+      }
+      Object.keys(diff[table].fields).forEach((f) => {
+        if (!schema[table].fields[f]) {
+          console.warn(`Entity ${table} field ${f} not exist in schema`);
+          schema[table].fields[f] = diff[table].fields[f];
+        }
+      });
+    });
+    return schema;
+  }
 
   addAttributesToSchema(schema: EntitySchema) {
     Object.keys(schema).forEach((table) => {
@@ -505,6 +528,7 @@ export class Entity {
 
     const entityDef = addDefaultFields(schemaDefinition);
 
+    // Dohledani tabulek a slopupcu ktere jsou ve Schematu a pridam je do DB
     const actualDBSchema = await this.getTablesAndColumns(entityDef);
     const differencesAdd = findDifferences(actualDBSchema, entityDef);
     console.log("differencesAdd", differencesAdd);
@@ -515,7 +539,18 @@ export class Entity {
       actualDBSchema: actualDBSchema,
     });
 
-    this.schema = this.addAttributesToSchema(entityDef);
+    // Dohledani tabulek a slopupcu ktere jsou v DB ale chybi ve schematu
+    const differencesFromDBToSchema = findDifferences(
+      actualDBSchema,
+      entityDef,
+      true
+    );
+    const entityDefComplete = this.addEntityFieldsFromDB(
+      entityDef,
+      differencesFromDBToSchema
+    );
+
+    this.schema = this.addAttributesToSchema(entityDefComplete);
 
     const sqlAdmin = new Sql({
       db: this.db,

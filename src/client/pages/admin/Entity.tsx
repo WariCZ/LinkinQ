@@ -6,9 +6,10 @@ import Table from "../../components/Table";
 import { EntitySchema, EntityType, FieldType } from "@/lib/entity/types";
 import Form from "@/client/components/Form/Form";
 import { useModalStore } from "@/client/components/Modal/modalStore";
+import { httpRequest } from "@/client/hooks/useDataDetail";
 
 const Entity = () => {
-  const schema: EntitySchema = useStore((state) => state.schema);
+  const schema = useStore((state) => state.schema);
   const entities: string[] = useMemo(() => Object.keys(schema), [schema]);
   const [selectedEntity, setSelectedEntity] = useState("" as string);
   const [searchValue, setSearchValue] = useState("");
@@ -34,32 +35,7 @@ const Entity = () => {
       </div>
       <div className="flex items-start h-full">
         <div className="px-3 w-48 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
-          <div className="py-1">
-            {/* <Button
-                  onClick={() => {
-                    setAddEntityModal(true);
-                  }}
-                  size="xs"
-                >
-                  Add Entity
-                </Button> */}
-
-            {/* {addEntityModal && (
-                  <ModalWin
-                    showModal
-                    title="Add Entity"
-                    onClose={() => {
-                      reset();
-                      setAddEntityModal(false);
-                    }}
-                    handleSubmit={handleSubmit(onSubmit)}
-                  >
-                    <form>
-                      <TextInput required {...register("name")} />
-                    </form>
-                  </ModalWin>
-                )} */}
-          </div>
+          <div className="py-1"></div>
           <div className="pt-1">
             <span className="font-bold">Entities</span>
             <span className="float-end">{entities.length}</span>
@@ -123,7 +99,7 @@ const EntityDetail = ({
         <span className="font-bold pr-2">{entity}</span>
         <Button
           onClick={() => {
-            openModal(<FieldDetail />);
+            openModal(<FieldDetail entity={entity} />);
           }}
           size="xs"
         >
@@ -145,7 +121,9 @@ const EntityDetail = ({
       <div className="pt-1">
         <Table
           data={fieldsArray}
-          rowClick={(data) => openModal(<FieldDetail data={data} />)}
+          rowClick={(data) =>
+            openModal(<FieldDetail data={data} entity={entity} />)
+          }
           columns={[
             { field: "name", className: "font-bold" },
             "type",
@@ -162,18 +140,38 @@ const EntityDetail = ({
 };
 
 const FieldDetail = (props: any) => {
+  const getSchema = useStore((state) => state.getSchema);
   return (
     <Form
-      onSubmit={(props) => {
-        debugger;
-        // setRecord(props.data);
+      onSubmit={async ({ closeModal, data }) => {
+        await httpRequest({
+          url: "/api/entityField",
+          method: "POST",
+          entity: "",
+          data: {
+            entity: props.entity,
+            fields: [
+              {
+                type: data.type,
+                name: data.name,
+                label: data.label,
+                description: data.description,
+              },
+            ],
+          },
+        });
+        getSchema();
         props.closeModal && props.closeModal();
       }}
-      data={[]}
+      data={props.data}
       formFields={[
         {
           label: "Name",
           field: "name",
+        },
+        {
+          label: "Label",
+          field: "label",
         },
         {
           label: "Type",

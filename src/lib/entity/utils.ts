@@ -79,18 +79,24 @@ export const translateDefaultDBtoSchema = (column_default: string) => {
 
 export const findDifferences = (
   actual: DbSchemaType,
-  schema: Record<string, EntityType>
+  schema: Record<string, EntityType>,
+  reverse?: boolean
 ): Record<string, EntityType> => {
   const differences: Record<string, EntityType> = {};
 
-  //
+  let actualTmp = actual.tables;
+  let schemaTmp = schema;
+  if (reverse) {
+    actualTmp = schema;
+    schemaTmp = actual.tables;
+  }
   // Projdeme všechny tabulky v actualDBSchema
-  for (const tableName in schema) {
-    if (_.has(actual.tables, tableName)) {
+  for (const tableName in schemaTmp) {
+    if (_.has(actualTmp, tableName)) {
       // Porovnáme sloupce v tabulce
 
-      const obj1 = schema[tableName].fields;
-      const obj2: any = actual.tables[tableName].fields;
+      const obj1 = schemaTmp[tableName].fields;
+      const obj2: any = actualTmp[tableName].fields;
       _.forEach(obj1, (value, key) => {
         // if (value.type && value.type.indexOf("nlink(") > -1) {
         //   return;
@@ -113,7 +119,7 @@ export const findDifferences = (
       });
     } else {
       // Tabulka v schemaDefinition neexistuje v actualDBSchema
-      differences[tableName] = schema[tableName];
+      differences[tableName] = schemaTmp[tableName];
     }
   }
 

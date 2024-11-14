@@ -17,12 +17,14 @@ export const httpRequest = ({
   data,
   config,
   params,
+  url,
 }: {
   method: string;
   entity: string;
   data?: Record<string, any>;
   config?: AxiosRequestConfig;
   params?: any;
+  url?: string;
 }) => {
   const urpparams = new URLSearchParams();
   if (params) {
@@ -38,7 +40,7 @@ export const httpRequest = ({
   }
   return axios.request({
     method,
-    url: "/api/entity/" + entity,
+    url: url || "/api/entity/" + entity,
     data,
     params: urpparams,
     ...config,

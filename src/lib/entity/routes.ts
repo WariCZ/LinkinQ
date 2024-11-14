@@ -7,6 +7,7 @@ import _ from "lodash";
 import { Entity } from ".";
 import { DateTime } from "luxon";
 import { Sql } from "./sql";
+import { c } from "vite/dist/node/types.d-aGj9QkWt";
 
 export type ServerSideOutputType = {
   time: string;
@@ -257,6 +258,42 @@ export class EntityRoutes extends Entity {
       try {
         if (req.user) {
           return res.json(this.schema);
+        } else {
+          res.sendStatus(401);
+        }
+      } catch (error: any) {
+        debugger;
+        console.error("Error fetching data from external API:", error?.stack);
+        res.status(500).send("Error fetching data from external API");
+      }
+    });
+
+    router.post("/entityField", async (req: Request, res: Response) => {
+      try {
+        if (req.user) {
+          if (
+            req.body.entity &&
+            req.body.fields &&
+            Array.isArray(req.body.fields)
+          ) {
+            const entityFields = this.schema[req.body.entity].fields;
+            for (const f of req.body.fields) {
+              await this.createField({
+                tableName: req.body.entity,
+                columnName: f.name,
+                columnDef: {
+                  type: f.type,
+                  name: f.name,
+                  description: f.description,
+                },
+              });
+              entityFields[f.name] = f;
+
+              this.setSchema({ ...this.schema });
+            }
+
+            return res.json({});
+          }
         } else {
           res.sendStatus(401);
         }
