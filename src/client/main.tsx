@@ -11,8 +11,8 @@ import ModalContainer from "./components/Modal/ModalContainer";
 //   </React.StrictMode>
 // );
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <>
+  <React.StrictMode>
     <App />
     <ModalContainer />
-  </>
+  </React.StrictMode>
 );

@@ -16,9 +16,30 @@ import { MdTask } from "react-icons/md";
 import { RiFileList2Fill } from "react-icons/ri";
 import { FaTools } from "react-icons/fa";
 import { TbTableOptions, TbTable } from "react-icons/tb";
+import { FaBuffer } from "react-icons/fa";
+import { FaCode } from "react-icons/fa";
+import { FaProjectDiagram } from "react-icons/fa";
+import { FaTable } from "react-icons/fa";
+import { FaTasks } from "react-icons/fa";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 
-export default function DashboardSidebar() {
+type Label = {
+  label: string;
+  icon?: React.FC;
+};
+
+type WithTo = Label & {
+  to: string; // Povinný atribut 'to', pokud je přítomen
+  children?: never; // Pokud je 'to', nesmí být 'children'
+};
+
+type WithChildren = Label & {
+  children: MenuItemType[]; // Povinný atribut 'children', pokud je přítomen
+  to?: never; // Pokud jsou 'children', nesmí být 'to'
+};
+type MenuItemType = WithTo | WithChildren;
+
+export default function DashboardSidebar(props: { admin?: boolean }) {
   // const context = useContext(sidebarContext);
 
   useEffect(() => {
@@ -34,83 +55,179 @@ export default function DashboardSidebar() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+  const menuAdmin: MenuItemType[] = [
+    {
+      label: "journal",
+      to: "/admin/journal",
+      icon: FaBuffer,
+    },
+    {
+      label: "workflow",
+      to: "/admin/workflow",
+      icon: FaProjectDiagram,
+    },
+    {
+      label: "serverScript",
+      to: "/admin/serverScript",
+      icon: FaCode,
+    },
+    {
+      label: "entity",
+      to: "/admin/entity",
+      icon: FaTable,
+    },
+    // {
+    //   label: "test",
+    //   icon: IoMdHome,
+    //   children: [
+    //     {
+    //       label: "kuk1",
+    //       to: "/sdw",
+    //       icon: IoMdHome,
+    //     },
+    //   ],
+    // },
+  ];
 
-  const navigate = useNavigate();
+  const menu: MenuItemType[] = [
+    {
+      label: "Home",
+      to: "/",
+      icon: IoMdHome,
+    },
+    {
+      label: "Tasks",
+      to: "/tasks",
+      icon: FaTasks,
+    },
+    // {
+    //   label: "serverScript",
+    //   to: "/admin/serverScript",
+    //   icon: FaCode,
+    // },
+    // {
+    //   label: "entity",
+    //   to: "/admin/entity",
+    //   icon: FaTable,
+    // },
+    // {
+    //   label: "test",
+    //   icon: IoMdHome,
+    //   children: [
+    //     {
+    //       label: "kuk1",
+    //       to: "/sdw",
+    //       icon: IoMdHome,
+    //     },
+    //   ],
+    // },
+  ];
 
-  const handleClick = (path: string) => {
-    debugger;
-    //navigate(path);
-  };
   return (
     <Sidebar
       className={`h-full border-r dark:border-r dark:border-gray-700 border-gray-200`}
     >
       <Sidebar.Items>
         <Sidebar.ItemGroup>
-          <Sidebar.Item icon={IoMdHome}>
-            <Link to="/">Home</Link>
-          </Sidebar.Item>
-          <Sidebar.Item icon={HiInboxArrowDown}>
-            <Link to="/protected">Inbox</Link>
-          </Sidebar.Item>
-          <Sidebar.Item icon={BsKanban}>
-            <Link to="/public2">Kanban</Link>
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={FaAddressBook}>
-            Uživatelé
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={PiUserSquareFill}>
-            Portál občana
-          </Sidebar.Item>
-          <Sidebar.Collapse icon={FaUsersBetweenLines} label="Portál úředníka">
-            <Sidebar.Item href="/list">Otevřené</Sidebar.Item>
-            <Sidebar.Item href="/list">Vyřízené</Sidebar.Item>
-          </Sidebar.Collapse>
-          <Sidebar.Collapse label="Žádosti" icon={HiServer}>
-            <Sidebar.Item href="#">Otevřené</Sidebar.Item>
-            <Sidebar.Item href="#">Vyřízené</Sidebar.Item>
-            <Sidebar.Item href="#">Archivované</Sidebar.Item>
-            <Sidebar.Collapse
-              label="Spisy"
-              icon={HiFolderOpen}
-              className="pl-2"
-            >
-              <Sidebar.Item href="#">Otevřené</Sidebar.Item>
-              <Sidebar.Item href="#">Vyřízené</Sidebar.Item>
-            </Sidebar.Collapse>
-          </Sidebar.Collapse>
-          <Sidebar.Collapse label="Spisy" icon={HiFolderOpen}>
-            <Sidebar.Item href="#">Otevřené</Sidebar.Item>
-            <Sidebar.Item href="#">Vyřízené</Sidebar.Item>
-          </Sidebar.Collapse>
-          <Sidebar.Item href="#" icon={MdTask}>
-            Požadavky
-          </Sidebar.Item>
-          <Sidebar.Item href="#" icon={RiFileList2Fill}>
-            Spis
-          </Sidebar.Item>
-          <Sidebar.Collapse
-            label="Vývojář"
-            icon={FaTools}
-            data-testid="navigation-item-developer"
-          >
-            <Sidebar.Item
-              href="/metamodel"
-              icon={TbTableOptions}
-              data-testid="navigation-item-metamodel"
-            >
-              Metamodel
-            </Sidebar.Item>
-            <Sidebar.Item
-              href="/querydata"
-              icon={TbTable}
-              data-testid="navigation-item-querydata"
-            >
-              Query data
-            </Sidebar.Item>
-          </Sidebar.Collapse>
+          {renderMenuItems(props.admin ? menuAdmin : menu)}
         </Sidebar.ItemGroup>
       </Sidebar.Items>
     </Sidebar>
   );
 }
+
+const renderMenuItems = (items: MenuItemType[]) => {
+  return items.map((item, index) => {
+    if (item.children) {
+      return (
+        <Sidebar.Collapse
+          key={index + item.label}
+          icon={item.icon}
+          label={item.label}
+        >
+          {renderMenuItems(item.children)}
+        </Sidebar.Collapse>
+      );
+    }
+
+    return (
+      <Link to={item.to || "#"}>
+        <Sidebar.Item key={index + item.label} icon={item.icon}>
+          {item.label}
+        </Sidebar.Item>
+      </Link>
+    );
+  });
+};
+// return (
+//   <Sidebar
+//     className={`h-full border-r dark:border-r dark:border-gray-700 border-gray-200`}
+//   >
+//     <Sidebar.Items>
+//       <Sidebar.ItemGroup>
+//         <Sidebar.Item icon={IoMdHome}>
+//           <Link to="/">Home</Link>
+//         </Sidebar.Item>
+//         <Sidebar.Item icon={HiInboxArrowDown}>
+//           <Link to="/protected">Inbox</Link>
+//         </Sidebar.Item>
+//         <Sidebar.Item icon={BsKanban}>
+//           <Link to="/public2">Kanban</Link>
+//         </Sidebar.Item>
+//         <Sidebar.Item href="#" icon={FaAddressBook}>
+//           Uživatelé
+//         </Sidebar.Item>
+//         <Sidebar.Item href="#" icon={PiUserSquareFill}>
+//           Portál občana
+//         </Sidebar.Item>
+//         <Sidebar.Collapse icon={FaUsersBetweenLines} label="Portál úředníka">
+//           <Sidebar.Item href="/list">Otevřené</Sidebar.Item>
+//           <Sidebar.Item href="/list">Vyřízené</Sidebar.Item>
+//         </Sidebar.Collapse>
+//         <Sidebar.Collapse label="Žádosti" icon={HiServer}>
+//           <Sidebar.Item href="#">Otevřené</Sidebar.Item>
+//           <Sidebar.Item href="#">Vyřízené</Sidebar.Item>
+//           <Sidebar.Item href="#">Archivované</Sidebar.Item>
+//           <Sidebar.Collapse
+//             label="Spisy"
+//             icon={HiFolderOpen}
+//             className="pl-2"
+//           >
+//             <Sidebar.Item href="#">Otevřené</Sidebar.Item>
+//             <Sidebar.Item href="#">Vyřízené</Sidebar.Item>
+//           </Sidebar.Collapse>
+//         </Sidebar.Collapse>
+//         <Sidebar.Collapse label="Spisy" icon={HiFolderOpen}>
+//           <Sidebar.Item href="#">Otevřené</Sidebar.Item>
+//           <Sidebar.Item href="#">Vyřízené</Sidebar.Item>
+//         </Sidebar.Collapse>
+//         <Sidebar.Item href="#" icon={MdTask}>
+//           Požadavky
+//         </Sidebar.Item>
+//         <Sidebar.Item href="#" icon={RiFileList2Fill}>
+//           Spis
+//         </Sidebar.Item>
+//         <Sidebar.Collapse
+//           label="Vývojář"
+//           icon={FaTools}
+//           data-testid="navigation-item-developer"
+//         >
+//           <Sidebar.Item
+//             href="/metamodel"
+//             icon={TbTableOptions}
+//             data-testid="navigation-item-metamodel"
+//           >
+//             Metamodel
+//           </Sidebar.Item>
+//           <Sidebar.Item
+//             href="/querydata"
+//             icon={TbTable}
+//             data-testid="navigation-item-querydata"
+//           >
+//             Query data
+//           </Sidebar.Item>
+//         </Sidebar.Collapse>
+//       </Sidebar.ItemGroup>
+//     </Sidebar.Items>
+//   </Sidebar>
+// );

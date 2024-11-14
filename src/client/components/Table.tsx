@@ -1,5 +1,6 @@
 import React, { Dispatch, SetStateAction } from "react";
 import {
+  CellContext,
   ColumnDef,
   flexRender,
   getCoreRowModel,
@@ -7,7 +8,47 @@ import {
   SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import useStore from "../store";
+import { EntityType } from "@/lib/entity/types";
 
+export type TableFieldType =
+  | {
+      field: string;
+      label?: string;
+      className?: string;
+      cell?: ({ getValue }: CellContext<any, unknown>) => string;
+    }
+  | string;
+
+const translateColumns = (
+  columns: TableFieldType[],
+  schema?: EntityType
+): ColumnDef<any>[] => {
+  return columns.map((c) => {
+    let col;
+    if (typeof c === "string") {
+      const s = schema?.fields[c];
+      col = {
+        id: c,
+        header: s?.label || c,
+        accessorKey: c,
+      };
+    } else {
+      const s = schema?.fields[c.field];
+      col = {
+        id: c.field,
+        header: c.label || s?.label || c.field,
+        accessorKey: c.field,
+        cell:
+          c.cell ||
+          ((info) => (
+            <span className={c.className}>{info.getValue() as string}</span>
+          )),
+      };
+    }
+    return col;
+  });
+};
 const Table = <T, U>({
   columns,
   data,
@@ -15,24 +56,31 @@ const Table = <T, U>({
   setOrdering,
   ordering,
   loading,
+  rowClick,
+  entity,
 }: {
+  entity?: string;
   loading?: boolean;
-  columns: ColumnDef<T>[];
+  columns: TableFieldType[];
   data: T[];
-  highlightedRow: string[];
+  rowClick?: (data: T) => void;
+  highlightedRow?: string[];
   setOrdering?: Dispatch<
     SetStateAction<
       {
         id: string;
-        desc: boolean;
+        desc?: boolean;
       }[]
     >
   >;
-  ordering?: SortingState;
+  ordering?: {
+    id: string;
+    desc?: boolean;
+  }[];
 }) => {
-  // Use the useTable hook provided by react-table
+  const schema: any = useStore((state) => state.schema);
   const { getRowModel, getHeaderGroups } = useReactTable({
-    columns,
+    columns: translateColumns(columns, entity ? schema[entity] : undefined),
     data,
     debugTable: true,
     getCoreRowModel: getCoreRowModel(),
@@ -42,7 +90,7 @@ const Table = <T, U>({
     },
     manualSorting: true,
     state: {
-      sorting: ordering,
+      sorting: ordering?.map((o) => ({ ...o, desc: o.desc || false })),
     },
   });
 
@@ -55,7 +103,7 @@ const Table = <T, U>({
               {headerGroup.headers.map((header) => {
                 return (
                   <th
-                    className="px-6 py-3"
+                    className="px-4 py-2"
                     key={header.id}
                     colSpan={header.colSpan}
                     onClick={header.column.getToggleSortingHandler()}
@@ -100,7 +148,7 @@ const Table = <T, U>({
                   <tr key={i} className="max-w-sm animate-pulse">
                     {headerGroup.headers.map((header, a) => {
                       return (
-                        <td key={a} className="px-6 py-4 whitespace-nowrap">
+                        <td key={a} className="px-4 py-2 whitespace-nowrap">
                           <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full"></div>
                         </td>
                       );
@@ -111,8 +159,12 @@ const Table = <T, U>({
             : getRowModel().rows.map((row) => {
                 return (
                   <tr
+                    onClick={() => {
+                      rowClick && rowClick(row.original);
+                    }}
                     key={row.id}
                     className={`hover:bg-gray-100 dark:hover:bg-gray-600 ${
+                      highlightedRow &&
                       highlightedRow.indexOf((row.original as any).guid) > -1
                         ? "highlight"
                         : ""
@@ -122,7 +174,7 @@ const Table = <T, U>({
                       return (
                         <td
                           key={cell.id}
-                          className="px-6 py-4 whitespace-nowrap"
+                          className="px-4 py-2 whitespace-nowrap"
                         >
                           {flexRender(
                             cell.column.columnDef.cell,

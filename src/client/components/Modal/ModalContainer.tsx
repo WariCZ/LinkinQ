@@ -52,8 +52,13 @@ const ModalContainer = () => {
                 </Button>
                 <Button
                   onClick={() => {
-                    if (formRef.current.firstChild.firstChild)
-                      formRef.current.firstChild.firstChild.requestSubmit();
+                    if (formRef.current)
+                      formRef.current.dispatchEvent(
+                        new Event("submit", {
+                          cancelable: true,
+                          bubbles: true,
+                        })
+                      );
                   }}
                 >
                   {t("modal.save")}

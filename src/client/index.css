@@ -35,7 +35,7 @@
   }
 
   .highlight {
-    background-color: #ec8fcc; /* Barva zvýraznění */
+    background-color: rgb(205 236 241); /* Barva zvýraznění */
     transition: background-color 0.2s ease-in-out; /* Plynulé zmizení */
   }
   

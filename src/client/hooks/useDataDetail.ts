@@ -64,28 +64,6 @@ const getSingleRecord = ({
   });
 };
 
-const getTableRecords = ({
-  entity,
-  fields,
-  filter,
-  orderBy,
-}: {
-  entity: string;
-  fields: string;
-  filter: Object;
-  orderBy?: string;
-}) => {
-  return httpRequest({
-    method: "GET",
-    entity: entity,
-    params: {
-      __fields: fields,
-      __orderby: orderBy,
-      ...filter,
-    },
-  });
-};
-
 export function idsValueInside(
   paramsFetch: Record<string, number[] | number>,
   params: Record<string, number[]>
@@ -107,7 +85,7 @@ export function idsValueInside(
 }
 
 type EventData = any;
-function useDataApi<T, U>(
+function useDataDetail<T, U>(
   param: {
     entity: string;
     guid?: string;
@@ -115,11 +93,6 @@ function useDataApi<T, U>(
     filter?: Object;
     orderby?: string[];
   },
-  // httpRequestFunction: {
-  //   entity: string;
-  //   fetch: (params: any) => Promise<AxiosResponse<T, any>> | undefined;
-  //   create: (data: U) => Promise<AxiosResponse<U, any>>;
-  // },
   initialState?: T
 ): [
   T,
@@ -127,101 +100,75 @@ function useDataApi<T, U>(
   {
     loading: boolean;
     error: string | null;
-    createRecord: (data: U) => void;
+    setRecord: (data: U) => void;
     deleteRecord: (guid: string) => void;
     refresh: (params?: { fields?: string[]; filter?: Object }) => void;
     fields: string[];
-    filter: Object;
-    highlightedRow: string[];
   }
 ] {
   const [data, setData] = useState(initialState as T);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fieldsEntity, setFieldsEntity] = useState(param.fields || []);
-  const [filter, setFilter] = useState(param.filter || {});
-  const [orderby, setOrderby] = useState(param.orderby || []);
-  const [highlightedRow, setHighlightedRow] = useState([]);
 
-  useEffect(() => {
-    const eventSource = new EventSource("/api/events");
+  // useEffect(() => {
+  //   const eventSource = new EventSource("/api/events");
 
-    eventSource.onmessage = (event) => {
-      const newEvent: EventData = JSON.parse(event.data);
+  //   eventSource.onmessage = (event) => {
+  //     const newEvent: EventData = JSON.parse(event.data);
 
-      if (newEvent?.afterData?.guid)
-        actualizeData({ guid: newEvent.afterData.guid });
-    };
+  //     if (newEvent?.afterData?.guid)
+  //       actualizeData({ guid: newEvent.afterData.guid });
+  //   };
 
-    eventSource.onerror = () => {
-      console.error("Error occurred in EventSource");
-      eventSource.close();
-    };
+  //   eventSource.onerror = () => {
+  //     console.error("Error occurred in EventSource");
+  //     eventSource.close();
+  //   };
 
-    // Zavřít EventSource při odmountování komponenty
-    return () => {
-      eventSource.close();
-    };
-  }, []);
+  //   // Zavřít EventSource při odmountování komponenty
+  //   return () => {
+  //     eventSource.close();
+  //   };
+  // }, []);
 
-  const actualizeData = async ({ guid }: { guid: string }) => {
-    const response = await getSingleRecord({
-      entity: param.entity,
-      guid: guid,
-      fields: param.fields ? param.fields.join() : "guid",
-    });
-    setData((prevData) => {
-      if (Array.isArray(prevData)) {
-        setHighlightedRow(response.data.map((d: any) => d.guid));
-        return [...response.data, ...prevData] as any;
-      } else {
-        setData(response.data[0]);
-      }
-    });
+  // const actualizeData = async ({ guid }: { guid: string }) => {
+  //   const response = await getSingleRecord({
+  //     entity: param.entity,
+  //     guid: guid,
+  //     fields: param.fields ? param.fields.join() : "guid",
+  //   });
 
-    // Plynulé zmizení po 2 sekundách
-    setTimeout(() => {
-      setHighlightedRow([]);
-    }, 700);
-  };
+  //   setData((prevData) => {
+  //     if (Array.isArray(prevData)) {
+  //       return [...response.data, ...prevData] as any;
+  //     } else {
+  //       setData(response.data[0]);
+  //     }
+  //   });
+  // };
 
   const fetchData = async ({
     entity,
     guid,
     fields,
-    filter,
-    orderBy,
   }: {
     entity: string;
     guid?: string;
     fields?: string[];
-    filter?: Object;
-    orderBy?: string[];
   }) => {
     setLoading(true);
     setError(null);
 
     try {
       if (guid) {
-        // const response = await methods.fetch({ ...(params || {}) });
-        if (guid != "0") {
-          const response = await getSingleRecord({
-            entity,
-            guid,
-            fields: fields && fields.length > 0 ? fields.join(",") : "*",
-          });
-          console.log("response.data", response.data[0]);
-          if (response) setData(response.data[0]);
-        }
-      } else {
-        const response = await getTableRecords({
+        const response = await getSingleRecord({
           entity,
+          guid,
           fields: fields && fields.length > 0 ? fields.join(",") : "*",
-          filter: filter || {},
-          orderBy: orderBy && orderBy.join(","),
         });
-        console.log("response.data", response.data, data);
-        if (response) setData(response.data);
+        console.log("response.data", response.data[0]);
+        if (response) setData(response.data[0]);
       }
     } catch (err: any) {
       console.error(err.message);
@@ -237,8 +184,6 @@ function useDataApi<T, U>(
       entity: param.entity,
       guid: param.guid,
       fields: fieldsEntity || undefined,
-      filter: filter || undefined,
-      orderBy: orderby || undefined,
     });
   }, [param.entity, param.guid]);
 
@@ -247,24 +192,32 @@ function useDataApi<T, U>(
     if (params && params.fields) {
       await setFieldsEntity(params.fields);
     }
-    if (params && params.filter) {
-      await setFilter(params.filter);
-    }
     await fetchData({
       entity: param.entity,
       guid: param.guid,
       fields: params?.fields || fieldsEntity || undefined,
-      filter: params?.filter || filter || undefined,
     });
   };
 
-  const createRecord = async (data: any) => {
+  const setRecord = async (data: any) => {
     try {
-      const response = await httpRequest({
-        entity: param.entity,
-        method: "POST",
-        data: data,
-      });
+      const guid = data.guid;
+      delete data.guid;
+      delete data.id;
+      // Update
+      if (guid) {
+        const response = await httpRequest({
+          entity: param.entity,
+          method: "PUT",
+          data: { where: { guid: guid }, data: data },
+        });
+      } else {
+        const response = await httpRequest({
+          entity: param.entity,
+          method: "POST",
+          data: data,
+        });
+      }
       // const response = await methods.create(data);
       //   setData(response.data as any);
     } catch (err: any) {
@@ -299,12 +252,10 @@ function useDataApi<T, U>(
       loading,
       error,
       fields: fieldsEntity,
-      createRecord,
+      setRecord,
       deleteRecord,
-      filter,
-      highlightedRow,
     },
   ];
 }
 
-export default useDataApi;
+export default useDataDetail;

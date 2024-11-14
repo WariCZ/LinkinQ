@@ -256,7 +256,7 @@ export class EntityRoutes extends Entity {
       }
       try {
         if (req.user) {
-          return res.json(getFields(this.schema));
+          return res.json(this.schema);
         } else {
           res.sendStatus(401);
         }

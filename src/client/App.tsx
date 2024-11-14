@@ -7,26 +7,25 @@ import {
   Outlet,
 } from "react-router-dom";
 import useStore from "./store";
-import Login from "./app/Login";
+import Login from "./pages/Login";
 
-import ProtectedPage from "./components/ProtectedPage";
 import PublicPage from "./components/PublicPage";
 import { DashboardHeader } from "./components/layout/Header";
 import DashboardSidebar from "./components/layout/Sidebar";
 import { Flowbite } from "flowbite-react";
-import PublicPage2 from "./components/PublicPage2";
 import { customTheme } from "./flowbite";
-import ServerScript from "./app/admin/ServerScript";
-import Journal from "./app/admin/Journal";
-import Workflow from "./app/admin/Workflow";
-import Tasks from "./app/Tasks";
+import ServerScript from "./pages/admin/ServerScript";
+import Journal from "./pages/admin/Journal";
+import Workflow from "./pages/admin/Workflow";
+import Entity from "./pages/admin/Entity";
+import Tasks from "./pages/Tasks";
 
 const PrivateLayout = (props: { admin?: boolean }) => {
   return (
     <>
       <DashboardHeader {...props} />
       <div className="flex items-start pt-10 w-full h-full ">
-        <DashboardSidebar />
+        <DashboardSidebar {...props} />
         <main className="overflow-y-auto relative w-full h-full bg-gray-50 dark:bg-gray-900">
           <Outlet />
         </main>
@@ -61,17 +60,15 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<PublicPage />} />
-            <Route path="public" element={<PublicPage2 />} />
             <Route path="tasks" element={<Tasks />} />
           </Route>
           {/* <Route path="/logout" element={<Logout />} /> */}
-          <Route path="/admin" element={<PrivateRoute admin={true} />}>
-            <Route path="" element={<Journal />} />
-            <Route path="public" element={<PublicPage2 />} />
+          <Route path="/admin/" element={<PrivateRoute admin={true} />}>
+            <Route path="" element={<Entity />} />
+            <Route path="journal" element={<Journal />} />
             <Route path="workflow" element={<Workflow />} />
-            <Route path="protected" element={<ProtectedPage />} />
-            <Route path="protected2" element={<ProtectedPage />} />
             <Route path="serverScript" element={<ServerScript />} />
+            <Route path="entity" element={<Entity />} />
             {/* <Route path="*" element={<Navigate to="" replace />} /> */}
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

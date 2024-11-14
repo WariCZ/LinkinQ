@@ -138,7 +138,7 @@ function useDataTable<T, U>(
       SetStateAction<
         {
           id: string;
-          desc: boolean;
+          desc?: boolean;
         }[]
       >
     >;
@@ -182,9 +182,19 @@ function useDataTable<T, U>(
     setData((prevData) => {
       if (Array.isArray(prevData)) {
         setHighlightedRow(response.data.map((d: any) => d.guid));
-        return [...response.data, ...prevData] as any;
+
+        const prevDataGuids = _.keyBy(prevData, "guid");
+        response.data.forEach((d: any) => {
+          if (prevDataGuids[d.guid]) {
+            _.merge(prevDataGuids[d.guid], d);
+          } else {
+            prevData.unshift(d);
+            prevDataGuids[d.guid] = d;
+          }
+        });
+        return [...prevData] as any;
       } else {
-        setData(response.data[0]);
+        return [...response.data];
       }
     });
 

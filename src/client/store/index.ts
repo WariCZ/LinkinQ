@@ -1,7 +1,7 @@
 import create from "zustand";
 import axios from "axios";
 import { User } from "@/lib/auth";
-import { FieldType } from "@/lib/entity/types";
+import { EntitySchema, FieldType } from "@/lib/entity/types";
 
 type GuiEntitySchema = Record<string, FieldType>;
 interface StoreState {
@@ -12,7 +12,7 @@ interface StoreState {
   loading: boolean;
   checkAuth: () => void;
   getSchema: () => void;
-  schema: GuiEntitySchema;
+  schema: EntitySchema;
 }
 
 const useStore = create<StoreState>((set) => ({

@@ -61,9 +61,9 @@ export const customTheme: CustomFlowbiteTheme = {
       },
     },
     content: {
-      base: "YYY relative h-full w-full p-4 md:h-auto pointer-events-auto",
+      base: "relative h-full w-full p-4 md:h-auto pointer-events-auto",
       inner:
-        "border border-gray-200 relative flex max-h-[90dvh] flex-col rounded-sm bg-white shadow dark:bg-gray-700",
+        "shadow-lg shadow-gray-500/50 border border-gray-200 relative flex max-h-[90dvh] flex-col rounded-sm bg-white shadow dark:bg-gray-700",
     },
     header: {
       base: "flex items-start justify-between rounded-t border-b p-1 dark:border-gray-600",
@@ -84,5 +84,22 @@ export const customTheme: CustomFlowbiteTheme = {
     //   base: "flex items-center space-x-2 rounded-b border-gray-200 p-6 dark:border-gray-600",
     //   popup: "border-t",
     // },
+  },
+  textInput: {
+    addon:
+      "inline-flex items-center rounded-l-md border border-r-0 border-gray-300 bg-gray-200 px-3 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-600 dark:text-gray-400",
+    field: {
+      input: {
+        sizes: {
+          sm: "p-2 sm:text-xs",
+          md: "py-1 px-2 text-sm",
+          lg: "p-4 sm:text-base",
+        },
+        withAddon: {
+          on: "rounded-r-md",
+          off: "rounded-md",
+        },
+      },
+    },
   },
 };
