@@ -18,6 +18,27 @@ const logger = winston.createLogger({
   ],
 });
 
+// Rozšíření typu Logger
+interface CustomLogger extends winston.Logger {
+  logS: (message: string) => void;
+  logE: (message: string) => void;
+}
+
+// Přidání vlastní metody logS
+const customLogger: CustomLogger = logger as CustomLogger;
+customLogger.logS = function (message: string) {
+  this.log({
+    level: "info", // Nebo jiná požadovaná úroveň
+    message: `[SPECIAL S] ${message}`, // Speciální formát zprávy
+  });
+};
+customLogger.logE = function (message: string) {
+  this.log({
+    level: "error", // Nebo jiná požadovaná úroveň
+    message: `[SPECIAL E] ${message}`, // Speciální formát zprávy
+  });
+};
+
 const printArgv = (argv: any) => {
   return argv.map((a: any) => {
     if (typeof a == "object") {

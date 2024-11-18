@@ -408,16 +408,17 @@ export class Triggers {
               diffDataItem || beforeDataItem || afterDataDataItem
             );
 
-            await that.addToJournal({
-              entity: table,
-              fields_new: operation !== "D" ? afterDataDataItem : null,
-              fields_diff: diffDataItem,
-              fields_old: beforeDataItem,
-              entityid: beforeDataItem?.id || afterDataDataItem?.id,
-              entityguid: beforeDataItem?.guid || afterDataDataItem?.guid,
-              operation: operation,
-              user: runner.builder?._user?.id,
-            });
+            if (that.schema[table].journal)
+              await that.addToJournal({
+                entity: table,
+                fields_new: operation !== "D" ? afterDataDataItem : null,
+                fields_diff: diffDataItem,
+                fields_old: beforeDataItem,
+                entityid: beforeDataItem?.id || afterDataDataItem?.id,
+                entityguid: beforeDataItem?.guid || afterDataDataItem?.guid,
+                operation: operation,
+                user: runner.builder?._user?.id,
+              });
 
             const sqlUser = new Sql({
               db: db,

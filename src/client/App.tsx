@@ -9,7 +9,7 @@ import {
 import useStore from "./store";
 import Login from "./pages/Login";
 
-import PublicPage from "./components/PublicPage";
+import PublicPage from "./pages/PublicPage";
 import { DashboardHeader } from "./components/layout/Header";
 import DashboardSidebar from "./components/layout/Sidebar";
 import { Flowbite } from "flowbite-react";
@@ -39,11 +39,11 @@ const PrivateRoute = (props: { admin?: boolean }) => {
   const checkAuth = useStore((state) => state.checkAuth);
   const loading = useStore((state) => state.loading);
   const getSchema = useStore((state) => state.getSchema);
+  const firstLoad = useStore((state) => state.firstLoad);
 
   useEffect(() => {
-    checkAuth();
-    getSchema();
-  }, [checkAuth, getSchema]);
+    firstLoad();
+  }, [firstLoad]);
 
   if (loading) {
     return <div>Loading...</div>;

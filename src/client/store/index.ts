@@ -12,10 +12,11 @@ interface StoreState {
   loading: boolean;
   checkAuth: () => void;
   getSchema: () => void;
+  firstLoad: () => void;
   schema: EntitySchema;
 }
 
-const useStore = create<StoreState>((set) => ({
+const useStore = create<StoreState>((set, get) => ({
   schema: {},
   user: null,
   roles: [],
@@ -29,8 +30,19 @@ const useStore = create<StoreState>((set) => ({
   setLoading: (loading) => {
     set({ loading });
   },
-  checkAuth: async () => {
+  firstLoad: async () => {
     set({ loading: true });
+    try {
+      await get().checkAuth();
+      await get().getSchema();
+    } catch (error) {
+      set({ user: null });
+    } finally {
+      set({ loading: false });
+    }
+  },
+  checkAuth: async () => {
+    // set({ loading: true });
     try {
       const response = await axios.get("/checkAuth", {
         withCredentials: true,
@@ -43,7 +55,7 @@ const useStore = create<StoreState>((set) => ({
     } catch (error) {
       set({ user: null });
     } finally {
-      set({ loading: false });
+      // set({ loading: false });
     }
   },
   getSchema: async () => {

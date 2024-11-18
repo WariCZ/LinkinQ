@@ -81,7 +81,9 @@ class InstanceLocker {
     try {
       await this.dataStore.db(COLLECTION).setUser({ id: 1 }).insert(lock);
     } catch (err) {
-      return false; // Locking failed, possibly due to a duplicate entry.
+      debugger;
+      console.error(err);
+      return false; // Locking failed, possibly due to a duplicate entry.//
     }
 
     return true;

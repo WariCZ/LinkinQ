@@ -45,16 +45,6 @@ class DataStore extends ServerComponent implements IDataStore {
   constructor(server: IBPMNServer) {
     super(server);
     this.db = db;
-    // this.db = {
-    //   knex: db,
-    //   find: (...args) => {
-    //     console.log("args", args);
-    //     debugger;
-    //   },
-    // };
-    // dbConfiguration = {
-    //   db: {},
-    // };
     this.locker = new InstanceLocker(this);
   }
 

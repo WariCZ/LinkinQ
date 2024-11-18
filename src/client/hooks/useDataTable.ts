@@ -124,6 +124,7 @@ function useDataTable<T, U>(
   {
     loading: boolean;
     error: string | null;
+    setRecord: (data: U) => void;
     // createRecord: (data: U) => void;
     // deleteRecord: (guid: string) => void;
     refresh: (params?: { fields?: string[]; filter?: Object }) => void;
@@ -202,6 +203,34 @@ function useDataTable<T, U>(
     setTimeout(() => {
       setHighlightedRow([]);
     }, 700);
+  };
+
+  const setRecord = async (data: any) => {
+    try {
+      const guid = data.guid;
+      delete data.guid;
+      delete data.id;
+      // Update
+      if (guid) {
+        const response = await httpRequest({
+          entity: param.entity,
+          method: "PUT",
+          data: { where: { guid: guid }, data: data },
+        });
+      } else {
+        const response = await httpRequest({
+          entity: param.entity,
+          method: "POST",
+          data: data,
+        });
+      }
+      // const response = await methods.create(data);
+      //   setData(response.data as any);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchData = async ({
@@ -319,6 +348,7 @@ function useDataTable<T, U>(
       ordering,
       // createRecord,
       // deleteRecord,
+      setRecord,
       filter,
       highlightedRow,
       setOrdering: (a: any) => {

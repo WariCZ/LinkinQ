@@ -1,164 +1,174 @@
+import Form from "@/client/components/Form/Form";
+import { ModalPropsType } from "@/client/components/Modal/ModalContainer";
+import { useModalStore } from "@/client/components/Modal/modalStore";
+import useDataDetail from "@/client/hooks/useDataDetail";
+import useDataTable from "@/client/hooks/useDataTable";
 import { BpmnJsReact, useBpmnJsReact } from "bpmn-js-react";
+import { Button, TextInput } from "flowbite-react";
+import { useMemo, useState } from "react";
 
-// const ComponentForBpmnViewer = (props:any) => {
-//   return <BpmnJsReact xml={xml} />;
-// };
-const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1cbql69" targetNamespace="http://bpmn.io/schema/bpmn" exporter="bpmn-js (https://demo.bpmn.io)" exporterVersion="6.5.1">
-  <bpmn:collaboration id="Collaboration_0t2r4h0">
-    <bpmn:participant id="Participant_0jf4n5b" processRef="Process_0jvadxd" />
-  </bpmn:collaboration>
-  <bpmn:process id="Process_0jvadxd" isExecutable="true">
-    <bpmn:exclusiveGateway id="ExclusiveGateway_0ey1xj0">
-      <bpmn:incoming>SequenceFlow_0tl9p9p</bpmn:incoming>
-      <bpmn:outgoing>flow_rejected</bpmn:outgoing>
-      <bpmn:outgoing>flow_approved</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:userTask id="Activity_03i6maz" name="User Request">
-      <bpmn:incoming>Flow_07jc6tg</bpmn:incoming>
-      <bpmn:outgoing>Flow_15lhvq2</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:startEvent id="StartEvent_09in9bz" name="start">
-      <bpmn:outgoing>Flow_07jc6tg</bpmn:outgoing>
-    </bpmn:startEvent>
-    <bpmn:userTask id="task_approval" name="Approval">
-      <bpmn:extensionElements>
-        <camunda:formData>
-          <camunda:formField id="approved" label="Approved ? say(&#39;yes&#39;)" type="boolean" />
-        </camunda:formData>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_15lhvq2</bpmn:incoming>
-      <bpmn:outgoing>SequenceFlow_0tl9p9p</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:endEvent id="event_end" name="end">
-      <bpmn:incoming>Flow_05qmeqi</bpmn:incoming>
-    </bpmn:endEvent>
-    <bpmn:serviceTask id="Activity_065bb7n" name="Dispense Cash">
-      <bpmn:incoming>flow_approved</bpmn:incoming>
-      <bpmn:outgoing>Flow_05qmeqi</bpmn:outgoing>
-    </bpmn:serviceTask>
-    <bpmn:endEvent id="event_closed" name="Closed">
-      <bpmn:incoming>flow_rejected</bpmn:incoming>
-      <bpmn:terminateEventDefinition id="TerminateEventDefinition_01zeov6" />
-    </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_05qmeqi" sourceRef="Activity_065bb7n" targetRef="event_end" />
-    <bpmn:sequenceFlow id="Flow_15lhvq2" sourceRef="Activity_03i6maz" targetRef="task_approval" />
-    <bpmn:sequenceFlow id="Flow_07jc6tg" sourceRef="StartEvent_09in9bz" targetRef="Activity_03i6maz" />
-    <bpmn:sequenceFlow id="flow_approved" name="Approved" sourceRef="ExclusiveGateway_0ey1xj0" targetRef="Activity_065bb7n" />
-    <bpmn:sequenceFlow id="flow_rejected" name="Rejected" sourceRef="ExclusiveGateway_0ey1xj0" targetRef="event_closed" />
-    <bpmn:sequenceFlow id="SequenceFlow_0tl9p9p" sourceRef="task_approval" targetRef="ExclusiveGateway_0ey1xj0" />
-  </bpmn:process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_0t2r4h0">
-      <bpmndi:BPMNShape id="Participant_0jf4n5b_di" bpmnElement="Participant_0jf4n5b" isHorizontal="true">
-        <dc:Bounds x="160" y="20" width="640" height="320" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_05qmeqi_di" bpmnElement="Flow_05qmeqi">
-        <di:waypoint x="656" y="130" />
-        <di:waypoint x="698" y="130" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="599" y="96" width="90" height="20" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_15lhvq2_di" bpmnElement="Flow_15lhvq2">
-        <di:waypoint x="349" y="132" />
-        <di:waypoint x="349" y="220" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="286" y="157" width="90" height="20" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_07jc6tg_di" bpmnElement="Flow_07jc6tg">
-        <di:waypoint x="240" y="92" />
-        <di:waypoint x="269" y="92" />
-        <di:waypoint x="269" y="92" />
-        <di:waypoint x="299" y="92" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="206" y="73" width="90" height="20" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="flow_approved_di" bpmnElement="flow_approved">
-        <di:waypoint x="461" y="235" />
-        <di:waypoint x="461" y="130" />
-        <di:waypoint x="556" y="130" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="478" y="102" width="47" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="flow_rejected_di" bpmnElement="flow_rejected">
-        <di:waypoint x="486" y="260" />
-        <di:waypoint x="565" y="260" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="465" y="239" width="44" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="SequenceFlow_0tl9p9p_di" bpmnElement="SequenceFlow_0tl9p9p">
-        <di:waypoint x="399" y="260" />
-        <di:waypoint x="436" y="260" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="340" y="230" width="90" height="12" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="ExclusiveGateway_0ey1xj0_di" bpmnElement="ExclusiveGateway_0ey1xj0" isMarkerVisible="true">
-        <dc:Bounds x="436" y="235" width="50" height="50" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="383" y="280" width="90" height="12" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_00mtu3l_di" bpmnElement="Activity_03i6maz">
-        <dc:Bounds x="299" y="52" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_09in9bz">
-        <dc:Bounds x="204" y="74" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="212" y="117" width="23" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_06dr3pq_di" bpmnElement="task_approval">
-        <dc:Bounds x="299" y="220" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_096z9hv_di" bpmnElement="event_end">
-        <dc:Bounds x="698" y="112" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="744" y="123" width="19" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="ServiceTask_1ul6gng_di" bpmnElement="Activity_065bb7n">
-        <dc:Bounds x="556" y="90" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1rrgi0e_di" bpmnElement="event_closed">
-        <dc:Bounds x="565" y="242" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="565" y="218" width="35" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-    </bpmndi:BPMNPlane>
-  </bpmndi:BPMNDiagram>
-</bpmn:definitions>
-`;
+import { FaPlus } from "react-icons/fa";
 
+type WorkflowType = { name: string; source: string; guid: string };
 const Workflow = (props: any) => {
+  // const workflows: string[] = useMemo(() => [], []);
+  const [searchValue, setSearchValue] = useState("");
+  const [selectedWorkflow, setSelectedWorkflow] = useState({} as WorkflowType);
+  const [tableWorkflows, setTableWorkflows] = useState([] as string[]);
+  const { openModal } = useModalStore();
+
+  const [workflows, setWorkflows, { refresh, setRecord }] = useDataTable(
+    {
+      entity: "wf_models",
+      fields: ["guid", "name", "source"],
+    },
+    [] as WorkflowType[]
+  );
+  const searchWorkflow = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchValue(e.target.value);
+    // setTableWorkflows(workflows.filter((m) => m.indexOf(e.target.value) > -1));
+  };
+
   const bpmnReactJs = useBpmnJsReact();
 
   const handleShown = (viewer: any) => {
-    bpmnReactJs.addMarker("Activity_03i6maz", "moje");
+    // bpmnReactJs.addMarker("Activity_03i6maz", "moje");
   };
   const saveXml = async () => {
     const result = await bpmnReactJs.saveXml();
 
     console.log(result?.xml);
+    console.log(selectedWorkflow);
+    await setRecord({ guid: selectedWorkflow.guid, source: result?.xml });
+    alert("Saved");
   };
 
-  console.log("xml", xml);
+  // const test = (a, b, c) => {
+  //   debugger;
+  // };
+  console.log(workflows);
   return (
-    <div>
-      <BpmnJsReact
-        useBpmnJsReact={bpmnReactJs}
-        mode="edit"
-        xml={xml}
-        onShown={handleShown}
-      />
-      <button onClick={() => saveXml()}>Save Xml</button>
+    <div className="h-full">
+      <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
+        <span className="font-bold">Workflow models</span>
+      </div>
+      <div className="flex items-start h-full">
+        <div className="px-3 w-48 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
+          <div className="py-1"></div>
+          <div className="pt-1">
+            <Button
+              className="h-full"
+              onClick={() => {
+                openModal(<AddWorkflow refresh={refresh} />);
+              }}
+            >
+              <span className="top-0 flex items-center left-4">
+                <FaPlus className="h-3 w-3 mr-2" />
+                <span>Add</span>
+              </span>
+            </Button>
+          </div>
+
+          <div className="pt-1">
+            <span className="font-bold">Workflows</span>
+            <span className="float-end">{workflows?.length}</span>
+          </div>
+          {/* <div className="pt-1">
+            <TextInput
+              style={{ maxHeight: 18 }}
+              value={searchValue}
+              onChange={searchWorkflow}
+              className="w-full"
+              placeholder="Hledat..."
+            />
+          </div> */}
+          <div>
+            <ul>
+              {workflows.map((m, i) => (
+                <li
+                  key={m.name + i}
+                  onClick={() => setSelectedWorkflow(m)}
+                  className={`${
+                    selectedWorkflow.name === m.name ? "font-bold" : ""
+                  } cursor-pointer`}
+                >
+                  {m.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+        <div className="p-2 w-full">
+          <div className="w-full">
+            {selectedWorkflow ? (
+              <>
+                <Button
+                  className="h-full"
+                  onClick={() => {
+                    saveXml();
+                  }}
+                >
+                  Save
+                </Button>
+                <BpmnJsReact
+                  useBpmnJsReact={bpmnReactJs}
+                  mode="edit"
+                  xml={selectedWorkflow.source || ""}
+                  onShown={handleShown}
+                  // click={test}
+                />
+              </>
+            ) : (
+              <span>Vyberte worflow</span>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
+  );
+};
+
+const defaultXml = `<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="sample-diagram" targetNamespace="http://bpmn.io/schema/bpmn" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
+  <bpmn2:process id="Process_1" isExecutable="false">
+    <bpmn2:startEvent id="StartEvent_1" />
+  </bpmn2:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="412" y="240" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>
+`;
+
+const AddWorkflow = (props: ModalPropsType & { refresh: () => void }) => {
+  const [data, setData, { setRecord }] = useDataDetail(
+    {
+      entity: "wf_models",
+    },
+    {}
+  );
+  return (
+    <Form
+      data={data}
+      onSubmit={async ({ closeModal, data }) => {
+        await setRecord({
+          name: data.name,
+          source: defaultXml,
+        });
+        closeModal && closeModal();
+      }}
+      formFields={[
+        {
+          label: "Workflow name",
+          field: "name",
+          required: true,
+        },
+      ]}
+      {...props}
+    />
   );
 };
 

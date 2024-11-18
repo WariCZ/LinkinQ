@@ -8,6 +8,7 @@ import { Entity } from ".";
 import { DateTime } from "luxon";
 import { Sql } from "./sql";
 import { c } from "vite/dist/node/types.d-aGj9QkWt";
+import { addDefaultFields } from "./utils";
 
 export type ServerSideOutputType = {
   time: string;
@@ -221,7 +222,7 @@ export class EntityRoutes extends Entity {
       }
     });
 
-    // UPDATE
+    // DELETE
     router.delete("/entity/:entity", async (req: Request, res: Response) => {
       try {
         if (req.user) {
@@ -258,6 +259,54 @@ export class EntityRoutes extends Entity {
       try {
         if (req.user) {
           return res.json(this.schema);
+        } else {
+          res.sendStatus(401);
+        }
+      } catch (error: any) {
+        debugger;
+        console.error("Error fetching data from external API:", error?.stack);
+        res.status(500).send("Error fetching data from external API");
+      }
+    });
+
+    router.post("/entity", async (req: Request, res: Response) => {
+      try {
+        if (req.user) {
+          if (req.body.entity) {
+            const entDefinition = addDefaultFields({
+              [req.body.entity]: { fields: {} },
+            });
+            await this.createTables({
+              schemaDefinition: entDefinition,
+            });
+
+            this.setSchema({ ...this.schema, ...entDefinition });
+
+            return res.json({});
+          }
+        } else {
+          res.sendStatus(401);
+        }
+      } catch (error: any) {
+        debugger;
+        console.error("Error fetching data from external API:", error?.stack);
+        res.status(500).send("Error fetching data from external API");
+      }
+    });
+
+    router.delete("/entity", async (req: Request, res: Response) => {
+      try {
+        if (req.user) {
+          if (req.body.entity) {
+            await this.deleteTable({
+              tableName: req.body.entity,
+            });
+            delete this.schema[req.body.entity];
+
+            this.setSchema({ ...this.schema });
+
+            return res.json({});
+          }
         } else {
           res.sendStatus(401);
         }

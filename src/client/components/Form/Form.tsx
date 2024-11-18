@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, UseFormSetError } from "react-hook-form";
 import {
   Button,
   TextInput,
@@ -11,6 +11,7 @@ import {
 } from "flowbite-react";
 import useStore from "../../store";
 import { EntitySchema, EntityType, FieldType } from "@/lib/entity/types";
+import _ from "lodash";
 
 type FormField = {
   id?: string;
@@ -21,7 +22,7 @@ type FormField = {
   conditional?: {
     hide: string;
   };
-  type:
+  type?:
     | "textformField"
     | "textarea"
     | "number"
@@ -39,11 +40,16 @@ type FormField = {
 
 interface DynamicFormProps {
   formFields: (FormField | string)[];
-  onSubmit?: (data: Record<string, any>) => void;
-  formRef?: any;
+  onSubmit?: (props: {
+    closeModal?: () => void;
+    data: Record<string, any>;
+    setError: UseFormSetError<any>;
+  }) => void;
+  formRef?: React.LegacyRef<HTMLFormElement>;
   closeModal?: () => void;
   entity?: string;
-  data: Record<string, any>;
+  data?: Record<string, any>;
+  disabled?: boolean;
 }
 
 const translateSchemaToForm = (
@@ -82,6 +88,7 @@ const Form: React.FC<DynamicFormProps> = ({
   closeModal,
   entity,
   data,
+  disabled,
 }) => {
   const schema: any = useStore((state) => state.schema);
 
@@ -93,11 +100,10 @@ const Form: React.FC<DynamicFormProps> = ({
   const {
     control,
     handleSubmit,
-    watch,
-    register,
     reset,
+    setError,
     formState: { errors },
-  } = useForm({ disabled: true });
+  } = useForm({ disabled: disabled });
 
   useEffect(() => {
     reset(data);
@@ -118,12 +124,14 @@ const Form: React.FC<DynamicFormProps> = ({
   //     : false;
   // };
   const formSubmit = (formdata: any, e: any) => {
-    const data = formdata; // removeUndefined(formdata);
+    //TODO: Spatne nemohu mazat prazdne hodnoty pokud uzivatel smaze hodnoty musi se to vyreset nejak jinak
 
+    const data = _.pickBy(formdata, (value) => value !== null && value !== "");
     onSubmit &&
       onSubmit({
         data,
         closeModal,
+        setError,
       });
   };
 
@@ -131,7 +139,9 @@ const Form: React.FC<DynamicFormProps> = ({
     <form ref={formRef} onSubmit={handleSubmit(formSubmit)}>
       {formSchema.map((formField) => {
         // if (isFieldHidden(formField)) return null; // Conditionally hide formFields
-
+        if (disabled) {
+          formField.disabled = true;
+        }
         switch (formField.type) {
           case "textformField":
             return (

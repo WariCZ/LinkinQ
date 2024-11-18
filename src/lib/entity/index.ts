@@ -345,6 +345,61 @@ export class Entity {
     // }
   }
 
+  async deleteColumn({
+    tableName,
+    columnName,
+  }: {
+    tableName: string;
+    columnName: string;
+  }) {
+    // Zjistím, zda tabulka existuje
+    if (await this.db.schema.setUser({ id: 1 }).hasTable(tableName)) {
+      // Zjistím, zda sloupec existuje
+      const columnExists = await this.db.schema
+        .setUser({ id: 1 })
+        .hasColumn(tableName, columnName);
+      if (columnExists) {
+        if (!this.schema[tableName].fields[columnName].system) {
+          await this.db.schema
+            .setUser({ id: 1 })
+            .alterTable(tableName, (table) => {
+              table.dropColumn(columnName);
+            });
+          console.log(`Sloupec ${columnName} v tabulce ${tableName} smazaný.`);
+          return true;
+        } else {
+          console.log(
+            `Sloupec ${columnName} v tabulce ${tableName} je systemový.`
+          );
+          return false;
+        }
+      } else {
+        console.log(`Sloupec ${columnName} v tabulce ${tableName} neexistuje.`);
+        return false;
+      }
+    } else {
+      console.log(`Tabulka ${tableName} neexistuje.`);
+      return false;
+    }
+  }
+
+  async deleteTable({ tableName }: { tableName: string }) {
+    // Zjistim zda tabulka existuje
+    if (await this.db.schema.setUser({ id: 1 }).hasTable(tableName)) {
+      if (!this.schema[tableName].system) {
+        await this.db.schema.setUser({ id: 1 }).dropTable(tableName);
+        console.log(`Tabulka ${tableName} smazaná.`);
+        return true;
+      } else {
+        console.log(`Tabulka ${tableName} je systémová`);
+        return false;
+      }
+    } else {
+      console.log(`Tabulka ${tableName} neexistuje.`);
+      return false;
+    }
+  }
+
   async createTable({
     tableName,
     schemaDefinition,
@@ -359,8 +414,15 @@ export class Entity {
         .setUser({ id: 1 })
         .createTable(tableName, async (table) => {
           // nastavim defaultni sloupce
-          const column = table.bigIncrements(this.MAIN_ID);
-          table.primary([this.MAIN_ID]);
+          // TODO: vyjimka pro BPMN
+          //
+          let column;
+          if (tableName.indexOf("wf_") > -1) {
+            column = table.text(this.MAIN_ID);
+          } else {
+            column = table.bigIncrements(this.MAIN_ID);
+            table.primary([this.MAIN_ID]);
+          }
           if (schemaDefinition[tableName].fields[this.MAIN_ID].description) {
             column.comment(
               schemaDefinition[tableName].fields[this.MAIN_ID].description ||
@@ -379,7 +441,7 @@ export class Entity {
     actualDBSchema,
   }: {
     schemaDefinition: EntitySchema;
-    actualDBSchema: DbSchemaType;
+    actualDBSchema?: DbSchemaType;
   }) {
     for (const tableName in schemaDefinition) {
       await this.createTable({
@@ -515,9 +577,9 @@ export class Entity {
   }
 
   async prepareSchema() {
-    if (process.env.e2etest == "true") {
-      await this.resetPublicSchema();
-    }
+    // if (process.env.e2etest == "true") {
+    await this.resetPublicSchema();
+    // }
 
     await defaultExecute().map(async (e) => {
       await this.db.raw(e).setUser({ id: 1 });

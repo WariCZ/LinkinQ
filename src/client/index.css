@@ -67,3 +67,36 @@ div:has( > span > span.errorHighlight) {
 .no-transform-modal {
   transform: none !important;
 }
+
+
+/*  */
+
+.Completed > .djs-visual > rect, .Completed > .djs-visual > circle, .Completed > .djs-visual > polygon {
+  stroke: green !important;
+  fill:   #e9f1e8 !important;
+}
+.Completed > .djs-visual > path {
+  stroke: green !important;
+}
+
+.Cancelled > .djs-visual > rect, .Cancelled > .djs-visual > circle, .Cancelled > .djs-visual > polygon {
+  stroke: gray !important;
+  fill: #e4e0e0 !important;
+}
+
+.Cancelled > .djs-visual > path {
+  stroke: gray !important;
+}
+
+.Pending > .djs-visual > rect, .Pending > .djs-visual > circle, .Pending > .djs-visual > polygon {
+  stroke: orange !important;
+  fill: #dbd9a8 !important; /* #8bc286 !important; */
+}
+.Pending.bpmn_SubProcess > .djs-visual > rect {
+  stroke: orange !important;
+  fill: #d2dbd2  !important;
+}
+
+.bpmnView .djs-palette {
+  display: none;
+}

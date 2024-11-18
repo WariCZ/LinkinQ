@@ -10,25 +10,21 @@ import { useModalStore } from "../components/Modal/modalStore";
 import { FieldType } from "@/lib/entity/types";
 import { Description, Schema } from "@bpmn-io/form-js";
 import useDataDetail from "../hooks/useDataDetail";
+import { BpmnJsReact, useBpmnJsReact } from "bpmn-js-react";
 
-type TasksType = {
-  guid: string;
-  caption: string;
-};
 const Tasks = () => {
-  const columns: TableFieldType[] = [
-    {
-      field: "guid",
-    },
-    {
-      field: "caption",
-    },
-    {
-      field: "description",
-    },
+  const schema = useStore((state) => state.schema);
+
+  const columns = [
+    ...["guid", "caption", "createdby.fullname"],
+    ...(schema["tasks"]
+      ? Object.keys(schema["tasks"].fields).filter((f) => {
+          return !schema["tasks"].fields[f].system;
+        })
+      : []),
   ];
 
-  console.log("call ProtectedPage");
+  console.log("call ProtectedPage", columns);
 
   const [
     data,
@@ -37,7 +33,7 @@ const Tasks = () => {
   ] = useDataTable(
     {
       entity: "tasks",
-      fields: ["caption", "guid", "description"],
+      fields: columns, //["caption", "guid", "description"],
       ordering: [{ id: "caption", desc: false }],
     },
     []
@@ -49,15 +45,10 @@ const Tasks = () => {
   return (
     <div className="m-3">
       <h1>Tasks</h1>
-      <Button onClick={() => refresh()}>reload</Button>
+      <Button className="mb-1" onClick={() => openModal(<TaskDetail />)}>
+        Add
+      </Button>
 
-      <button
-        onClick={() => openModal(<TaskDetail />)}
-        // onClick={() => openModal((props: any) => <TaskDetail {...props} />)}
-        className="bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600"
-      >
-        Otevřít Modální Okno
-      </button>
       <Table
         entity="tasks"
         data={data}
@@ -73,24 +64,82 @@ const Tasks = () => {
 };
 
 const TaskDetail = (props: any) => {
-  const [data, setData, { setRecord, loading }] = useDataDetail({
-    entity: "tasks",
-    guid: props?.data?.guid,
+  const schema = useStore((state) => state.schema);
+  const fields = Object.keys(schema["tasks"].fields).filter((f) => {
+    return (
+      !schema["tasks"].fields[f].system ||
+      f === "caption" ||
+      f === "description"
+    );
   });
 
+  const [data, setData, { setRecord, loading }] = useDataDetail(
+    {
+      entity: "tasks",
+      guid: props?.data?.guid,
+    },
+    {} as any
+  );
+
+  console.log("data", data);
   if (loading) return "loading";
   return (
-    <Form
-      onSubmit={(props) => {
-        debugger;
-        setRecord(props.data);
-        props.closeModal && props.closeModal();
-      }}
-      data={data}
-      entity={"tasks"}
-      formFields={["caption", "description"]}
-      {...props}
-    />
+    <>
+      {data.workflowInstance && (
+        <BPMNInstance workflowInstance={data.workflowInstance} />
+      )}
+      <Form
+        onSubmit={(props) => {
+          delete props.data.createdby;
+          setRecord(props.data);
+          props.closeModal && props.closeModal();
+        }}
+        data={data}
+        entity={"tasks"}
+        formFields={fields}
+        {...props}
+      />
+    </>
+  );
+};
+
+const BPMNInstance = ({ workflowInstance }: { workflowInstance: string }) => {
+  const bpmnReactJs = useBpmnJsReact();
+
+  const [data, setData, { setRecord, loading }] = useDataDetail(
+    {
+      entity: "wf_instances",
+      fields: ["source", "name", "items"],
+      guid: workflowInstance,
+    },
+    {} as { source: string; name: string; items: any[] }
+  );
+  if (loading) return "loading";
+
+  const handleShown = (viewer: any) => {
+    console.log("data", data);
+    debugger;
+    data.items?.map((item) => {
+      if (item.status === "end") {
+        bpmnReactJs.addMarker(item.elementId, "Completed");
+      }
+      if (item.status === "wait") {
+        bpmnReactJs.addMarker(item.elementId, "Pending");
+      }
+    });
+  };
+
+  return (
+    <div className="bpmnView">
+      <div>{data.name}</div>
+      <BpmnJsReact
+        useBpmnJsReact={bpmnReactJs}
+        mode="edit"
+        xml={data.source}
+        onShown={handleShown}
+        // click={test}
+      />
+    </div>
   );
 };
 export default Tasks;

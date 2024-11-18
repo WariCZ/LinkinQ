@@ -4,6 +4,7 @@ const entityFields: EntitySchema = {
   tasks: {
     system: true,
     journal: true,
+    workflow: true,
     permissions: {
       get: {
         default: false,

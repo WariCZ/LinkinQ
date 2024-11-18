@@ -10,7 +10,7 @@ import logger from "../lib/logger";
 import { EntityRoutes } from "../lib/entity/routes";
 import authRoutes, { authenticate } from "../lib/auth";
 import { EntitySchema } from "../lib/entity/types";
-import { BPMNServer, configuration } from "../lib/bpmn-web";
+import { BPMNServer, configuration, BPMNAPI, Logger } from "../lib/bpmn-web";
 import { Sql } from "@/lib/entity/sql";
 
 dotenv.config();
@@ -57,9 +57,20 @@ export class WebApp {
     //
     this.entity
       .prepareSchema()
-      .then(({ schema, sqlAdmin }) => {
-        logger.debug("Call setupExpress -------------------");
-        this.bpmnServer = new BPMNServer(configuration, logger as any);
+      .then(async ({ schema, sqlAdmin }) => {
+        const wflogger = new Logger({ toConsole: true });
+        this.bpmnServer = new BPMNServer(configuration, wflogger);
+
+        // const bpmnAPI = new BPMNAPI(this.bpmnServer);
+
+        // var caseId = Math.floor(Math.random() * 10000);
+        // //
+        // let context = await bpmnAPI.engine.start(
+        //   "Cash Request",
+        //   { caseId: caseId++ },
+        //   { userName: "admin" } as any
+        // );
+
         this.setupExpress({ schema, sqlAdmin });
       })
       .catch((e) => {
@@ -70,6 +81,28 @@ export class WebApp {
         //
       });
   }
+
+  // router.post("/runWorkflow", async (req: Request, res: Response) => {
+  //   try {
+  //     if (req.user) {
+  //       debugger;
+  //       this.
+  //       let processName = "Cash Request";
+  //       // req.session.processName = processName;
+  //       let context = await bpmnAPI.engine.start(
+  //         processName,
+  //         { caseId: 1 },
+  //         1
+  //       );
+  //     } else {
+  //       res.sendStatus(401);
+  //     }
+  //   } catch (error: any) {
+  //     debugger;
+  //     console.error("Error fetching data from external API:", error?.stack);
+  //     res.status(500).send("Error fetching data from external API");
+  //   }
+  // });
 
   initExpress() {
     const app = express();

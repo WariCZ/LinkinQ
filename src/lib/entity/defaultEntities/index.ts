@@ -23,14 +23,6 @@ export const defaultFields = (entity: string): Record<string, FieldType> => ({
     description: "Title record",
     system: true,
   },
-  createtime: {
-    type: "datetime",
-    label: "Created",
-    isRequired: true,
-    description: "Created datetime",
-    default: "now()",
-    system: true,
-  },
   guid: {
     type: "uuid",
     isRequired: true,
@@ -63,13 +55,6 @@ export const defaultFields = (entity: string): Record<string, FieldType> => ({
     description: "Order record",
     system: true,
   },
-  createdby: {
-    type: "link(users)",
-    isRequired: true,
-    label: "Created by",
-    description: "Record created by",
-    system: true,
-  },
   parent: {
     type: `link(${entity})`,
     label: "Parent",
@@ -80,6 +65,21 @@ export const defaultFields = (entity: string): Record<string, FieldType> => ({
     type: `link(${entity})`,
     label: "Root",
     description: "Root id",
+    system: true,
+  },
+  createtime: {
+    type: "datetime",
+    label: "Created",
+    isRequired: true,
+    description: "Created datetime",
+    default: "now()",
+    system: true,
+  },
+  createdby: {
+    type: "link(users)",
+    isRequired: true,
+    label: "Created by",
+    description: "Record created by",
     system: true,
   },
   updatedby: {

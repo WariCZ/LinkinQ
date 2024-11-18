@@ -4,12 +4,14 @@ import { useModalStore } from "./modalStore";
 import Draggable from "react-draggable";
 import { useTranslation } from "react-i18next";
 
-export type ModalContentType = {
-  content: any;
+export type ModalPropsType = {
+  closeModal?: () => void;
+  formRef?: React.LegacyRef<HTMLFormElement> | undefined;
 };
+
 const ModalContainer = () => {
   const { modals, closeModal } = useModalStore();
-  const formRef: any = useRef(null);
+  const formRef: React.LegacyRef<HTMLFormElement> | undefined = useRef(null);
   const { t, i18n } = useTranslation();
 
   return (
