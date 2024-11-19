@@ -4,6 +4,10 @@ import path from "path";
 
 export default defineConfig({
   root: "./src/client/",
+  build: {
+    outDir: "../../dist",
+    emptyOutDir: true, // also necessary
+  },
   server: {
     watch: {
       ignored: ["./src/server/**"],
