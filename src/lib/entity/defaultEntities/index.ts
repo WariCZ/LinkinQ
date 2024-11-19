@@ -100,13 +100,9 @@ export const defaultFields = (entity: string): Record<string, FieldType> => ({
 });
 
 export const workflowFields = (): Record<string, FieldType> => ({
-  workflow: {
-    type: "text",
-    label: "Workflow",
-    description: "Workflow name",
-  },
   workflowInstance: {
-    type: "text",
+    type: "link(wf_instances)",
+    // type: "text",
     label: "Workflow instance",
     description: "Workflow instance",
   },

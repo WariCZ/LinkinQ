@@ -53,7 +53,7 @@ class DataStore extends ServerComponent implements IDataStore {
   }
 
   async loadInstance(instanceId, options = {}) {
-    const recs = await this.findInstances({ id: instanceId }, "full");
+    const recs = await this.findInstances({ guid: instanceId }, "full");
     if (recs.length == 0) {
       this.logger.error("Instance is not found for this item");
       return null;
@@ -115,7 +115,7 @@ class DataStore extends ServerComponent implements IDataStore {
     if (this.enableSavePoints) {
       let lastItem = instance.items[instance.items.length - 1].id;
       let savePoint = {
-        id: lastItem,
+        guid: lastItem,
         items: JSON.stringify(instance.items),
         loop: JSON.stringify(instance.loops),
         tokens: JSON.stringify(instance.tokens),
@@ -129,6 +129,7 @@ class DataStore extends ServerComponent implements IDataStore {
     }
 
     if (!instance.saved) {
+      //
       instance.items = JSON.stringify(instance.items);
       instance.loops = JSON.stringify(instance.loops);
       instance.tokens = JSON.stringify(instance.tokens);
@@ -138,11 +139,17 @@ class DataStore extends ServerComponent implements IDataStore {
 
       instance.saved = new Date();
 
-      await db(Instance_collection).setUser({ id: 1 }).insert(instance);
+      instance.guid = instance.id;
+      delete instance.id;
+      const ic = await db(Instance_collection)
+        .setUser({ id: 1 })
+        .insert(instance);
+      instance.id = instance.guid;
+      instance.dbId = ic[0].id;
     } else {
       await db(Instance_collection)
         .setUser({ id: 1 })
-        .where({ id: instance.id })
+        .where({ guid: instance.id })
         .update(saveObject);
     }
 
@@ -199,7 +206,15 @@ class DataStore extends ServerComponent implements IDataStore {
     const { conditions, values } = prepareConditions(query);
 
     const result = db.raw(conditions.join(" AND "), values).setUser({ id: 1 });
-    const projection = ["id", "data", "name", "version", "items", "tokens"];
+    const projection = [
+      "guid",
+      "id",
+      "data",
+      "name",
+      "version",
+      "items",
+      "tokens",
+    ];
     const records = await db(Instance_collection)
       .setUser({ id: 1 })
       .select(projection)
@@ -213,6 +228,8 @@ class DataStore extends ServerComponent implements IDataStore {
   }
 
   async install() {
+    debugger;
+    return;
     await db.schema
       .setUser({ id: 1 })
       .createTableIfNotExists(Instance_collection, (table) => {

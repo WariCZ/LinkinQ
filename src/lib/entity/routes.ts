@@ -353,6 +353,20 @@ export class EntityRoutes extends Entity {
       }
     });
 
+    router.get("/triggers", async (req: Request, res: Response) => {
+      try {
+        if (req.user) {
+          return res.json(this.triggers.definitions);
+        } else {
+          res.sendStatus(401);
+        }
+      } catch (error: any) {
+        debugger;
+        console.error("Error fetching data from external API:", error?.stack);
+        res.status(500).send("Error fetching data from external API");
+      }
+    });
+
     return router;
   }
 }

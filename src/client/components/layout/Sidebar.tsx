@@ -22,6 +22,7 @@ import { FaProjectDiagram } from "react-icons/fa";
 import { FaTable } from "react-icons/fa";
 import { FaTasks } from "react-icons/fa";
 import { Link, Navigate, useNavigate } from "react-router-dom";
+import { FaHubspot } from "react-icons/fa";
 
 type Label = {
   label: string;
@@ -57,24 +58,29 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
   }, []);
   const menuAdmin: MenuItemType[] = [
     {
-      label: "journal",
+      label: "Journal",
       to: "/admin/journal",
       icon: FaBuffer,
     },
     {
-      label: "workflow",
+      label: "Workflows",
       to: "/admin/workflow",
       icon: FaProjectDiagram,
     },
     {
-      label: "serverScript",
+      label: "Server side script",
       to: "/admin/serverScript",
       icon: FaCode,
     },
     {
-      label: "entity",
+      label: "Entity",
       to: "/admin/entity",
       icon: FaTable,
+    },
+    {
+      label: "Triggers",
+      to: "/admin/triggers",
+      icon: FaHubspot,
     },
     // {
     //   label: "test",

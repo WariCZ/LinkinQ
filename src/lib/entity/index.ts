@@ -417,12 +417,12 @@ export class Entity {
           // TODO: vyjimka pro BPMN
           //
           let column;
-          if (tableName.indexOf("wf_") > -1) {
-            column = table.text(this.MAIN_ID);
-          } else {
-            column = table.bigIncrements(this.MAIN_ID);
-            table.primary([this.MAIN_ID]);
-          }
+          // if (tableName.indexOf("wf_") > -1) {
+          //   column = table.text(this.MAIN_ID);
+          // } else {
+          column = table.bigIncrements(this.MAIN_ID);
+          table.primary([this.MAIN_ID]);
+          // }
           if (schemaDefinition[tableName].fields[this.MAIN_ID].description) {
             column.comment(
               schemaDefinition[tableName].fields[this.MAIN_ID].description ||

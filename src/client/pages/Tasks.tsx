@@ -77,16 +77,27 @@ const TaskDetail = (props: any) => {
     {
       entity: "tasks",
       guid: props?.data?.guid,
+      fields: [
+        ...fields,
+        "workflowInstance.name",
+        "workflowInstance.source",
+        "workflowInstance.items",
+      ],
     },
     {} as any
   );
 
   console.log("data", data);
+  debugger;
   if (loading) return "loading";
   return (
     <>
       {data.workflowInstance && (
-        <BPMNInstance workflowInstance={data.workflowInstance} />
+        <BPMNInstance
+          name={data.workflowInstance.name}
+          source={data.workflowInstance.source}
+          items={data.workflowInstance.items}
+        />
       )}
       <Form
         onSubmit={(props) => {
@@ -103,23 +114,31 @@ const TaskDetail = (props: any) => {
   );
 };
 
-const BPMNInstance = ({ workflowInstance }: { workflowInstance: string }) => {
+const BPMNInstance = ({
+  name,
+  source,
+  items,
+}: {
+  name: string;
+  source: string;
+  items: [];
+}) => {
   const bpmnReactJs = useBpmnJsReact();
 
-  const [data, setData, { setRecord, loading }] = useDataDetail(
-    {
-      entity: "wf_instances",
-      fields: ["source", "name", "items"],
-      guid: workflowInstance,
-    },
-    {} as { source: string; name: string; items: any[] }
-  );
-  if (loading) return "loading";
-
+  // const [data, setData, { setRecord, loading }] = useDataDetail(
+  //   {
+  //     entity: "wf_instances",
+  //     fields: ["source", "name", "items"],
+  //     guid: workflowInstance,
+  //   },
+  //   {} as { source: string; name: string; items: any[] }
+  // );
+  // if (loading) return "loading";
+  const data = { items: [] as any };
   const handleShown = (viewer: any) => {
     console.log("data", data);
     debugger;
-    data.items?.map((item) => {
+    items?.map((item: any) => {
       if (item.status === "end") {
         bpmnReactJs.addMarker(item.elementId, "Completed");
       }
@@ -131,11 +150,11 @@ const BPMNInstance = ({ workflowInstance }: { workflowInstance: string }) => {
 
   return (
     <div className="bpmnView">
-      <div>{data.name}</div>
+      <div>{name}</div>
       <BpmnJsReact
         useBpmnJsReact={bpmnReactJs}
         mode="edit"
-        xml={data.source}
+        xml={source}
         onShown={handleShown}
         // click={test}
       />

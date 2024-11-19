@@ -73,7 +73,7 @@ class InstanceLocker {
 
   async try(id) {
     const lock = {
-      id: id,
+      guid: id,
       server: typeof process !== "undefined" ? process.env.SERVER_ID : null,
       time: new Date(),
     };
@@ -90,12 +90,8 @@ class InstanceLocker {
   }
 
   async release(id) {
-    const query = { id: id };
-    return await this.dataStore
-      .db(COLLECTION)
-      .setUser({ id: 1 })
-      .where(query)
-      .del();
+    const query = { guid: id };
+    return this.dataStore.db(COLLECTION).setUser({ id: 1 }).where(query).del();
   }
 
   async delete(filter) {

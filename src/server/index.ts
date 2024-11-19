@@ -61,24 +61,26 @@ export class WebApp {
         const wflogger = new Logger({ toConsole: true });
         this.bpmnServer = new BPMNServer(configuration, wflogger);
 
-        // const bpmnAPI = new BPMNAPI(this.bpmnServer);
+        const bpmnAPI = new BPMNAPI(this.bpmnServer);
 
-        // var caseId = Math.floor(Math.random() * 10000);
-        // //
-        // let context = await bpmnAPI.engine.start(
-        //   "Cash Request",
-        //   { caseId: caseId++ },
-        //   { userName: "admin" } as any
-        // );
+        this.entity.triggers.startWorkflow = async ({ table, data }) => {
+          var caseId = Math.floor(Math.random() * 10000);
+          let context = await bpmnAPI.engine.start(
+            "Cash Request",
+            { caseId: caseId++ },
+            { userName: "admin" } as any
+          );
+          return (context.instance as any).dbId;
+        };
 
+        // console.log("context", context);
         this.setupExpress({ schema, sqlAdmin });
       })
       .catch((e) => {
         // debugger;
-        // logger.error(e.message);
+
         logger.error(e);
         if (e.stack) logger.error(e.stack);
-        //
       });
   }
 

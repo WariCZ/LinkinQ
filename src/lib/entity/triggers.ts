@@ -33,6 +33,7 @@ export class Triggers {
   > = {};
   eventsOnEntities: EventEmitter;
   schema: EntitySchema = {};
+  startWorkflow?: ({ table, data }: { table: string; data: any }) => void;
   constructor({
     db,
     eventsOnEntities,
@@ -45,6 +46,7 @@ export class Triggers {
     this.db = (table: string) => db(table).setUser({ id: 1 });
 
     this.registerTriggers(db);
+    this.startWorkflow = undefined;
   }
 
   private getPath(filename: string) {
@@ -286,6 +288,15 @@ export class Triggers {
                     "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
                   ),
                 };
+
+                if (that.schema?.[table]?.workflow && that.startWorkflow) {
+                  const workflowInstance = await that.startWorkflow({
+                    table,
+                    data: runner.builder._single.insert,
+                  });
+                  runner.builder._single.insert.workflowInstance =
+                    workflowInstance;
+                }
                 // returningFields = [
                 //   ...returningFields,
                 //   ..._.keys(runner.builder._single.insert),

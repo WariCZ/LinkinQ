@@ -19,6 +19,7 @@ import Journal from "./pages/admin/Journal";
 import Workflow from "./pages/admin/Workflow";
 import Entity from "./pages/admin/Entity";
 import Tasks from "./pages/Tasks";
+import Triggers from "./pages/admin/Triggers";
 
 const PrivateLayout = (props: { admin?: boolean }) => {
   return (
@@ -69,6 +70,7 @@ const App: React.FC = () => {
             <Route path="workflow" element={<Workflow />} />
             <Route path="serverScript" element={<ServerScript />} />
             <Route path="entity" element={<Entity />} />
+            <Route path="triggers" element={<Triggers />} />
             {/* <Route path="*" element={<Navigate to="" replace />} /> */}
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
