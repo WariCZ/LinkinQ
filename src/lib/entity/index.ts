@@ -577,9 +577,9 @@ export class Entity {
   }
 
   async prepareSchema() {
-    // if (process.env.e2etest == "true") {
-    await this.resetPublicSchema();
-    // }
+    if (process.env.e2etest == "true") {
+      await this.resetPublicSchema();
+    }
 
     await defaultExecute().map(async (e) => {
       await this.db.raw(e).setUser({ id: 1 });

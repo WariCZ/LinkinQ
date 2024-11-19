@@ -22,7 +22,7 @@ declare module "express-serve-static-core" {
   }
 }
 
-const SECRET_KEY = "your_jwt_secret_key";
+const SECRET_KEY = process.env.SECRET_KEY || "your_jwt_secret_key";
 
 export const authenticate = (
   req: Request,
