@@ -7,6 +7,13 @@ export default defineConfig({
   build: {
     outDir: "../../dist",
     emptyOutDir: true, // also necessary
+    rollupOptions: {
+      output: {
+        manualChunks: undefined,
+      },
+    },
+    target: "esnext", // Rychlejší build pro moderní prohlížeče
+    minify: "esbuild", // Použití esbuild místo Terseru pro minifikaci
   },
   server: {
     watch: {
