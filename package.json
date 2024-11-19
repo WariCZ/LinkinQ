@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "heroku-prebuild": "npm install",
     "vite:build": "vite build",
     "build": "tsc --build",
     "start": "vite build && ts-node src/server",
@@ -17,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
     "@bpmn-io/form-js": "^1.11.3",
     "@monaco-editor/react": "^4.6.0",
     "@tanstack/react-table": "^8.20.5",
@@ -71,7 +71,6 @@
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
     "@types/react-table": "^7.7.20",
-    "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.19",
     "nodemon": "^3.1.0",
     "ts-node": "^10.9.2",
