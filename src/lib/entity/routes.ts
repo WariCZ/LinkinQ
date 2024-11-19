@@ -45,7 +45,7 @@ export class EntityRoutes extends Entity {
             const sql = new Sql({
               db: this.db,
               schema: this.schema,
-              user: req.user,
+              user: req.user as any,
             });
 
             const fnc = new Function(
@@ -121,7 +121,7 @@ export class EntityRoutes extends Entity {
             const sql = new Sql({
               db: this.db,
               schema: this.schema,
-              user: req.user,
+              user: req.user as any,
             });
 
             const fields = (
@@ -168,7 +168,7 @@ export class EntityRoutes extends Entity {
           const sql = new Sql({
             db: this.db,
             schema: this.schema,
-            user: req.user,
+            user: req.user as any,
           });
 
           const ret = await sql.insert({
@@ -201,7 +201,7 @@ export class EntityRoutes extends Entity {
           const sql = new Sql({
             db: this.db,
             schema: this.schema,
-            user: req.user,
+            user: req.user as any,
           });
           const ret = await sql.update({
             entity: req.params.entity,
@@ -229,7 +229,7 @@ export class EntityRoutes extends Entity {
           const sql = new Sql({
             db: this.db,
             schema: this.schema,
-            user: req.user,
+            user: req.user as any,
           });
           //TODO: pres API dovolit jen mazani pres GUID?
           const ret = await sql.delete({

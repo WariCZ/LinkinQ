@@ -10,7 +10,7 @@ export class Sql {
   #schema: EntitySchema = {};
   #knex: Knex;
   #db: dbType; //Knex.QueryBuilder<any, unknown[]>;
-  user: User;
+  user: User | any;
 
   constructor({
     schema,

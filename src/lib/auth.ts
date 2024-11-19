@@ -16,11 +16,11 @@ export type User = {
   // další vlastnosti podle potřeby
 };
 
-declare module "express-serve-static-core" {
-  interface Request {
-    user?: User;
-  }
-}
+// declare module "express-serve-static-core" {
+//   interface Request {
+//     user?: User;
+//   }
+// }
 
 const SECRET_KEY = process.env.SECRET_KEY || "your_jwt_secret_key";
 
