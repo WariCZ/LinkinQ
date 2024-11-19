@@ -171,7 +171,7 @@ export class WebApp {
         logger.error(err);
         res.status(500).send("Server Error");
       });
-      ViteExpress.config({ mode: "development" });
+      ViteExpress.config({ mode: "production" });
     }
 
     ViteExpress.listen(app, parseInt(process.env.PORT), () => {
