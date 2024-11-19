@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "heroku-prebuild": "npm install --only=dev",
+    "heroku-prebuild": "npm install",
     "vite:build": "vite build",
     "build": "tsc --build",
     "start": "vite build && ts-node src/server",
