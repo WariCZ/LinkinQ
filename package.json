@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "build": "tsc --build",
+    "start": "node dist/server/index.js",
+    "clean": "tsc --build --clean",
     "test": "echo \"Error: no test specified\" && exit 1",
     "client:dev": "vite",
-    "start": "ts-node src/server/index -p $PORT",
     "server:start": "ts-node src/app",
     "server:dev": "ts-node-dev --respawn src/server/index",
     "server:e2etest": "ts-node-dev --respawn src/server/index e2etest=true"
