@@ -1,8 +1,8 @@
-import winston from "winston";
+import * as winston from "winston";
 import { Response } from "express";
 import { parse, stringify } from "flatted";
 
-const { combine, timestamp, label, printf } = winston.format;
+const { combine, timestamp, printf } = winston.format;
 
 const myFormat = printf(({ level, message, label, timestamp }) => {
   return `${timestamp} ${level.toUpperCase()}: ${message}`;

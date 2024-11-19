@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "build": "tsc --build",
-    "start": "node dist/server/index.js",
+    "start": "ts-node src/server",
     "clean": "tsc --build --clean",
     "test": "echo \"Error: no test specified\" && exit 1",
     "client:dev": "vite",
