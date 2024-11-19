@@ -333,7 +333,7 @@ const getPermissionsSelect = ({
   let permissionsFilters: Record<string, any>[] = [];
   if ((user && user.id !== 1) || !user) {
     if (schema[entity].permissions?.get) {
-      const rules = schema[entity].permissions?.get?.rules || [];
+      const rules = [...(schema[entity].permissions?.get?.rules || [])];
 
       for (let rule of rules) {
         if (rule.type == "role" && user) {
