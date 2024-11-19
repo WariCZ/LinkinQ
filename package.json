@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "vite:build": "vite build",
     "build": "tsc --build",
-    "start": "ts-node src/server",
+    "start": "vite build && ts-node src/server",
     "clean": "tsc --build --clean",
     "test": "echo \"Error: no test specified\" && exit 1",
     "client:dev": "vite",

@@ -171,16 +171,15 @@ export class WebApp {
         logger.error(err);
         res.status(500).send("Server Error");
       });
+      ViteExpress.config({ mode: "production" });
     }
 
-    ViteExpress.listen(app, app.get("port"), () => {
-      logger.info(
-        "App is running at http://localhost:%s in %s mode",
-        app.get("port"),
-        app.get("env")
+    ViteExpress.listen(app, parseInt(process.env.PORT), () => {
+      console.log(
+        `App is running at http://localhost:${process.env.PORT} in ${process.env.NODE_ENV} mode`
       );
       this.viteRunning = true;
-      logger.info("  Press CTRL-C to stop\n");
+      console.log("  Press CTRL-C to stop\n");
     });
 
     return app;
