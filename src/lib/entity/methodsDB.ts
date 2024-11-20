@@ -308,16 +308,17 @@ export const addWhere = async ({
 };
 
 const addPermissionsFilter = ({ rule, user }: { rule: Rule; user?: User }) => {
-  const filterKeys = _.keys(rule.filter);
+  const filter = { ...rule.filter };
+  const filterKeys = _.keys(filter);
   if (filterKeys.length == 0) {
     return true;
   } else {
     filterKeys.map((fk: any) => {
-      if (rule.filter[fk] == "$user" && user) {
-        rule.filter[fk] = user.id;
+      if (filter[fk] == "$user" && user) {
+        filter[fk] = user.id;
       }
     });
-    return rule.filter;
+    return filter;
   }
 };
 

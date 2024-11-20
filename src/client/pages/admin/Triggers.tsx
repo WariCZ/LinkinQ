@@ -16,6 +16,7 @@ import * as monaco from "monaco-editor";
 const Triggers = () => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [selectedTriggers, setSelectedTriggers] = useState({} as any);
+  const { openModal } = useModalStore();
   const [triggers, setTriggers] = useDataTable(
     {
       entity: "triggers",
@@ -31,10 +32,6 @@ const Triggers = () => {
     <div className="h-full">
       <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
         <span className="font-bold">Triggers editor</span>
-        {/* <HiRefresh
-          className="inline-block mx-3 cursor-pointer"
-          // onClick={() => getEntities(true)}
-        /> */}
       </div>
       <div className="flex items-start h-full">
         <div className="px-3 w-48 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
@@ -43,7 +40,9 @@ const Triggers = () => {
             <Button
               className="h-full"
               onClick={() => {
-                // openModal(<AddEntity />);
+                openModal(
+                  <AddTrigger modalLabel="Add trigger" modalSingle={true} />
+                );
               }}
             >
               <span className="top-0 flex items-center left-4">
@@ -88,95 +87,45 @@ const Triggers = () => {
   );
 };
 
-const EntityDetail = ({
-  entity,
-  definition,
-}: {
-  entity?: string;
-  definition?: EntityType;
-}) => {
-  const { openModal } = useModalStore();
-  const fieldsArray = definition?.fields
-    ? Object.entries(definition?.fields).map(([key, value]) => ({
-        name: key,
-        ...value,
-      }))
-    : [];
-
-  if (!entity) return <div>Not selected</div>;
-
-  return (
-    <div className="p-2 w-full">
-      <div className="flex w-full">
-        <span className="pr-2">Entity:</span>
-        <span className="font-bold pr-2">{entity}</span>
-        <Button
-          onClick={() => {
-            // openModal(<FieldDetail entity={entity} />);
-          }}
-          size="xs"
-        >
-          Add Field
-        </Button>
-        <span className="ml-auto">
-          <Button
-            disabled={definition?.system}
-            color="failure"
-            onClick={() => {
-              openModal(<DeleteEntity entity={entity} />);
-            }}
-            size="xs"
-          >
-            Delete Entity
-          </Button>
-        </span>
-      </div>
-      <div className="pt-1">
-        <Table
-          data={fieldsArray}
-          // rowClick={(data) =>
-          //   openModal(<FieldDetail data={data} entity={entity} />)
-          // }
-          columns={[
-            { field: "name", className: "font-bold" },
-            "type",
-            "label",
-            "description",
-            "default",
-          ]}
-          // loading={loading}
-          // ordering={[{ id: "name" }]}
-        />
-      </div>
-    </div>
-  );
-};
-
-const DeleteEntity = (props: { entity: string } & ModalPropsType) => {
+const AddTrigger = (props: { guid?: object } & ModalPropsType) => {
   const getSchema = useStore((state) => state.getSchema);
   return (
     <Form
-      onSubmit={async ({ closeModal, data, setError }) => {
-        if (data.entity) {
-          if (data.entity === props.entity) {
-            await httpRequest({
-              url: "/api/entity",
-              method: "DELETE",
-              entity: "",
-              data: {
-                entity: data.entity,
-              },
-            });
-            getSchema();
-            closeModal && closeModal();
-          } else {
-            setError("entity", { message: "Názvy nejsou stejné" });
-          }
-        }
+      // disabled={!!props.data}
+      onSubmit={async ({ closeModal, data }) => {
+        // await httpRequest({
+        //   url: "/api/entityField",
+        //   method: "POST",
+        //   entity: "",
+        //   data: {
+        //     entity: props.entity,
+        //     fields: [
+        //       {
+        //         type: data.type,
+        //         name: data.name,
+        //         label: data.label,
+        //         description: data.description,
+        //       },
+        //     ],
+        //   },
+        // });
+        // getSchema();
+        closeModal && closeModal();
       }}
+      // data={props.data}
       formFields={[
         {
-          label: "Write entity name",
+          label: "Type",
+          field: "Typ",
+          required: true,
+        },
+        {
+          label: "Method",
+          field: "method",
+          required: true,
+        },
+        {
+          label: "Entity",
           field: "entity",
           required: true,
         },

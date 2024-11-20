@@ -12,7 +12,7 @@ import Login from "./pages/Login";
 import PublicPage from "./pages/PublicPage";
 import { DashboardHeader } from "./components/layout/Header";
 import DashboardSidebar from "./components/layout/Sidebar";
-import { Flowbite } from "flowbite-react";
+import { Flowbite, Toast } from "flowbite-react";
 import { customTheme } from "./flowbite";
 import ServerScript from "./pages/admin/ServerScript";
 import Journal from "./pages/admin/Journal";
@@ -20,6 +20,7 @@ import Workflow from "./pages/admin/Workflow";
 import Entity from "./pages/admin/Entity";
 import Tasks from "./pages/Tasks";
 import Triggers from "./pages/admin/Triggers";
+import AppToast from "./components/Toast";
 
 const PrivateLayout = (props: { admin?: boolean }) => {
   return (
@@ -31,6 +32,7 @@ const PrivateLayout = (props: { admin?: boolean }) => {
           <Outlet />
         </main>
       </div>
+      <AppToast />
     </>
   );
 };

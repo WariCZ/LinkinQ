@@ -9,6 +9,8 @@ import {
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 // import { useGlobalState } from "./useSSE";
 import _ from "lodash";
+import useStore from "../store";
+import { AppToastType } from "../components/Toast";
 // import { MAIN_ID } from "../../lib/entity";
 const MAIN_ID = "guid";
 export const httpRequest = ({
@@ -108,56 +110,22 @@ function useDataDetail<T, U>(
     fields: string[];
   }
 ] {
+  const setToast = useStore((state) => state.setToast);
   const [data, setData] = useState(initialState as T);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fieldsEntity, setFieldsEntity] = useState(param.fields || []);
 
-  // useEffect(() => {
-  //   const eventSource = new EventSource("/api/events");
-
-  //   eventSource.onmessage = (event) => {
-  //     const newEvent: EventData = JSON.parse(event.data);
-
-  //     if (newEvent?.afterData?.guid)
-  //       actualizeData({ guid: newEvent.afterData.guid });
-  //   };
-
-  //   eventSource.onerror = () => {
-  //     console.error("Error occurred in EventSource");
-  //     eventSource.close();
-  //   };
-
-  //   // Zavřít EventSource při odmountování komponenty
-  //   return () => {
-  //     eventSource.close();
-  //   };
-  // }, []);
-
-  // const actualizeData = async ({ guid }: { guid: string }) => {
-  //   const response = await getSingleRecord({
-  //     entity: param.entity,
-  //     guid: guid,
-  //     fields: param.fields ? param.fields.join() : "guid",
-  //   });
-
-  //   setData((prevData) => {
-  //     if (Array.isArray(prevData)) {
-  //       return [...response.data, ...prevData] as any;
-  //     } else {
-  //       setData(response.data[0]);
-  //     }
-  //   });
-  // };
-
   const fetchData = async ({
     entity,
     guid,
     fields,
+    setToast,
   }: {
     entity: string;
     guid?: string;
     fields?: string[];
+    setToast: (props: AppToastType) => void;
   }) => {
     setLoading(true);
     setError(null);
@@ -174,6 +142,7 @@ function useDataDetail<T, U>(
       }
     } catch (err: any) {
       console.error(err.message);
+      setToast({ type: "error", msg: err.response.statusText });
       setError(err.message);
     } finally {
       setLoading(false);
@@ -186,6 +155,7 @@ function useDataDetail<T, U>(
       entity: param.entity,
       guid: param.guid,
       fields: fieldsEntity || undefined,
+      setToast,
     });
   }, [param.entity, param.guid]);
 
@@ -198,6 +168,7 @@ function useDataDetail<T, U>(
       entity: param.entity,
       guid: param.guid,
       fields: params?.fields || fieldsEntity || undefined,
+      setToast,
     });
   };
 
@@ -212,12 +183,16 @@ function useDataDetail<T, U>(
           entity: param.entity,
           method: "PUT",
           data: { where: { guid: guid }, data: data },
+        }).catch((e) => {
+          setToast({ type: "error", msg: e.response.statusText });
         });
       } else {
         const response = await httpRequest({
           entity: param.entity,
           method: "POST",
           data: data,
+        }).catch((e) => {
+          setToast({ type: "error", msg: e.response.statusText });
         });
       }
       // const response = await methods.create(data);
@@ -241,6 +216,7 @@ function useDataDetail<T, U>(
       refresh();
     } catch (err: any) {
       setError(err.message);
+      setToast({ type: "error", msg: err.response.statusText });
     } finally {
       setLoading(false);
     }

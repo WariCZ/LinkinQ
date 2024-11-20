@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 export type ModalPropsType = {
   closeModal?: () => void;
   formRef?: React.LegacyRef<HTMLFormElement> | undefined;
+  modalLabel?: string;
+  modalSingle?: boolean;
 };
 
 const ModalContainer = () => {
@@ -18,11 +20,12 @@ const ModalContainer = () => {
     <>
       {modals.map((content: any, index: number) => {
         console.log("formRef", formRef);
+
         let ComponentWithProps;
-        if (typeof content.content === "function") {
-          ComponentWithProps = content.content({ formRef, closeModal });
+        if (typeof content === "function") {
+          ComponentWithProps = content({ formRef, closeModal });
         } else {
-          ComponentWithProps = React.cloneElement(content.content, {
+          ComponentWithProps = React.cloneElement(content, {
             formRef,
             closeModal,
           });
@@ -42,7 +45,9 @@ const ModalContainer = () => {
               }}
             >
               <Modal.Header className="draggable-handle cursor-move">
-                <h3 className="text-sm font-semibold">Modální Okno</h3>
+                <h3 className="text-sm font-semibold">
+                  {content?.props.modalLabel}
+                </h3>
               </Modal.Header>
               <Modal.Body>
                 {/* <ModalContent.content formRef={formRef} /> */}

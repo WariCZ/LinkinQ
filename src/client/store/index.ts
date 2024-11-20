@@ -2,18 +2,28 @@ import create from "zustand";
 import axios from "axios";
 import { User } from "@/lib/auth";
 import { EntitySchema, FieldType } from "@/lib/entity/types";
+import { AppToastType } from "../components/Toast";
 
 type GuiEntitySchema = Record<string, FieldType>;
 interface StoreState {
-  user: User | null;
-  setUser: (user: User) => void;
   logout: () => void;
   setLoading: (loading: boolean) => void;
   loading: boolean;
   checkAuth: () => void;
-  getSchema: () => void;
   firstLoad: () => void;
+
+  user: User | null;
+  setUser: (user: User) => void;
+
   schema: EntitySchema;
+  getSchema: () => void;
+
+  sidebar: boolean;
+  setSidebar: (sidebar: boolean) => void;
+
+  toasts: AppToastType[];
+  setToast: (toast: AppToastType) => void;
+  removeToast: (item: number) => void;
 }
 
 const useStore = create<StoreState>((set, get) => ({
@@ -21,11 +31,15 @@ const useStore = create<StoreState>((set, get) => ({
   user: null,
   roles: [],
   loading: true,
+  sidebar: false,
   setUser: (user) => set({ user }),
   logout: async () => {
     await axios.post("/logout");
     set({ user: null });
     window.location.reload();
+  },
+  setSidebar: (sidebar) => {
+    set({ sidebar });
   },
   setLoading: (loading) => {
     set({ loading });
@@ -73,6 +87,20 @@ const useStore = create<StoreState>((set, get) => ({
     } finally {
       set({ loading: false });
     }
+  },
+
+  toasts: [
+    // { msg: "test 1", type: "error" },
+    // { msg: "test 2", type: "info" },
+  ],
+  setToast: (toast) => {
+    const toasts = [...get().toasts, toast];
+    set({ toasts });
+  },
+  removeToast: (item) => {
+    get().toasts.splice(item, 1);
+    const toasts = [...get().toasts];
+    set({ toasts });
   },
 }));
 

@@ -77,7 +77,8 @@ const UserAvatar = () => {
 };
 
 export const DashboardHeader = function (props: { admin?: boolean }) {
-  // const context = useContext(sidebarContext);
+  const sidebar = useStore((state) => state.sidebar);
+  const setSidebar = useStore((state) => state.setSidebar);
 
   return (
     <header>
@@ -93,7 +94,7 @@ export const DashboardHeader = function (props: { admin?: boolean }) {
                 aria-expanded
                 className="mr-2 cursor-pointer rounded p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:ring-2 focus:ring-gray-100 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:focus:bg-gray-700 dark:focus:ring-gray-700"
                 onClick={() => {
-                  // context.toggleCollapsed();
+                  setSidebar(!sidebar);
                 }}
               >
                 {!isSmallScreen() ? (
@@ -125,7 +126,7 @@ export const DashboardHeader = function (props: { admin?: boolean }) {
             <div className="flex gap-5">
               {/* <NotificationButton /> */}
               <DarkThemeToggle className="p-1" />
-              <div className="hidden md:block">
+              <div>
                 <UserAvatar />
               </div>
             </div>

@@ -11,9 +11,17 @@ interface StoreState {
 
 export const useModalStore = create<StoreState>((set) => ({
   modals: [],
-  openModal: (content) =>
-    set((state) => ({
-      modals: [...state.modals, { content }],
-    })),
+  openModal: (content: any) => {
+    debugger;
+    if (content.props.modalSingle) {
+      set(() => ({
+        modals: [content],
+      }));
+    } else {
+      set((state) => ({
+        modals: [...state.modals, content],
+      }));
+    }
+  },
   closeModal: () => set((state) => ({ modals: state.modals.slice(0, -1) })),
 }));
