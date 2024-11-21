@@ -353,10 +353,26 @@ export class EntityRoutes extends Entity {
       }
     });
 
-    router.get("/triggers", async (req: Request, res: Response) => {
+    router.post("/triggers", async (req: Request, res: Response) => {
       try {
         if (req.user) {
-          return res.json(this.triggers.definitions);
+          await this.triggers.setTrigger(req.body);
+          return res.json({});
+        } else {
+          res.sendStatus(401);
+        }
+      } catch (error: any) {
+        debugger;
+        console.error("Error fetching data from external API:", error?.stack);
+        res.status(500).send("Error fetching data from external API");
+      }
+    });
+
+    router.delete("/triggers", async (req: Request, res: Response) => {
+      try {
+        if (req.user) {
+          await this.triggers.removeTrigger(req.body.guid);
+          return res.json({});
         } else {
           res.sendStatus(401);
         }

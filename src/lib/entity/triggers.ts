@@ -1,6 +1,6 @@
 import { Knex } from "knex";
 import fs from "fs";
-import _ from "lodash";
+import _, { update } from "lodash";
 import { DateTime } from "luxon";
 import EventEmitter from "events";
 import { EntitySchema } from "./types";
@@ -14,6 +14,8 @@ export type CodeType = {
   sql: Sql;
 };
 export type TriggerItemType = {
+  active: boolean;
+  guid: string;
   entity: string;
   caption: string;
   type: "before" | "after";
@@ -21,7 +23,7 @@ export type TriggerItemType = {
   code: ({ beforeData, data, afterData, sql }: CodeType) => void;
 };
 export type TriggerItemInternalType = TriggerItemType & {
-  modifytime: DateTime<true>;
+  updatetime: DateTime<true>;
 };
 
 export class Triggers {
@@ -29,7 +31,7 @@ export class Triggers {
   path: string;
   definitions: Record<
     string,
-    Record<string, Record<string, TriggerItemType[]>>
+    Record<string, Record<string, Record<string, TriggerItemInternalType>>>
   > = {};
   eventsOnEntities: EventEmitter;
   schema: EntitySchema = {};
@@ -57,9 +59,112 @@ export class Triggers {
     return this.definitions;
   }
 
+  prepareDefinition = (trigger: TriggerItemType) => {
+    if (!this.definitions[trigger.type]) {
+      this.definitions[trigger.type] = {};
+    }
+    if (!this.definitions[trigger.type][trigger.method]) {
+      this.definitions[trigger.type][trigger.method] = {};
+    }
+    if (!this.definitions[trigger.type][trigger.method][trigger.entity]) {
+      this.definitions[trigger.type][trigger.method][trigger.entity] = {};
+    }
+  };
+
+  setTrigger = async (trigger: TriggerItemType) => {
+    debugger;
+    try {
+      if (trigger.guid) {
+        await this.db("triggers")
+          .setUser({ id: 1 })
+          .where({ guid: trigger.guid })
+          .update(trigger);
+      } else {
+        const t: any = await this.db("triggers")
+          .setUser({ id: 1 })
+          .insert(trigger);
+        trigger.guid = t.guid;
+      }
+
+      trigger.code = new Function("return " + trigger.code)();
+      this.definitions[trigger.type][trigger.method][trigger.entity][
+        trigger.guid
+      ] = {
+        ...trigger,
+        updatetime: DateTime.now(),
+      };
+    } catch (e) {
+      throw e;
+    }
+  };
+
+  removeTrigger = async (guid: string) => {
+    debugger;
+    try {
+      if (guid) {
+        const ret = await this.db("triggers")
+          .setUser({ id: 1 })
+          .where({ guid: guid })
+          .select("*");
+
+        if (ret.length == 1) {
+          const trigger: TriggerItemType = ret[0];
+          if (
+            this.definitions[trigger.type][trigger.method][trigger.entity][guid]
+          ) {
+            delete this.definitions[trigger.type][trigger.method][
+              trigger.entity
+            ][guid];
+
+            await this.db("triggers")
+              .setUser({ id: 1 })
+              .where({ guid: guid })
+              .del();
+          } else {
+            throw `removeTrigger for guid (${guid}) not found definition`;
+          }
+        } else {
+          if (ret.length == 0) {
+            throw `removeTrigger for guid (${guid}) is empty`;
+          } else {
+            throw `removeTrigger for guid (${guid}) found too much rows`;
+          }
+        }
+      } else {
+        throw "removeTrigger guid is empty";
+      }
+    } catch (e) {
+      throw e;
+    }
+  };
+  //
+  // addTrigger
+  // updateTrigger
+  // deleteTrigger
+
   initTriggers = async (schema: EntitySchema) => {
     this.schema = schema;
-    let triggersArray: TriggerItemInternalType[] = [];
+
+    const dbTriggers: TriggerItemInternalType[] = await this.db("triggers")
+      .setUser({ id: 1 })
+      .select("*");
+
+    const registeredGuids = [];
+    // Projdu a pridam vse z DB
+    for (const trigger of dbTriggers) {
+      this.prepareDefinition(trigger);
+      //
+      trigger.code = new Function("return " + trigger.code)();
+
+      this.definitions[trigger.type][trigger.method][trigger.entity][
+        trigger.guid
+      ] = trigger;
+
+      registeredGuids.push(trigger.guid);
+    }
+
+    // nactu vsechny triggery z FS
+    let triggersFS: TriggerItemInternalType[] = [];
     for (const filename of fs.readdirSync(this.path)) {
       const path = require("path");
       if (path.extname(filename) == ".ts") {
@@ -68,53 +173,52 @@ export class Triggers {
         const stats = await fs.promises.stat(this.getPath(name));
         const { default: triggers } = await import(this.getPath(name));
 
-        const triggersTmp = triggers.map((t: TriggerItemInternalType) => ({
-          ...t,
-          modifytime: DateTime.fromJSDate(stats.mtime),
-        }));
-        triggersArray = triggersArray.concat(triggersTmp);
+        const triggersTmp: TriggerItemInternalType[] = triggers.map(
+          (t: TriggerItemInternalType) => ({
+            ...t,
+            updatetime: DateTime.fromJSDate(stats.mtime),
+          })
+        );
+
+        triggersFS = triggersFS.concat(triggersTmp);
       }
     }
 
-    for (const trigger of triggersArray) {
-      if (!this.definitions[trigger.type]) {
-        this.definitions[trigger.type] = {};
-      }
-      if (!this.definitions[trigger.type][trigger.method]) {
-        this.definitions[trigger.type][trigger.method] = {};
-      }
-      if (!this.definitions[trigger.type][trigger.method][trigger.entity]) {
-        this.definitions[trigger.type][trigger.method][trigger.entity] = [];
-      }
-      this.definitions[trigger.type][trigger.method][trigger.entity].push(
-        trigger
-      );
-      //
-      const dbTrigger: any = { ...trigger };
-      dbTrigger.code = dbTrigger.code.toString();
-      delete dbTrigger.modifytime;
+    for (const trigger of triggersFS) {
+      this.prepareDefinition(trigger);
+      const dbTrigger: any =
+        this.definitions[trigger.type][trigger.method][trigger.entity][
+          trigger.guid
+        ];
 
-      const getterTrigger = this.db("triggers")
-        .setUser({ id: 1 })
-        .select("updatetime")
-        .where({ caption: trigger.caption });
-
-      const existsTrigger = await getterTrigger;
-
-      if (existsTrigger.length == 0) {
-        await this.db("triggers").setUser({ id: 1 }).insert(dbTrigger);
-      } else {
+      const codeString = trigger.code.toString();
+      if (dbTrigger) {
+        //// trigger uz v DB existuje
         if (
-          trigger.modifytime.toMillis() >
-          DateTime.fromJSDate(existsTrigger[0].updatetime).toMillis()
+          trigger.updatetime.toMillis() >
+          DateTime.fromJSDate(dbTrigger.updatetime).toMillis()
         ) {
           await this.db("triggers")
             .setUser({ id: 1 })
-            .where({ caption: trigger.caption })
-            .update(dbTrigger);
+            .where({ guid: trigger.guid })
+            .update({ ...trigger, code: codeString });
+          this.definitions[trigger.type][trigger.method][trigger.entity][
+            trigger.guid
+          ] = trigger;
         }
+      } else {
+        // trigger je novy
+        this.definitions[trigger.type][trigger.method][trigger.entity][
+          trigger.guid
+        ] = trigger;
+        await this.db("triggers")
+          .setUser({ id: 1 })
+          .insert({ ...trigger, code: codeString });
+        registeredGuids.push(trigger.guid);
       }
     }
+
+    console.log("this.definitions", this.definitions);
   };
 
   deepDiff(obj1: any, obj2: any) {
@@ -241,9 +345,11 @@ export class Triggers {
             that.definitions["before"][method] &&
             that.definitions["before"][method][table]
           ) {
+            //
             const data = runner.builder._single[runner.builder._method];
-            for (const trigger of that.definitions["before"][method][table]) {
-              if (trigger.code) {
+            for (const guid in that.definitions["before"][method][table]) {
+              const trigger = that.definitions["before"][method][table][guid];
+              if (trigger.code && trigger.active) {
                 await trigger.code({
                   beforeData,
                   data,
@@ -382,8 +488,8 @@ export class Triggers {
           if (operation == "C") {
             afterData = [
               that.translateIdsToNumber(table, {
-                ...runner.builder._single.insert,
                 ...changedData,
+                ...runner.builder._single.insert,
                 ...afterData[0],
               }),
             ];
@@ -445,8 +551,10 @@ export class Triggers {
               that.definitions["after"][method] &&
               that.definitions["after"][method][table]
             ) {
-              that.definitions["after"][method][table].map((trigger) => {
-                if (trigger.code) {
+              for (const guid in that.definitions["after"][method][table]) {
+                const trigger = that.definitions["before"][method][table][guid];
+                if (trigger.code && trigger.active) {
+                  //TODO: mozna by se zde melo cekat nez se kod provede?
                   trigger.code({
                     beforeData: beforeData[i],
                     data: diffDataItem, //runner.builder._single[runner.builder._method],
@@ -454,7 +562,7 @@ export class Triggers {
                     sql: sqlUser,
                   });
                 }
-              });
+              }
             }
 
             that.eventsOnEntities.emit("afterTrigger", {

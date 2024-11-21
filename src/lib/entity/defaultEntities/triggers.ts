@@ -4,6 +4,11 @@ const entityFields: EntitySchema = {
     system: true,
     journal: true,
     fields: {
+      active: {
+        type: "boolean",
+        label: "Active",
+        description: "Active",
+      },
       entity: {
         type: "text",
         label: "Entity",
@@ -20,6 +25,7 @@ const entityFields: EntitySchema = {
         type: "text",
         label: "Method",
         description: "Type (insert, update, delete)",
+        isRequired: true,
       },
       code: {
         type: `text`,

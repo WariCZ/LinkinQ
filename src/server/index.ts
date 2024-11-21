@@ -37,7 +37,7 @@ export class WebApp {
   viteRunning: boolean;
 
   constructor() {
-    console.log("ENV", process.env);
+    // console.log("ENV", process.env);
     this.viteRunning = false;
     const fs = require("fs");
 
