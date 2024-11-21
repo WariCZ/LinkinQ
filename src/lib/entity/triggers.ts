@@ -71,6 +71,7 @@ export class Triggers {
     }
   };
 
+  //
   setTrigger = async (trigger: TriggerItemType) => {
     debugger;
     try {

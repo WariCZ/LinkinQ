@@ -48,6 +48,7 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+
   const menuAdmin: MenuItemType[] = [
     {
       label: "Journal",
@@ -117,7 +118,7 @@ const renderMenuItems = (items: MenuItemType[]) => {
     if (item.children) {
       return (
         <Sidebar.Collapse
-          key={index + item.label}
+          key={index + item.label + "ch"}
           icon={item.icon}
           label={item.label}
         >
@@ -127,8 +128,8 @@ const renderMenuItems = (items: MenuItemType[]) => {
     }
 
     return (
-      <Link to={item.to || "#"}>
-        <Sidebar.Item key={index + item.label} icon={item.icon}>
+      <Link to={item.to || "#"} key={index + item.label}>
+        <Sidebar.Item as="span" icon={item.icon}>
           {item.label}
         </Sidebar.Item>
       </Link>

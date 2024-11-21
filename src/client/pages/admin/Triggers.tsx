@@ -12,6 +12,7 @@ import { ModalPropsType } from "@/client/components/Modal/ModalContainer";
 import useDataTable from "@/client/hooks/useDataTable";
 import MonacoEditor from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
+import Tree, { TreeNode } from "@/client/components/Tree";
 
 const Triggers = () => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
@@ -27,6 +28,43 @@ const Triggers = () => {
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
   };
+
+  function transformToTree(input: any[]): TreeNode[] {
+    const tree: {
+      [key: string]: { [key: string]: { [key: string]: TreeNode } };
+    } = {};
+
+    input.forEach((item) => {
+      // Vytvoření struktur pro typ, metodu a entitu
+      if (!tree[item.type]) {
+        tree[item.type] = {};
+      }
+      if (!tree[item.type][item.method]) {
+        tree[item.type][item.method] = {};
+      }
+      if (!tree[item.type][item.method][item.entity]) {
+        tree[item.type][item.method][item.entity] = {
+          name: item.entity,
+          children: [],
+        };
+      }
+
+      // Přidání listového uzlu
+      tree[item.type][item.method][item.entity].children.push({
+        name: item.caption,
+        children: [], // Leaf nodes nemají žádné další děti
+      });
+    });
+
+    // Rekonstrukce stromu
+    return Object.entries(tree).map(([type, methods]) => ({
+      name: type,
+      children: Object.entries(methods).map(([method, entities]) => ({
+        name: method,
+        children: Object.values(entities),
+      })),
+    }));
+  }
 
   return (
     <div className="h-full">
@@ -58,6 +96,7 @@ const Triggers = () => {
           </div>
           <div className="pt-1"></div>
           <div>
+            <Tree data={transformToTree(triggers)} />
             <ul>
               {triggers.map((m) => (
                 <li

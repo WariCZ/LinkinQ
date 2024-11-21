@@ -104,7 +104,7 @@ export const DashboardHeader = function (props: { admin?: boolean }) {
                 )}
               </button>
               <div className="hidden md:block">
-                <Navbar.Brand>
+                <Navbar.Brand as="span">
                   <Link to="/">
                     <img
                       alt="Prodigi logo"
