@@ -143,7 +143,17 @@ export class EntityRoutes extends Entity {
                 "__orderby",
               ]),
             });
-            return res.json(ret);
+
+            if ((req.user as any)?.roles?.indexOf("prodigi.admin") > -1) {
+              return res.json(ret);
+            } else {
+              return res.json(
+                ret.map((r) => {
+                  delete r[this.MAIN_ID];
+                  return r;
+                })
+              );
+            }
           } catch (e: any) {
             debugger;
             console.error(e);

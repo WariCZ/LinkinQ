@@ -41,7 +41,6 @@ const Tasks = () => {
 
   const { openModal } = useModalStore();
 
-  console.log("ordering", ordering);
   return (
     <div className="m-3">
       <h1>Tasks</h1>
@@ -87,8 +86,6 @@ const TaskDetail = (props: any) => {
     {} as any
   );
 
-  console.log("data", data);
-  debugger;
   if (loading) return "loading";
   return (
     <>
@@ -125,19 +122,8 @@ const BPMNInstance = ({
 }) => {
   const bpmnReactJs = useBpmnJsReact();
 
-  // const [data, setData, { setRecord, loading }] = useDataDetail(
-  //   {
-  //     entity: "wf_instances",
-  //     fields: ["source", "name", "items"],
-  //     guid: workflowInstance,
-  //   },
-  //   {} as { source: string; name: string; items: any[] }
-  // );
-  // if (loading) return "loading";
   const data = { items: [] as any };
   const handleShown = (viewer: any) => {
-    console.log("data", data);
-    debugger;
     items?.map((item: any) => {
       if (item.status === "end") {
         bpmnReactJs.addMarker(item.elementId, "Completed");

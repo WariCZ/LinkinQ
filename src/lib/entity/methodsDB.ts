@@ -144,7 +144,13 @@ export const getQueries = ({
           f &&
           modelFields.fields &&
           modelFields.fields[f] &&
-          modelFields.fields[f].type.indexOf("nlink(") > -1;
+          !!modelFields.fields[f].nlinkTable;
+        const isLink =
+          f &&
+          modelFields.fields &&
+          modelFields.fields[f] &&
+          modelFields.fields[f].link &&
+          !modelFields.fields[f].nlinkTable;
         // pokud to je Nlink a nema tecku budu posilat id
         if (!onlyIds) {
           if (f && f.indexOf(".") == -1 && isNlink) {
@@ -152,28 +158,23 @@ export const getQueries = ({
               return acc + (word && word?.indexOf(f || "-1") > -1 ? 1 : 0);
             }, 0);
 
-            f = f + ".id";
+            f = f + ".guid";
             if (exitsOthers == 1) {
               onlyIds = true;
             }
           }
         }
-        if (f && f.indexOf(".") > -1) {
-          const fSplit = f.split(".");
+        if ((f && f.indexOf(".") > -1) || isLink) {
+          const fSplit = f && f.indexOf(".") == -1 ? [f, "guid"] : f.split(".");
           const field = fSplit[0];
           const fieldNext = fSplit.shift();
           if (
             fieldNext &&
             modelFields.fields &&
-            modelFields.fields[field].type.indexOf("link(") > -1
+            modelFields.fields[field].link
           ) {
-            //
-            const isNlink =
-              modelFields.fields[field].type.indexOf("nlink(") > -1;
-            const relTable = modelFields.fields[field].type.replace(
-              /.*link\((\w+)\)/,
-              "$1"
-            );
+            const isNlink = !!modelFields.fields[field].nlinkTable;
+            const relTable = modelFields.fields[field].link;
 
             var qs = getQueries({
               schema,
@@ -465,14 +466,14 @@ export const getData = async ({
     for (const field in queries) {
       const query = queries[field];
       const ids = data.map((d) => {
-        return query.nJoin ? d.id : d[field];
+        return query.nJoin ? d[MAIN_ID] : d[field];
       });
 
       const joindata = await getData({
         db,
         schema,
         entity: query.entity,
-        fieldsArr: [MAIN_ID, ...query.fieldsArr],
+        fieldsArr: [MAIN_ID, MAIN_GUID, ...query.fieldsArr],
         queries: query.queries,
         where: { id: ids },
         nJoin: query.nJoin,
@@ -480,15 +481,18 @@ export const getData = async ({
       if (query.nJoin) {
         data = data.map((d) => {
           const jd = joindata
-            .filter((j) => j.source == d.id)
+            .filter((j) => j.source == d[MAIN_ID])
             .map((j) => {
               delete j.source;
               // pokud se nechteji zadana dalsi data posilam jen pole id aby nlink fungoval stejne jako link
               if (query.onlyIds) {
-                return j.id;
+                // return j.id;
+                return j[MAIN_GUID];
               }
+              delete j[MAIN_ID];
               return j;
             });
+
           return {
             ...d,
             [field]: jd.length > 0 ? jd : undefined, //pokud je pole prazdne neposilam ho
@@ -496,9 +500,17 @@ export const getData = async ({
         });
       } else {
         const byIds = _.keyBy(joindata, MAIN_ID);
+
+        // Odebrání `MAIN_ID` a případný převod na hodnotu, pokud zůstane jen jeden atribut
+        const result = _.mapValues(byIds, (obj) => {
+          // const newObj = _.omit(obj, MAIN_ID); // Odebere `MAIN_ID`
+          delete obj[MAIN_ID];
+          return Object.keys(obj).length === 1 ? Object.values(obj)[0] : obj; // Převod na hodnotu, pokud je jen jeden klíč
+        });
+
         data = data.map((d) => ({
           ...d,
-          [field]: byIds[d[field]],
+          [field]: result[d[field]],
         }));
       }
     }

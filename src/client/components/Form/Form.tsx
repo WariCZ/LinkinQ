@@ -11,7 +11,6 @@ import {
   Textarea,
   Checkbox,
   Radio,
-  Select,
   Label,
   TextInput,
   TextInputProps,
@@ -19,6 +18,7 @@ import {
 import useStore from "../../store";
 import { EntitySchema, EntityType, FieldType } from "@/lib/entity/types";
 import _, { debounce } from "lodash";
+import Select from "./Select";
 
 type FormFieldDefault = {
   label?: string;
@@ -36,7 +36,9 @@ type FormFieldDefault = {
 
 type FormFieldSelect = {
   type: "select";
-  options: { key: string | number; label: string }[];
+  options?: { value: string | number; label: string }[];
+  entity?: string;
+  isMulti?: boolean;
 } & FormFieldDefault;
 
 type FormFieldText = {
@@ -96,24 +98,63 @@ interface DynamicFormProps {
   gap?: number;
 }
 
-const translateSchemaToForm = (
+const getFieldsForForm = (
   fields: (FormFieldType | string)[],
   schema?: EntityType
-): FormFieldType[] => {
-  return fields.map((field: FormFieldType | string, i) => {
-    let f: FormFieldType;
-    if (typeof field == "string") {
-      const s = schema?.fields[field];
-      f = {
+): (FormFieldType | string)[] => {
+  return _.flatMapDeep(
+    fields.map((field: FormFieldType | string, i) => {
+      if (typeof field == "object" && field.type == "Section") {
+        return getFieldsForForm(field.fields, schema);
+      }
+      return field;
+    })
+  );
+};
+
+const translateFormField = ({
+  field,
+  schema,
+}: {
+  field: FormFieldType | string;
+  schema?: EntityType;
+}): FormFieldType => {
+  if (typeof field == "string") {
+    const s = schema?.fields[field];
+    if (s.link) {
+      return {
+        field: field,
+        label: s?.label || "",
+        required: s?.isRequired,
+        default: s?.default,
+        entity: s.link,
+        isMulti: s.nlinkTable ? true : false,
+        type: "select",
+      };
+    } else {
+      return {
         field: field,
         label: s?.label || "",
         required: s?.isRequired,
         default: s?.default,
         type: "text",
       };
+    }
+  } else {
+    if (field.type == "Section") {
+      return field;
+    }
+    const s = schema?.fields[field.field];
+    if (s.link) {
+      return {
+        field: field.field,
+        label: field.label || s?.label || "",
+        required: field.required || s?.isRequired,
+        default: field.default || s?.default,
+        type: "select",
+      };
     } else {
-      const s = schema?.fields[field.field];
-      f = {
+      return {
         field: field.field,
         label: field.label || s?.label || "",
         required: field.required || s?.isRequired,
@@ -121,8 +162,7 @@ const translateSchemaToForm = (
         type: "text",
       };
     }
-    return f;
-  });
+  }
 };
 
 const Form = ({
@@ -139,7 +179,7 @@ const Form = ({
   const schema: any = useStore((state) => state.schema);
 
   const formSchema = entity
-    ? translateSchemaToForm(formFields, entity && schema[entity])
+    ? getFieldsForForm(formFields, entity && schema[entity])
     : (formFields as FormFieldType[]);
 
   const {
@@ -165,15 +205,15 @@ const Form = ({
         setError,
       });
   };
-
+  // debugger;
   return (
     <form
       ref={formRef}
       onSubmit={handleSubmit(formSubmit)}
-      className={columns && `grid grid-cols-${columns} gap-${gap || 2}`}
+      className={columns && `grid lg:grid-cols-${columns} gap-${gap || 2}`}
     >
-      {formSchema.map((item, index) =>
-        renderItem({ item, key: index, control, gap })
+      {formFields.map((item, index) =>
+        renderItem({ item, key: index, control, gap, schema: schema[entity] })
       )}
       <Button type="submit">Odeslat</Button>
     </form>
@@ -185,37 +225,54 @@ const renderItem = ({
   key,
   control,
   gap,
+  schema,
 }: {
-  item: FormFieldType | Section;
+  item: string | FormFieldType | Section;
   key: number;
   control: Control<FieldValues, any>;
   gap?: number;
+  schema?: EntityType;
 }): React.ReactNode => {
-  if (item.type === "Section") {
-    return <FormSection key={key} section={item} control={control} gap={gap} />;
+  if (typeof item == "object" && item.type === "Section") {
+    return (
+      <FormSection
+        key={key}
+        section={item}
+        control={control}
+        gap={gap}
+        schema={schema}
+      />
+    );
   }
-  return <FormField key={key} formField={item} control={control} />;
+
+  // debugger;
+  const formField: any = schema
+    ? translateFormField({ schema, field: item })
+    : item;
+  return <FormField key={key} formField={formField} control={control} />;
 };
 
 const FormSection = ({
   section,
   control,
   gap,
+  schema,
 }: {
   section: Section;
   control: Control<FieldValues, any>;
   gap?: number;
+  schema?: EntityType;
 }) => {
   return (
     <div
       className={
-        (section.colSpan && `col-span-${section.colSpan}`) +
-        ` grid grid-cols-${section.columns || 1} gap-${gap || 2}`
+        (section.colSpan && `lg:col-span-${section.colSpan}`) +
+        ` grid lg:grid-cols-${section.columns || 1} gap-${gap || 2}`
       }
     >
       {section.label && <h3 className="col-span-full">{section.label}</h3>}
       {section.fields.map((field, index) =>
-        renderItem({ item: field, key: index, control: control })
+        renderItem({ item: field, key: index, control: control, schema })
       )}
     </div>
   );
@@ -344,30 +401,15 @@ const FormField = ({
 
     case "select":
       return (
-        <div key={formField.field} className="test">
+        <div key={formField.field} className="test select">
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
             name={formField.field}
             control={control}
-            defaultValue=""
+            // defaultValue={formField.default || 1}
             rules={{ required: formField.required }}
-            render={({ field }) => (
-              <Select
-                {...field}
-                id={formField.field}
-                disabled={formField.disabled}
-              >
-                <option value="" disabled>
-                  Select an option
-                </option>
-                {formField.options.map((option) => (
-                  <option key={option.key} value={option.key}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
-            )}
-          />
+            render={({ field }) => <Select {...field} {...formField} />}
+          ></Controller>
         </div>
       );
 
