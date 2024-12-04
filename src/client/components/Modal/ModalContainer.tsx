@@ -5,6 +5,7 @@ import Draggable from "react-draggable";
 import { useTranslation } from "react-i18next";
 
 export type ModalPropsType = {
+  modalOnSuccess?: (data?: any) => void;
   closeModal?: () => void;
   formRef?: React.LegacyRef<HTMLFormElement> | undefined;
   modalLabel?: string;
@@ -23,7 +24,10 @@ const ModalContainer = () => {
 
         let ComponentWithProps;
         if (typeof content === "function") {
-          ComponentWithProps = content({ formRef, closeModal });
+          ComponentWithProps = content({
+            formRef,
+            closeModal,
+          });
         } else {
           ComponentWithProps = React.cloneElement(content, {
             formRef,
@@ -59,13 +63,17 @@ const ModalContainer = () => {
                 </Button>
                 <Button
                   onClick={() => {
-                    if (formRef.current)
+                    if (formRef.current) {
                       formRef.current.dispatchEvent(
                         new Event("submit", {
                           cancelable: true,
                           bubbles: true,
                         })
                       );
+                    } else {
+                      content?.props?.modalOnSuccess &&
+                        content?.props?.modalOnSuccess();
+                    }
                   }}
                 >
                   {t("modal.save")}

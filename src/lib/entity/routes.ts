@@ -186,7 +186,17 @@ export class EntityRoutes extends Entity {
             data: req.body,
           });
 
-          return res.json(ret);
+          if ((req.user as any)?.roles?.indexOf("prodigi.admin") > -1) {
+            return res.json(ret);
+          } else {
+            return res.json(
+              ret.map((r) => {
+                delete r[this.MAIN_ID];
+                return r;
+              })
+            );
+          }
+          // return res.json(ret);
         } else {
           res.sendStatus(401);
         }

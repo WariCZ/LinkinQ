@@ -1,5 +1,5 @@
 import { Button, Spinner } from "flowbite-react";
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import WordTagInput from "../components/WordTagInput";
 import Form from "../components/Form/Form";
@@ -7,6 +7,10 @@ import Select from "../components/Form/Select";
 
 const PublicPage: React.FC = () => {
   console.log("PublicPage");
+
+  const [formData, setFormData] = useState(
+    ({ text: "dd" } as any) || undefined
+  );
 
   return (
     <div>
@@ -56,7 +60,7 @@ const PublicPage: React.FC = () => {
           {
             type: "text",
             field: "text",
-            label: "Text",
+            label: "Text k",
             id: "kuk",
             // color: "success",
             colSpan: 1,
@@ -87,30 +91,31 @@ const PublicPage: React.FC = () => {
           //     },
           //   ],
           // },
-          {
-            field: "users",
-            label: "Users",
-            type: "select",
-            entity: "users",
-          },
-          {
-            field: "select",
-            label: "Select",
-            type: "select",
-            options: [
-              { label: "test 1", value: 1 },
-              { label: "test 2", value: 2 },
-            ],
-          },
+          // {
+          //   field: "users",
+          //   label: "Users",
+          //   type: "select",
+          //   entity: "users",
+          // },
+          // {
+          //   field: "select",
+          //   label: "Select",
+          //   type: "select",
+          //   options: [
+          //     { label: "test 1", value: 1 },
+          //     { label: "test 2", value: 2 },
+          //   ],
+          // },
         ]}
         onSubmit={({ data }) => {
           console.log("kuk", data);
         }}
+        data={formData}
       ></Form>
-
-      <div>------------</div>
-      <Select entity="users" />
-      <div>------------</div>
+      {/* <Button onClick={() => setFormData(undefined)}>resert</Button> */}
+      {/* <div>------------</div> */}
+      {/* <Select entity="users" /> */}
+      {/* <div>------------</div> */}
     </div>
   );
 };

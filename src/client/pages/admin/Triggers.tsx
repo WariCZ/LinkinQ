@@ -5,7 +5,7 @@ import { FaPlus } from "react-icons/fa";
 import { Button, TextInput } from "flowbite-react";
 import Table from "../../components/Table";
 import { EntitySchema, EntityType, FieldType } from "@/lib/entity/types";
-import Form from "@/client/components/Form/Form";
+import Form, { FormFieldType } from "@/client/components/Form/Form";
 import { useModalStore } from "@/client/components/Modal/modalStore";
 import useDataDetail, { httpRequest } from "@/client/hooks/useDataDetail";
 import { ModalPropsType } from "@/client/components/Modal/ModalContainer";
@@ -13,12 +13,70 @@ import useDataTable from "@/client/hooks/useDataTable";
 import MonacoEditor from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
 import Tree, { TreeNode } from "@/client/components/Tree";
+import axios from "axios";
+
+const fieldFormTriggers = (schema): (string | FormFieldType)[] => [
+  {
+    label: "Caption",
+    field: "caption",
+    type: "text",
+    required: true,
+  },
+  {
+    label: "Type",
+    field: "type",
+    type: "select",
+    options: [
+      {
+        label: "Before",
+        value: "before",
+      },
+      {
+        label: "After",
+        value: "after",
+      },
+    ],
+    required: true,
+  },
+  {
+    label: "Method",
+    field: "method",
+    type: "select",
+    options: [
+      {
+        label: "Insert",
+        value: "insert",
+      },
+      {
+        label: "Update",
+        value: "update",
+      },
+      {
+        label: "Delete",
+        value: "delete",
+      },
+    ],
+    required: true,
+  },
+  {
+    label: "Entity",
+    field: "entity",
+    required: true,
+    type: "select",
+    options: Object.keys(schema).map((s) => ({
+      label: s,
+      value: s,
+    })),
+  },
+];
 
 const Triggers = () => {
+  const schema = useStore((state) => state.schema);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [selectedTriggers, setSelectedTriggers] = useState({} as any);
   const { openModal } = useModalStore();
-  const [triggers, setTriggers] = useDataTable(
+
+  const [triggers, setTriggers, { refresh }] = useDataTable(
     {
       entity: "triggers",
     },
@@ -52,6 +110,7 @@ const Triggers = () => {
       // Přidání listového uzlu
       tree[item.type][item.method][item.entity].children.push({
         name: item.caption,
+        ...item,
         children: [], // Leaf nodes nemají žádné další děti
       });
     });
@@ -66,13 +125,14 @@ const Triggers = () => {
     }));
   }
 
+  console.log("selectedTriggers", selectedTriggers);
   return (
     <div className="h-full">
       <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
         <span className="font-bold">Triggers editor</span>
       </div>
       <div className="flex items-start h-full">
-        <div className="px-3 w-48 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
+        <div className="px-3 w-2/12 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
           <div className="py-1"></div>
           <div className="pt-1">
             <Button
@@ -96,30 +156,67 @@ const Triggers = () => {
           </div>
           <div className="pt-1"></div>
           <div>
-            <Tree data={transformToTree(triggers)} />
-            <ul>
-              {triggers.map((m) => (
-                <li
-                  key={m}
-                  onClick={() => setSelectedTriggers(m)}
-                  className={`${
-                    selectedTriggers.guid === m.guid ? "font-bold" : ""
-                  } cursor-pointer`}
-                >
-                  {m.caption}
-                </li>
-              ))}
-            </ul>
+            <Tree
+              data={transformToTree(triggers)}
+              onClick={(node) => {
+                setSelectedTriggers(node);
+              }}
+            />
           </div>
         </div>
+        <div className="w-2/12 p-2">
+          <Form
+            data={selectedTriggers}
+            onSubmit={async ({ data }) => {
+              await axios.post("/api/triggers", {
+                ...selectedTriggers,
+                ...data,
+              });
+            }}
+            formFields={[
+              {
+                label: "Active",
+                field: "active",
+                type: "checkbox",
+              },
+              ...fieldFormTriggers(schema),
+            ]}
+          >
+            <div className="my-2">
+              <Button type="submit" className="inline-block">
+                Ulozit
+              </Button>
+              <Button
+                color="failure"
+                className="inline-block float-right"
+                onClick={async () => {
+                  await axios.delete("/api/triggers", {
+                    data: {
+                      guid: selectedTriggers.guid as any,
+                    },
+                  });
+                  setSelectedTriggers({
+                    caption: "",
+                  });
+                  refresh();
+                }}
+              >
+                Smazat
+              </Button>
+            </div>
+          </Form>
+        </div>
         <MonacoEditor
+          className="w-8/12"
           value={selectedTriggers.code}
           height="60vh"
           defaultLanguage="javascript"
           defaultValue="// Začni psát svůj kód zde..."
           theme="light"
           onMount={handleEditorDidMount}
-          // onChange={handleCodeChange}
+          onChange={(code) => {
+            setSelectedTriggers({ ...selectedTriggers, code });
+          }}
         />
       </div>
     </div>
@@ -127,48 +224,16 @@ const Triggers = () => {
 };
 
 const AddTrigger = (props: { guid?: object } & ModalPropsType) => {
-  const getSchema = useStore((state) => state.getSchema);
+  const schema = useStore((state) => state.schema);
   return (
     <Form
-      // disabled={!!props.data}
-      onSubmit={async ({ closeModal, data }) => {
-        // await httpRequest({
-        //   url: "/api/entityField",
-        //   method: "POST",
-        //   entity: "",
-        //   data: {
-        //     entity: props.entity,
-        //     fields: [
-        //       {
-        //         type: data.type,
-        //         name: data.name,
-        //         label: data.label,
-        //         description: data.description,
-        //       },
-        //     ],
-        //   },
-        // });
-        // getSchema();
-        closeModal && closeModal();
+      onSubmit={async ({ data }) => {
+        await axios.post("/api/triggers", {
+          ...data,
+        });
+        props.closeModal && props.closeModal();
       }}
-      // data={props.data}
-      formFields={[
-        {
-          label: "Type",
-          field: "Typ",
-          required: true,
-        },
-        {
-          label: "Method",
-          field: "method",
-          required: true,
-        },
-        {
-          label: "Entity",
-          field: "entity",
-          required: true,
-        },
-      ]}
+      formFields={fieldFormTriggers(schema)}
       {...props}
     />
   );

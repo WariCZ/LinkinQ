@@ -31,7 +31,6 @@ const entityFields: EntitySchema = {
         type: `text`,
         label: "Code",
         description: "Code",
-        isRequired: true,
       },
     },
   },

@@ -9,7 +9,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import useStore from "../store";
-import { EntityType } from "@/lib/entity/types";
+import { EntitySchema, EntityType } from "@/lib/entity/types";
+import _ from "lodash";
 
 export type TableFieldType =
   | {
@@ -20,21 +21,68 @@ export type TableFieldType =
     }
   | string;
 
-const translateColumns = (
-  columns: TableFieldType[],
-  schema?: EntityType
-): ColumnDef<any>[] => {
+const getLabel = ({
+  field,
+  schema,
+  entity,
+}: {
+  field: string;
+  schema: EntitySchema;
+  entity: string;
+}) => {
+  const ids = field.split(".");
+
+  let label = [];
+  ids.map((i) => {
+    const f = schema[entity].fields[i];
+    label.push(f.label);
+    entity = f.link;
+  });
+  return label.join("/");
+};
+
+const translateColumns = ({
+  columns,
+  schema,
+  entity,
+}: {
+  columns: TableFieldType[];
+  schema?: EntitySchema;
+  entity?: string;
+}): ColumnDef<any>[] => {
   return columns.map((c) => {
     let col;
     if (typeof c === "string") {
-      const s = schema?.fields[c];
-      col = {
-        id: c,
-        header: s?.label || c,
-        accessorKey: c,
-      };
+      const s = schema && schema[entity] && schema[entity].fields[c];
+      if (c.indexOf(".") === -1) {
+        col = {
+          id: c,
+          header: s?.label || c,
+          accessorKey: c,
+        };
+      } else {
+        const ids = c.split(".");
+        const label = getLabel({ entity, field: s?.label || c, schema });
+        col = {
+          id: ids[0],
+          header: label,
+          accessorKey: ids[0],
+          cell: (info) => {
+            // debugger;
+            const val = info.getValue();
+            if (Array.isArray(val)) {
+              const id = ids.slice(1).join(".");
+              return <span>{val.map((v) => _.get(v, id))}</span>;
+            } else if (typeof val === "object") {
+              const id = ids.slice(1).join(".");
+              return <span>{_.get(val, id)}</span>;
+            }
+            return <span>{val}</span>;
+          },
+        };
+      }
     } else {
-      const s = schema?.fields[c.field];
+      const s = schema && schema[entity] && schema[entity].fields[c.field];
       col = {
         id: c.field,
         header: c.label || s?.label || c.field,
@@ -80,7 +128,7 @@ const Table = <T, U>({
 }) => {
   const schema: any = useStore((state) => state.schema);
   const { getRowModel, getHeaderGroups } = useReactTable({
-    columns: translateColumns(columns, entity ? schema[entity] : undefined),
+    columns: translateColumns({ columns, entity, schema }),
     data,
     debugTable: true,
     getCoreRowModel: getCoreRowModel(),

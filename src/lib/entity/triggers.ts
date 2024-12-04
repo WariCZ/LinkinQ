@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 import EventEmitter from "events";
 import { EntitySchema } from "./types";
 import { dbType, Sql } from "./sql";
-import { MAIN_ID } from "../knex";
+import { MAIN_GUID, MAIN_ID } from "../knex";
 
 export type CodeType = {
   beforeData: Record<string, any>;
@@ -73,25 +73,39 @@ export class Triggers {
 
   //
   setTrigger = async (trigger: TriggerItemType) => {
-    debugger;
     try {
       if (trigger.guid) {
         await this.db("triggers")
           .setUser({ id: 1 })
           .where({ guid: trigger.guid })
-          .update(trigger);
+          .update({
+            active: trigger.active,
+            caption: trigger.caption,
+            code: trigger.code,
+            entity: trigger.entity,
+            method: trigger.method,
+            type: trigger.type,
+            guid: trigger.guid,
+          });
       } else {
         const t: any = await this.db("triggers")
           .setUser({ id: 1 })
-          .insert(trigger);
-        trigger.guid = t.guid;
+          .insert(trigger)
+          .returning(["guid"]);
+        trigger.guid = t[0].guid;
       }
 
       trigger.code = new Function("return " + trigger.code)();
       this.definitions[trigger.type][trigger.method][trigger.entity][
         trigger.guid
       ] = {
-        ...trigger,
+        active: trigger.active,
+        caption: trigger.caption,
+        code: trigger.code,
+        entity: trigger.entity,
+        method: trigger.method,
+        type: trigger.type,
+        guid: trigger.guid,
         updatetime: DateTime.now(),
       };
     } catch (e) {
@@ -100,7 +114,6 @@ export class Triggers {
   };
 
   removeTrigger = async (guid: string) => {
-    debugger;
     try {
       if (guid) {
         const ret = await this.db("triggers")
@@ -138,10 +151,6 @@ export class Triggers {
       throw e;
     }
   };
-  //
-  // addTrigger
-  // updateTrigger
-  // deleteTrigger
 
   initTriggers = async (schema: EntitySchema) => {
     this.schema = schema;
@@ -442,11 +451,11 @@ export class Triggers {
             if (runner.builder._single.returning) {
               runner.builder._single.returning = [
                 ...runner.builder._single.returning,
-                "id",
-                "guid",
+                MAIN_ID,
+                MAIN_GUID,
               ];
             } else {
-              runner.builder._single.returning = ["id", "guid"];
+              runner.builder._single.returning = [MAIN_ID, MAIN_GUID];
             }
           }
           return beforeData;

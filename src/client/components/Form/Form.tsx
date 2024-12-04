@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   useForm,
   Controller,
@@ -55,7 +55,7 @@ type Section = {
   colSpan?: number;
 };
 
-type FormFieldType =
+export type FormFieldType =
   | {
       id?: string;
       field: string;
@@ -85,17 +85,16 @@ type FormFieldType =
 interface DynamicFormProps {
   formFields: (FormFieldType | string)[];
   onSubmit?: (props: {
-    closeModal?: () => void;
     data: Record<string, any>;
     setError: UseFormSetError<any>;
   }) => void;
   formRef?: React.LegacyRef<HTMLFormElement>;
-  closeModal?: () => void;
   entity?: string;
   data?: Record<string, any>;
   disabled?: boolean;
   columns?: number;
   gap?: number;
+  children?: React.ReactElement;
 }
 
 const getFieldsForForm = (
@@ -169,12 +168,12 @@ const Form = ({
   formFields,
   onSubmit,
   formRef,
-  closeModal,
   entity,
   data,
   disabled,
   columns,
   gap,
+  children,
 }: DynamicFormProps) => {
   const schema: any = useStore((state) => state.schema);
 
@@ -187,35 +186,90 @@ const Form = ({
     handleSubmit,
     reset,
     setError,
+    register,
     formState: { errors },
-  } = useForm({ disabled: disabled });
+  } = useForm({ disabled: disabled, defaultValues: { caption: "" } });
 
   useEffect(() => {
+    // debugger;
+    // if (!data || (data && Object.keys(data).length === 0)) {
+    //   reset(undefined);
+    // } else {
     reset(data);
+    // }
   }, [reset, data]);
 
-  const formSubmit = (formdata: any, e: any) => {
-    //TODO: Spatne nemohu mazat prazdne hodnoty pokud uzivatel smaze hodnoty musi se to vyreset nejak jinak
+  const findChanges = (current, initial) => {
+    if (_.isEqual(current, initial)) return {}; // Pokud je identické, vrátíme prázdný objekt
 
-    const data = _.pickBy(formdata, (value) => value !== null && value !== "");
+    // Najdeme rozdíly mezi objekty
+    return _.reduce(
+      current,
+      (result, value, key) => {
+        if (!_.isEqual(value, (initial && initial[key]) || {})) {
+          result[key] =
+            _.isObject(value) && !Array.isArray(value)
+              ? findChanges(value, initial[key]) // Rekurzivní kontrola objektů
+              : value; // Přímá hodnota (pro pole a základní typy)
+        }
+        return result;
+      },
+      {}
+    );
+  };
+
+  const formSubmit = (formdata: any, e: any) => {
+    const changedData = findChanges(formdata, data);
     onSubmit &&
       onSubmit({
-        data,
-        closeModal,
+        data: changedData,
         setError,
       });
   };
-  // debugger;
+
   return (
     <form
       ref={formRef}
       onSubmit={handleSubmit(formSubmit)}
       className={columns && `grid lg:grid-cols-${columns} gap-${gap || 2}`}
     >
-      {formFields.map((item, index) =>
-        renderItem({ item, key: index, control, gap, schema: schema[entity] })
-      )}
-      <Button type="submit">Odeslat</Button>
+      {formFields.map((item, index) => {
+        const c: Control<FieldValues, any> = control as any;
+        return renderItem({
+          item,
+          key: index,
+          control: c,
+          gap,
+          schema: schema[entity],
+        });
+      })}
+      {children}
+      {/* <Button type="submit">Ulozit</Button> */}
+
+      <Button
+        onClick={() => {
+          const resVal = formFields
+            .map((ff) => {
+              if (typeof ff === "string") {
+                return ff;
+              }
+              if (ff.type !== "Section") {
+                return ff?.field;
+              }
+
+              return undefined;
+            })
+            .filter((ff) => ff)
+            .reduce((acc, key) => {
+              acc[key] = "";
+              return acc;
+            }, {});
+
+          reset(resVal);
+        }}
+      >
+        Reset
+      </Button>
     </form>
   );
 };
@@ -249,6 +303,7 @@ const renderItem = ({
   const formField: any = schema
     ? translateFormField({ schema, field: item })
     : item;
+
   return <FormField key={key} formField={formField} control={control} />;
 };
 
@@ -367,7 +422,9 @@ const FormField = ({
             rules={{ required: formField.required }}
             render={({ field }) => (
               <Checkbox
+                className="block"
                 {...field}
+                checked={field.value}
                 id={formField.field}
                 disabled={formField.disabled}
               />

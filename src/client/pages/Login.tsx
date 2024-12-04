@@ -24,7 +24,6 @@ const Login: React.FC = () => {
 
   const onSubmit = async (data: any) => {
     try {
-      debugger;
       const response = await axios.post("./login", {
         username: data.email,
         password: data.password,

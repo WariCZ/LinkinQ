@@ -8,7 +8,7 @@ import {
 
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 // import { useGlobalState } from "./useSSE";
-import _ from "lodash";
+import _, { debounce } from "lodash";
 // import { MAIN_ID } from "../../lib/entity";
 const MAIN_ID = "guid";
 export const httpRequest = ({
@@ -178,7 +178,7 @@ function useDataTable<T, U>(
     const response = await getSingleRecord({
       entity: param.entity,
       guid: guid,
-      fields: param.fields ? param.fields.join() : "guid",
+      fields: param.fields ? param.fields.join() : "*",
     });
     setData((prevData) => {
       if (Array.isArray(prevData)) {
@@ -187,8 +187,18 @@ function useDataTable<T, U>(
         const prevDataGuids = _.keyBy(prevData, "guid");
         response.data.forEach((d: any) => {
           if (prevDataGuids[d.guid]) {
-            _.merge(prevDataGuids[d.guid], d);
+            // dohledam zaznam v poli
+            const index = _.findIndex(prevData, { guid: d.guid });
+            if (index !== -1) {
+              prevData[index] = d; // Nahraď objekt novým
+              prevDataGuids[d.guid] = d;
+            } else {
+              //pokud GUID v poli neexistuje vlozim ho
+              prevData.unshift(d);
+              prevDataGuids[d.guid] = d;
+            }
           } else {
+            //pokud jde o novy zaznam vlozim ho
             prevData.unshift(d);
             prevDataGuids[d.guid] = d;
           }
@@ -247,7 +257,6 @@ function useDataTable<T, U>(
       desc: boolean;
     }[];
   }) => {
-    setLoading(true);
     setError(null);
 
     try {
@@ -269,7 +278,7 @@ function useDataTable<T, U>(
   };
 
   useEffect(() => {
-    console.log("call useEffect");
+    setLoading(true);
     fetchData({
       entity: param.entity,
       fields: fieldsEntity || undefined,
@@ -286,7 +295,9 @@ function useDataTable<T, U>(
       desc: boolean;
     }[];
   }) => {
-    await setLoading(true);
+    if (!ordering) {
+      await setLoading(true);
+    }
     if (params && params.fields) {
       await setFieldsEntity(params.fields);
     }

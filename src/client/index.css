@@ -116,8 +116,8 @@ div:has(> span > span.errorHighlight) {
 }
 
 .flowbite-select__value-container {
-  padding: 0;
-  top: -4px;
+  line-height: 20px;
+  padding-top: 0px !important;
 }
 
 .flowbite-select__menu {
@@ -134,7 +134,12 @@ div:has(> span > span.errorHighlight) {
 }
 
 .flowbite-select__multi-value {
-  @apply bg-blue-100 text-blue-700 rounded-md px-2 py-1;
+  @apply bg-blue-100 text-blue-700 rounded-md p-0 m-0;
+}
+
+.flowbite-select__multi-value__label {
+  padding: 0px !important;
+  padding-left: 10px !important;
 }
 
 .flowbite-select__multi-value__remove {

@@ -9,7 +9,7 @@
     "clean": "tsc --build --clean",
     "test": "echo \"Error: no test specified\" && exit 1",
     "client:dev": "vite",
-    "server:start": "ts-node src/app",
+    "server:start": "ts-node src/server/index",
     "server:dev": "ts-node-dev --respawn src/server/index",
     "server:e2etest": "ts-node-dev --respawn src/server/index e2etest=true"
   },

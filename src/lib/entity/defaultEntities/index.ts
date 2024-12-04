@@ -105,6 +105,7 @@ export const workflowFields = (): Record<string, FieldType> => ({
     // type: "text",
     label: "Workflow instance",
     description: "Workflow instance",
+    system: true,
   },
 });
 

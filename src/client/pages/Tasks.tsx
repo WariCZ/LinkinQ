@@ -15,12 +15,25 @@ import { BpmnJsReact, useBpmnJsReact } from "bpmn-js-react";
 const Tasks = () => {
   const schema = useStore((state) => state.schema);
 
+  const entity = "tasks";
   const columns = [
     ...["guid", "caption", "createdby.fullname"],
-    ...(schema["tasks"]
-      ? Object.keys(schema["tasks"].fields).filter((f) => {
-          return !schema["tasks"].fields[f].system;
-        })
+    ...(schema[entity]
+      ? Object.keys(schema[entity].fields)
+          .filter((f) => {
+            return !schema[entity].fields[f].system;
+          })
+          .map((f) => {
+            if (schema[entity].fields[f].link) {
+              if (schema[entity].fields[f].link === "users") {
+                return f + ".fullname";
+              } else {
+                return f + ".caption";
+              }
+            } else {
+              return f;
+            }
+          })
       : []),
   ];
 
@@ -102,10 +115,10 @@ const TaskDetail = (props: any) => {
           setRecord(props.data);
           props.closeModal && props.closeModal();
         }}
+        {...props}
         data={data}
         entity={"tasks"}
         formFields={fields}
-        {...props}
       />
     </>
   );
