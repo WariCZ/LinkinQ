@@ -63,55 +63,89 @@ const PublicPage: React.FC = () => {
             label: "Text k",
             id: "kuk",
             // color: "success",
+            // required: true,
+            colSpan: 1,
+            // rules: [
+            //   {
+            //     type: "required",
+            //     conditions: [
+            //       {
+            //         field: "select",
+            //         value: 1,
+            //       },
+            //     ],
+            //   },
+            // ],
+          },
+          {
+            type: "text",
+            field: "text2",
+            label: "Text2",
+            id: "kuk2",
+            color: "success",
             colSpan: 1,
           },
-          // {
-          //   type: "text",
-          //   field: "text2",
-          //   label: "Text2",
-          //   id: "kuk2",
-          //   color: "success",
-          //   colSpan: 1,
-          // },
-          // {
-          //   type: "Section",
-          //   label: "Jméno2",
-          //   fields: [
-          //     {
-          //       type: "text",
-          //       label: "Ulice",
-          //       field: "street",
-          //       colSpan: 1,
-          //     },
-          //     {
-          //       type: "text",
-          //       label: "Číslo",
-          //       field: "street",
-          //       colSpan: 1,
-          //     },
-          //   ],
-          // },
-          // {
-          //   field: "users",
-          //   label: "Users",
-          //   type: "select",
-          //   entity: "users",
-          // },
-          // {
-          //   field: "select",
-          //   label: "Select",
-          //   type: "select",
-          //   options: [
-          //     { label: "test 1", value: 1 },
-          //     { label: "test 2", value: 2 },
-          //   ],
-          // },
+          {
+            type: "Section",
+            label: "Jméno2",
+            fields: [
+              {
+                type: "text",
+                label: "Ulice",
+                field: "street",
+                colSpan: 1,
+              },
+              {
+                type: "text",
+                label: "Číslo",
+                field: "street",
+                colSpan: 1,
+              },
+            ],
+          },
+          {
+            field: "users",
+            label: "Users",
+            type: "select",
+            entity: "users",
+          },
+          {
+            field: "select2",
+            label: "Select2",
+            type: "select",
+            required: true,
+            options: [
+              { label: "test 12", value: 1 },
+              { label: "test 22", value: 2 },
+            ],
+            rules: [
+              {
+                type: "show",
+                conditions: [
+                  {
+                    select: 1,
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            field: "select",
+            label: "Select",
+            type: "select",
+            options: [
+              { label: "test 1", value: 1 },
+              { label: "test 2", value: 2 },
+            ],
+          },
         ]}
         onSubmit={({ data }) => {
           console.log("kuk", data);
         }}
         data={formData}
-      ></Form>
+      >
+        <Button type="submit">SEND</Button>
+      </Form>
       {/* <Button onClick={() => setFormData(undefined)}>resert</Button> */}
       {/* <div>------------</div> */}
       {/* <Select entity="users" /> */}

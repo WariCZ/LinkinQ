@@ -195,9 +195,7 @@ const Triggers = () => {
                       guid: selectedTriggers.guid as any,
                     },
                   });
-                  setSelectedTriggers({
-                    caption: "",
-                  });
+                  setSelectedTriggers({});
                   refresh();
                 }}
               >

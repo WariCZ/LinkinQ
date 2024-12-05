@@ -41,6 +41,8 @@ const Select = React.forwardRef(
             setValue(opt);
           }
         }
+      } else {
+        setValue(null);
       }
     }, [props.value]);
 
@@ -77,6 +79,7 @@ const Select = React.forwardRef(
           defaultOptions={options}
           classNamePrefix="flowbite-select"
           placeholder="Vyberte možnosti"
+          menuPortalTarget={document.body} // Přesměrování dropdownu mimo modal
           onChange={(selectedOptions: any, b) => {
             const values =
               selectedOptions && Array.isArray(selectedOptions)
@@ -102,6 +105,7 @@ const Select = React.forwardRef(
           // menuIsOpen
           classNamePrefix="flowbite-select"
           placeholder="Vyberte možnosti"
+          menuPortalTarget={document.body} // Přesměrování dropdownu mimo modal
           onChange={(selectedOptions: any, b) => {
             const values =
               selectedOptions && Array.isArray(selectedOptions)

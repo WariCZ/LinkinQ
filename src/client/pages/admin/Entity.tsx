@@ -9,6 +9,8 @@ import Form from "@/client/components/Form/Form";
 import { useModalStore } from "@/client/components/Modal/modalStore";
 import { httpRequest } from "@/client/hooks/useDataDetail";
 import { ModalPropsType } from "@/client/components/Modal/ModalContainer";
+import { FaFileExport } from "react-icons/fa";
+import { exportJsonFile } from "@/client/utils";
 
 const Entity = () => {
   const schema = useStore((state) => state.schema);
@@ -90,7 +92,6 @@ const Entity = () => {
     </div>
   );
 };
-
 const EntityDetail = ({
   entity,
   definition,
@@ -105,6 +106,13 @@ const EntityDetail = ({
         ...value,
       }))
     : [];
+
+  const exportEntity = () => {
+    exportJsonFile({
+      json: { [entity]: definition },
+      filename: entity,
+    });
+  };
 
   if (!entity) return <div>Not selected</div>;
 
@@ -121,8 +129,14 @@ const EntityDetail = ({
         >
           Add Field
         </Button>
+        <span className="ml-auto"></span>
         <span className="ml-auto">
+          <FaFileExport
+            className="inline-block mx-2 cursor-pointer"
+            onClick={exportEntity}
+          />
           <Button
+            className="inline-block"
             disabled={definition?.system}
             color="failure"
             onClick={() => {
@@ -159,7 +173,7 @@ const DeleteEntity = (props: { entity: string } & ModalPropsType) => {
   const getSchema = useStore((state) => state.getSchema);
   return (
     <Form
-      onSubmit={async ({ closeModal, data, setError }) => {
+      onSubmit={async ({ data, setError }) => {
         if (data.entity) {
           if (data.entity === props.entity) {
             await httpRequest({
@@ -171,7 +185,7 @@ const DeleteEntity = (props: { entity: string } & ModalPropsType) => {
               },
             });
             getSchema();
-            closeModal && closeModal();
+            props.closeModal && props.closeModal();
           } else {
             setError("entity", { message: "Názvy nejsou stejné" });
           }
@@ -182,6 +196,7 @@ const DeleteEntity = (props: { entity: string } & ModalPropsType) => {
           label: "Write entity name",
           field: "entity",
           required: true,
+          type: "text",
         },
       ]}
       {...props}
@@ -193,7 +208,7 @@ const AddEntity = (props: ModalPropsType) => {
   const getSchema = useStore((state) => state.getSchema);
   return (
     <Form
-      onSubmit={async ({ closeModal, data }) => {
+      onSubmit={async ({ data }) => {
         await httpRequest({
           url: "/api/entity",
           method: "POST",
@@ -203,13 +218,14 @@ const AddEntity = (props: ModalPropsType) => {
           },
         });
         getSchema();
-        closeModal && closeModal();
+        props.closeModal && props.closeModal();
       }}
       formFields={[
         {
           label: "Entity",
           field: "entity",
           required: true,
+          type: "text",
         },
       ]}
       {...props}
@@ -224,7 +240,12 @@ const FieldDetail = (
   return (
     <Form
       disabled={!!props.data}
-      onSubmit={async ({ closeModal, data }) => {
+      onSubmit={async ({ data }) => {
+        if (data.type.indexOf("link") > -1) {
+          data.type = `${data.type}(${data.entity})`;
+          delete data.entity;
+        }
+
         await httpRequest({
           url: "/api/entityField",
           method: "POST",
@@ -242,7 +263,7 @@ const FieldDetail = (
           },
         });
         getSchema();
-        closeModal && closeModal();
+        props.closeModal && props.closeModal();
       }}
       data={props.data}
       formFields={[
@@ -250,20 +271,52 @@ const FieldDetail = (
           label: "Name",
           field: "name",
           required: true,
-        },
-        {
-          label: "Type",
-          field: "type",
-          required: true,
+          type: "text",
         },
         {
           label: "Label",
           field: "label",
           required: true,
+          type: "text",
+        },
+        {
+          field: "type",
+          label: "Type",
+          type: "select",
+          required: true,
+          options: [
+            { label: "text", value: "text" },
+            { label: "link", value: "link" },
+            { label: "nlink", value: "nlink" },
+          ],
+        },
+        {
+          field: "entity",
+          label: "Entity",
+          type: "select",
+          required: true,
+          options: [
+            { label: "users", value: "users" },
+            { label: "tasks", value: "tasks" },
+          ],
+          rules: [
+            {
+              type: "show",
+              conditions: [
+                {
+                  type: "link",
+                },
+                {
+                  type: "nlink",
+                },
+              ],
+            },
+          ],
         },
         {
           label: "Description",
           field: "description",
+          type: "text",
         },
       ]}
       {...props}

@@ -168,6 +168,10 @@ div:has(> span > span.errorHighlight) {
   background-color: rgb(249 250 251 / var(--tw-bg-opacity)) !important;
 }
 
+.flowbite-select__menu-portal {
+  z-index: 60 !important;
+}
+
 .flowbite-select__control:hover,
 .flowbite-select__control:focus,
 .flowbite-select__control--is-focused,
