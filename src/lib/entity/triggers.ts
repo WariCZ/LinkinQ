@@ -580,6 +580,7 @@ export class Triggers {
               diffData: diffDataItem,
               beforeData: afterDataDataItem,
               entity: table,
+              method: method,
             });
           }
         }

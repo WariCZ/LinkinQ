@@ -303,7 +303,7 @@ const Form = ({
       {formFields.map((item, index) => {
         let formField: FormFieldType =
           typeof item === "string"
-            ? translateFormField({ schema, field: item })
+            ? translateFormField({ schema: schema[entity], field: item })
             : item;
 
         if (formField.rules) {

@@ -110,9 +110,9 @@ const TaskDetail = (props: any) => {
         />
       )}
       <Form
-        onSubmit={(props) => {
-          delete props.data.createdby;
-          setRecord(props.data);
+        onSubmit={({ data }) => {
+          delete data.createdby;
+          setRecord(data);
           props.closeModal && props.closeModal();
         }}
         {...props}

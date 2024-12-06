@@ -55,7 +55,9 @@ export const translateDataTypesDBtoSchema = ({
 
   if (type === "bigint") {
     const type =
-      entityDef[entity] && entityDef[entity].fields[column_name].type;
+      entityDef[entity] &&
+      entityDef[entity].fields[column_name] &&
+      entityDef[entity].fields[column_name].type;
     if (type && type.indexOf("link(") > -1) {
       return entityDef[entity].fields[column_name].type;
     }

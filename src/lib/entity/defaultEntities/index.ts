@@ -10,6 +10,8 @@ import lov from "./lov";
 import journal from "./journal";
 import triggers from "./triggers";
 import tasks from "./tasks";
+import adapters from "./adapters";
+import notifications from "./notifications";
 
 export const defaultExecute = () => {
   return ['CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'];
@@ -120,6 +122,8 @@ export const defaultEntities = (): EntitySchema => {
     ...wf_model,
     ...journal,
     ...triggers.entityFields,
+    ...adapters.entityFields,
+    ...notifications.entityFields,
     ...tasks.entityFields,
   };
 };

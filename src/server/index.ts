@@ -12,6 +12,8 @@ import authRoutes, { authenticate } from "../lib/auth";
 import { EntitySchema } from "../lib/entity/types";
 import { BPMNServer, configuration, BPMNAPI, Logger } from "../lib/bpmn-web";
 import { Sql } from "@/lib/entity/sql";
+import { Adapters } from "../lib/entity/adapters";
+import { mailAdapter } from "../lib/entity/adaptersDef/mail";
 
 dotenv.config();
 
@@ -55,7 +57,19 @@ export class WebApp {
     // this.userManager.init();
 
     this.entity = new EntityRoutes();
-    //
+
+    console.log("Before start adapter");
+    const ad = new Adapters({
+      db: this.entity.db,
+      eventsOnEntities: this.entity.eventsOnEntities,
+    });
+
+    ad.registerAdapter({ name: "mailAdapter", adapter: mailAdapter });
+
+    ad.loadAdapters();
+
+    console.log("After start adapter");
+
     this.entity
       .prepareSchema()
       .then(async ({ schema, sqlAdmin }) => {
@@ -73,7 +87,6 @@ export class WebApp {
           );
           return (context.instance as any).dbId;
         };
-
         // console.log("context", context);
         this.setupExpress({ schema, sqlAdmin });
       })
