@@ -135,7 +135,7 @@ export class Sql {
           console.log("finish call getLinks");
           let joinsIds = gl.joinsIds;
           dataItem = gl.dataItem;
-
+          //
           const ret: any = await this.#db(entity)
             .addParams({ data: gl.data })
             .insert(dataItem);

@@ -64,7 +64,7 @@ export class WebApp {
       eventsOnEntities: this.entity.eventsOnEntities,
     });
 
-    ad.registerAdapter({ name: "mailAdapter", adapter: mailAdapter });
+    ad.registerAdapter({ adapter: mailAdapter });
 
     ad.loadAdapters();
 

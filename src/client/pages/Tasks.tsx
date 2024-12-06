@@ -112,6 +112,8 @@ const TaskDetail = (props: any) => {
       <Form
         onSubmit={({ data }) => {
           delete data.createdby;
+          delete data.attn;
+          delete data.assignee;
           setRecord(data);
           props.closeModal && props.closeModal();
         }}

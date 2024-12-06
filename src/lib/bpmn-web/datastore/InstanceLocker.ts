@@ -73,7 +73,7 @@ class InstanceLocker {
 
   async try(id) {
     const lock = {
-      guid: id,
+      id: id,
       server: typeof process !== "undefined" ? process.env.SERVER_ID : null,
       time: new Date(),
     };
@@ -81,7 +81,6 @@ class InstanceLocker {
     try {
       await this.dataStore.db(COLLECTION).setUser({ id: 1 }).insert(lock);
     } catch (err) {
-      debugger;
       console.error(err);
       return false; // Locking failed, possibly due to a duplicate entry.//
     }
@@ -90,7 +89,7 @@ class InstanceLocker {
   }
 
   async release(id) {
-    const query = { guid: id };
+    const query = { id: id };
     return this.dataStore.db(COLLECTION).setUser({ id: 1 }).where(query).del();
   }
 

@@ -181,6 +181,7 @@ export class Triggers {
         let name = path.basename(filename);
 
         const stats = await fs.promises.stat(this.getPath(name));
+        const x = await import(this.getPath(name));
         const { default: triggers } = await import(this.getPath(name));
 
         const triggersTmp: TriggerItemInternalType[] = triggers.map(

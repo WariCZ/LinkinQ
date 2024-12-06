@@ -239,7 +239,11 @@ export class Entity {
         } else if (columnDef.type == "password") {
           column = table.string(columnName);
         } else if (columnDef.type?.match(/^link\(\w+\)$/)) {
-          column = table.bigint(columnName);
+          if (columnDef.type.indexOf("wf_") > -1) {
+            column = table.uuid(columnName);
+          } else {
+            column = table.bigint(columnName);
+          }
           const rel = columnDef.type.match(/^link\((\w+)\)$/);
 
           if (rel) {
@@ -407,32 +411,59 @@ export class Entity {
     tableName: string;
     schemaDefinition: EntitySchema;
   }) {
-    //
-    // Zjistim zda tabulka existuje
-    if (!(await this.db.schema.setUser({ id: 1 }).hasTable(tableName))) {
-      await this.db.schema
-        .setUser({ id: 1 })
-        .createTable(tableName, async (table) => {
-          // nastavim defaultni sloupce
-          // TODO: vyjimka pro BPMN
-          //
-          let column;
-          // if (tableName.indexOf("wf_") > -1) {
-          //   column = table.text(this.MAIN_ID);
-          // } else {
-          column = table.bigIncrements(this.MAIN_ID);
-          table.primary([this.MAIN_ID]);
-          // }
-          if (schemaDefinition[tableName].fields[this.MAIN_ID].description) {
-            column.comment(
-              schemaDefinition[tableName].fields[this.MAIN_ID].description ||
-                "ID record"
-            );
-          }
-        });
-      logger.info(`Tabulka ${tableName} vytvořena.`);
-    } else {
-      // logger.info(`Tabulka ${tableName} již existuje.`);
+    try {
+      //
+      // Zjistim zda tabulka existuje
+      if (!(await this.db.schema.setUser({ id: 1 }).hasTable(tableName))) {
+        await this.db.schema
+          .setUser({ id: 1 })
+          .createTable(tableName, async (table) => {
+            // nastavim defaultni sloupce
+            // TODO: vyjimka pro BPMN
+            //
+            let column;
+            // if (tableName.indexOf("wf_") > -1) {
+            //   column = table.text(this.MAIN_ID);
+            // } else {
+            //TODO: Tenhle IF je blbe melo by se to predelat na to aby ID bylo jako ostatni
+            // if (tableName === "wf_locks") {
+            if (tableName.indexOf("wf_") > -1) {
+              // column = table.text(this.MAIN_ID);
+              table
+                .uuid(this.MAIN_ID)
+                .primary()
+                .defaultTo(this.db.raw("gen_random_uuid()"));
+              //Zatim nevim proc ??????
+              // table.text(this.MAIN_ID);
+              // // table.primary([this.MAIN_ID]);
+              // if (
+              //   schemaDefinition[tableName].fields[this.MAIN_ID].description
+              // ) {
+              //   column.comment(
+              //     schemaDefinition[tableName].fields[this.MAIN_ID]
+              //       .description || "ID record"
+              //   );
+              // }
+            } else {
+              column = table.bigIncrements(this.MAIN_ID);
+              table.primary([this.MAIN_ID]);
+              // }
+              if (
+                schemaDefinition[tableName].fields[this.MAIN_ID].description
+              ) {
+                column.comment(
+                  schemaDefinition[tableName].fields[this.MAIN_ID]
+                    .description || "ID record"
+                );
+              }
+            }
+          });
+        logger.info(`Tabulka ${tableName} vytvořena.`);
+      } else {
+        // logger.info(`Tabulka ${tableName} již existuje.`);
+      }
+    } catch (e) {
+      debugger;
     }
   }
 
