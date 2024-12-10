@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import useStore from "../store";
 import { Button, Dropdown } from "flowbite-react";
 import Table from "../components/Table";
@@ -13,26 +13,12 @@ import { ModalPropsType } from "../components/Modal/ModalContainer";
 import { FaPlus } from "react-icons/fa";
 import { MdOutlineSchema } from "react-icons/md";
 import { useLocation } from "react-router-dom";
-import { assign } from "lodash";
-
-const getFilter = (type) => {
-  if (type == "open") {
-    return undefined;
-  }
-
-  if (type == "mytasks") {
-    return { assignee: "$user" };
-  }
-  if (type == "attn") {
-    return { attn: "$user" };
-  }
-  return undefined;
-};
+import _, { assign } from "lodash";
 
 const Tasks = () => {
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const filters = getFilter(queryParams.get("filter"));
+  const filters = location.state.filter;
+  const header = location.state.header;
 
   const schema = useStore((state) => state.schema);
 
@@ -74,8 +60,16 @@ const Tasks = () => {
     []
   );
 
+  useEffect(() => {
+    if (!_.isEqual(filter, filters)) {
+      // debugger;
+      refresh({ filter: filters || {} });
+    }
+  }, [filters]);
+
   const { openModal } = useModalStore();
 
+  console.log("Tasks data", data);
   return (
     <div className="mx-3">
       <div className="flex items-center justify-between my-3">
@@ -84,7 +78,7 @@ const Tasks = () => {
             <FaPlus className="ml-0 m-1 h-3 w-3" />
             Add
           </Button>
-          <h1 className="text-2xl font-bold">Tasks</h1>
+          <h1 className="text-2xl font-bold">{header || "Tasks"}</h1>
         </div>
         {/* <Button
           className="mb-1"

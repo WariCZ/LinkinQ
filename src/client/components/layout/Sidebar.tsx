@@ -23,6 +23,7 @@ type Label = {
 type WithTo = Label & {
   to: string; // Povinný atribut 'to', pokud je přítomen
   children?: never; // Pokud je 'to', nesmí být 'children'
+  filter?: Record<string, any>;
 };
 
 type WithChildren = Label & {
@@ -32,14 +33,19 @@ type WithChildren = Label & {
 type MenuItemType = WithTo | WithChildren;
 
 export default function DashboardSidebar(props: { admin?: boolean }) {
-  // const context = useContext(sidebarContext);
   const sidebar = useStore((state) => state.sidebar);
   const setSidebar = useStore((state) => state.setSidebar);
+  const navigate = useNavigate();
+
+  const goTo = (data: WithTo) => {
+    navigate(data.to, {
+      state: { header: data.label, filter: data.filter },
+    });
+  };
 
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth <= 800) {
-        // context.toggleCollapsed();
       }
     };
 
@@ -96,17 +102,19 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
         {
           // icon: FaCircle,
           label: "My tasks",
-          to: "/tasks?filter=mytasks",
+          to: "/tasks",
+          filter: { assignee: "$user" },
         },
         {
           // icon: FaCircle,
           label: "Open tasks",
-          to: "/tasks?filter=open",
+          to: "/tasks",
         },
         {
           // icon: FaCircle,
           label: "K pozornosti",
-          to: "/tasks?filter=attn",
+          to: "/tasks",
+          filter: { attn: "$user" },
         },
       ],
     },
@@ -128,14 +136,17 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
               <img alt="Prodigi logo" src={logo} style={{ height: "20px" }} />
             </Link>
           </div>
-          {renderMenuItems(props.admin ? menuAdmin : menu)}
+          {renderMenuItems(props.admin ? menuAdmin : menu, goTo)}
         </Sidebar.ItemGroup>
       </Sidebar.Items>
     </Sidebar>
   );
 }
 
-const renderMenuItems = (items: MenuItemType[]) => {
+const renderMenuItems = (
+  items: MenuItemType[],
+  goTo: (item: MenuItemType) => void
+) => {
   return items.map((item, index) => {
     if (item.children) {
       return (
@@ -144,17 +155,22 @@ const renderMenuItems = (items: MenuItemType[]) => {
           icon={item.icon}
           label={item.label}
         >
-          {renderMenuItems(item.children)}
+          {renderMenuItems(item.children, goTo)}
         </Sidebar.Collapse>
       );
     }
 
     return (
-      <Link to={item.to || "#"} key={index + item.label}>
-        <Sidebar.Item as="span" icon={item.icon}>
-          {item.label}
-        </Sidebar.Item>
-      </Link>
+      <Sidebar.Item
+        as="span"
+        key={index + item.label}
+        icon={item.icon}
+        onClick={() => {
+          goTo(item);
+        }}
+      >
+        {item.label}
+      </Sidebar.Item>
     );
   });
 };
