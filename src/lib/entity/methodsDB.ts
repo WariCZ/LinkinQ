@@ -4,6 +4,8 @@ import { EntitySchema, Rule } from "./types";
 import { Knex } from "knex";
 import { dbType } from "./sql";
 import { User } from "../auth";
+import { s } from "vite/dist/node/types.d-aGj9QkWt";
+import { debug } from "winston";
 
 type SelectEntityType = {
   entity: string;
@@ -11,6 +13,7 @@ type SelectEntityType = {
   where?: Record<string, string | string[] | number | number[] | undefined>;
   queries?: Record<string, SelectEntityType>;
   nJoin?: string;
+  nJoinDirection?: boolean;
   onlyIds?: boolean;
   orderBy?: string[];
   user: User;
@@ -47,42 +50,36 @@ export const whereQueries = ({
           }, 0);
 
           //f = f + ".id";
+          if (typeof where[f] == "string") {
+            const newf = f + ".guid"; // Davam guid protoze pro where je to potreba pokud se pouzije naprikld attn="9500b584-fa8a-4a3c-8f94-92f2221db78b"
+            where[newf] = where[f];
+            delete where[f];
+            f = newf;
+          }
           if (exitsOthers == 1) {
             onlyIds = true;
           }
         }
       }
 
-      if (
+      const isLink =
         f &&
-        typeof where[f] == "string" &&
-        where[f] == "$user" &&
         modelFields.fields &&
-        modelFields.fields[f]
-      ) {
-        where[f] = user.id;
-      } else {
-        if (
-          f &&
-          typeof where[f] == "string" &&
-          modelFields.fields &&
-          modelFields.fields[f] &&
-          modelFields.fields[f].link &&
-          !modelFields.fields[f].nlinkTable
-        ) {
-          const newF = f + ".guid";
-          where[newF] = where[f];
-          delete where[f];
-          f = newF;
-        }
+        modelFields.fields[f] &&
+        modelFields.fields[f].link &&
+        !modelFields.fields[f].nlinkTable;
+
+      if (f && f.indexOf(".") == -1 && isLink) {
+        const newF = f + ".guid";
+        where[newF] = where[f];
+        delete where[f];
+        f = newF;
       }
-      if ((f && f.indexOf(".") > -1) || isNlink) {
+
+      if (f && f.indexOf(".") > -1) {
         let fSplit = f.split(".");
         const field = fSplit[0];
         const fieldNext = fSplit.shift();
-        if (fSplit.length == 0 && isNlink) {
-          fSplit = ["id"];
-        }
         if (
           fieldNext &&
           modelFields.fields &&
@@ -296,30 +293,76 @@ export const addWhere = async ({
 
     for (let field in where) {
       let val;
-      if (field.indexOf(".") > -1 || schema[entity].fields[field].nlinkTable) {
+      // const isLink =
+      //   schema[entity].fields[field].link &&
+      //   !schema[entity].fields[field].nlinkTable;
+
+      // if (
+      //   field.indexOf(".") == -1 &&
+      //   isLink &&
+      //   typeof where[field] === "string"
+      // ) {
+      //   debugger;
+      //   field = field + ".guid";
+      // }
+      if (field.indexOf(".") > -1) {
         const fieldWhere = field.split(".")[0];
         const fieldsArr = field.split(".");
         const query = joinQueries.queries[fieldsArr[0]];
         //TODO: umi pouze jednu uroven createdby.fullname neumi uroven createdby.owner.fullname
-        const d = await getData({
-          db,
-          schema,
-          entity: query.entity,
-          fieldsArr: query.fieldsArr,
-          where: query.where,
-          user,
-        });
+        let d;
+        if (schema[entity].fields[fieldWhere].nlinkTable) {
+          const dd = await getData({
+            db,
+            schema,
+            entity: query.entity,
+            fieldsArr: query.fieldsArr,
+            where: query.where,
+            user,
+          });
 
-        delete where[field];
-        where[fieldWhere] = d.map((d) => d.id);
-        field = fieldWhere;
+          d = await getData({
+            db,
+            schema,
+            entity: query.entity,
+            fieldsArr: query.fieldsArr,
+            where: { id: dd.map((d) => d.id) },
+            nJoin: query.nJoin,
+            nJoinDirection: true,
+            user,
+          });
+
+          delete where[field];
+          where["id"] = d.map((d) => d.source);
+          field = "id";
+        } else {
+          d = await getData({
+            db,
+            schema,
+            entity: query.entity,
+            fieldsArr: query.fieldsArr,
+            where: query.where,
+            user,
+          });
+
+          delete where[field];
+          where[fieldWhere] = d.map((d) => d.id);
+          field = fieldWhere;
+        }
       }
       try {
         val = JSON.parse(where[field] as any);
       } catch {
         val = where[field];
       }
-      mainWhere[field] = val;
+
+      if (where[field] == "$user" && field == "guid") {
+        // delete where[field];
+        mainWhere["id"] = user.id;
+      } else {
+        mainWhere[field] = val;
+      }
+
       // if (Array.isArray(val)) {
       //   query = query.whereIn(field, val);
       // } else {
@@ -447,6 +490,7 @@ export const getData = async ({
   queries,
   where,
   nJoin,
+  nJoinDirection,
   orderBy,
   user,
 }: SelectEntityType & {
@@ -470,12 +514,18 @@ export const getData = async ({
   if (nJoin) {
     // provedu join s vazebni tabulkou
 
-    const fieldsArrJoin = fieldsArr.map((f) => entity + "." + f);
-    fieldsArrJoin.push(nJoin + ".source");
-    query = db(entity)
-      .select(fieldsArrJoin)
-      .innerJoin(nJoin, entity + ".id", nJoin + ".target")
-      .whereIn(nJoin + ".source", where ? (where.id as any) : [-1]);
+    if (nJoinDirection) {
+      query = db(nJoin)
+        .select(nJoin + ".source")
+        .whereIn(nJoin + ".target", where ? (where.id as any) : [-1]);
+    } else {
+      const fieldsArrJoin = fieldsArr.map((f) => entity + "." + f);
+      fieldsArrJoin.push(nJoin + ".source");
+      query = db(entity)
+        .select(fieldsArrJoin)
+        .innerJoin(nJoin, entity + ".id", nJoin + ".target")
+        .whereIn(nJoin + ".source", where ? (where.id as any) : [-1]);
+    }
   } else {
     query = db(entity).select(fieldsArr);
 

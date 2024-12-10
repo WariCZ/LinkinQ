@@ -49,6 +49,7 @@ export class Sql {
           entity,
           fieldsArr: fields || ["*"],
           where: where,
+          user: this.user,
         });
 
         const ret = await getData({
@@ -96,18 +97,23 @@ export class Sql {
             delete newDataItem[d];
           } else if (match && match[0].indexOf("link") > -1 && match[1]) {
             console.log("getLinks", newDataItem, d);
-            const targetData: any = await this.#db(match[1])
-              .select("id")
-              .where("guid", newDataItem[d]);
-
-            if (targetData.length == 1) {
-              newDataItem[d] = targetData[0].id;
-              data[d] = parseInt(targetData[0].id);
+            if (newDataItem[d] === null) {
+              newDataItem[d] = null;
+              data[d] = null;
             } else {
-              if (targetData.length > 1) {
-                throw "Nalezeno guid pro vice linku";
+              const targetData: any = await this.#db(match[1])
+                .select("id")
+                .where("guid", newDataItem[d]);
+
+              if (targetData.length == 1) {
+                newDataItem[d] = targetData[0].id;
+                data[d] = parseInt(targetData[0].id);
               } else {
-                throw "Nenalezen guid pro link";
+                if (targetData.length > 1) {
+                  throw "Nalezeno guid pro vice linku";
+                } else {
+                  throw "Nenalezen guid pro link";
+                }
               }
             }
           }
@@ -186,6 +192,7 @@ export class Sql {
           db: this.#db,
           entity,
           query,
+          user: this.user,
         });
         const updateIdsData = await query.select(MAIN_ID);
         const idForDeleteIfIsJoinEmpty = updateIdsData.map((u) => u[MAIN_ID]);
@@ -267,6 +274,7 @@ export class Sql {
           db: this.#db,
           entity,
           query,
+          user: this.user,
         });
 
         const ret = await query.delete();
