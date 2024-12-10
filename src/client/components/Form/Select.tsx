@@ -72,11 +72,14 @@ const Select = React.forwardRef(
           {...props}
           value={value}
           // ref={ref}
+          // menuIsOpen
           cacheOptions
           onMenuOpen={() => {
             fetchOptions({});
           }}
-          defaultOptions={options}
+          defaultOptions={
+            props.required ? options : [{ value: null, label: " " }, ...options]
+          }
           classNamePrefix="flowbite-select"
           placeholder="Vyberte možnosti"
           menuPortalTarget={document.body} // Přesměrování dropdownu mimo modal

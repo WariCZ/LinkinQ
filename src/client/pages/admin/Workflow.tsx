@@ -153,18 +153,19 @@ const AddWorkflow = (props: ModalPropsType & { refresh: () => void }) => {
   return (
     <Form
       data={data}
-      onSubmit={async ({ closeModal, data }) => {
+      onSubmit={async ({ data }) => {
         await setRecord({
           name: data.name,
           source: defaultXml,
         });
-        closeModal && closeModal();
+        props.closeModal && props.closeModal();
       }}
       formFields={[
         {
           label: "Workflow name",
           field: "name",
           required: true,
+          type: "text",
         },
       ]}
       {...props}

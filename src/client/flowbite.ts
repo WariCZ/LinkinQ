@@ -23,7 +23,7 @@ export const customTheme: CustomFlowbiteTheme = {
         active: "text-gray-700 dark:text-gray-100",
       },
       collapsed: {
-        insideCollapse: "group w-full pl-6 transition duration-75",
+        insideCollapse: "group w-full pl-1 transition duration-75",
         noIcon: "font-bold",
       },
     },

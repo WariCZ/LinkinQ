@@ -144,7 +144,7 @@ const entityFields: EntitySchema = {
         system: true,
       },
       tokens: {
-        type: "text",
+        type: "jsonb",
         label: "Tokens",
         description: "Tokens associated with the element",
         system: true,

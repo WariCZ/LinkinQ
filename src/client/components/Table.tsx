@@ -11,6 +11,7 @@ import {
 import useStore from "../store";
 import { EntitySchema, EntityType } from "@/lib/entity/types";
 import _ from "lodash";
+import { DateTime } from "luxon";
 
 export type TableFieldType =
   | {
@@ -55,11 +56,26 @@ const translateColumns = ({
     if (typeof c === "string") {
       const s = schema && schema[entity] && schema[entity].fields[c];
       if (c.indexOf(".") === -1) {
-        col = {
-          id: c,
-          header: s?.label || c,
-          accessorKey: c,
-        };
+        if (s.type == "datetime") {
+          col = {
+            id: c,
+            header: s?.label || c,
+            accessorKey: c,
+            cell: (info) => {
+              const val = info.getValue();
+
+              return DateTime.fromISO(val, { zone: "utc" }).toFormat(
+                "dd.MM.yyyy HH:mm:ss"
+              );
+            },
+          };
+        } else {
+          col = {
+            id: c,
+            header: s?.label || c,
+            accessorKey: c,
+          };
+        }
       } else {
         const ids = c.split(".");
         const label = getLabel({ entity, field: s?.label || c, schema });
@@ -68,11 +84,10 @@ const translateColumns = ({
           header: label,
           accessorKey: ids[0],
           cell: (info) => {
-            // debugger;
             const val = info.getValue();
             if (Array.isArray(val)) {
               const id = ids.slice(1).join(".");
-              return <span>{val.map((v) => _.get(v, id))}</span>;
+              return <span>{val.map((v) => _.get(v, id)).join(", ")}</span>;
             } else if (typeof val === "object") {
               const id = ids.slice(1).join(".");
               return <span>{_.get(val, id)}</span>;

@@ -8,7 +8,8 @@ import {
 
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 // import { useGlobalState } from "./useSSE";
-import _, { debounce } from "lodash";
+import _, { debounce, filter } from "lodash";
+import { debug } from "winston";
 // import { MAIN_ID } from "../../lib/entity";
 const MAIN_ID = "guid";
 export const httpRequest = ({
@@ -49,10 +50,12 @@ const getSingleRecord = ({
   entity,
   guid,
   fields,
+  filter,
 }: {
   entity: string;
   guid: string;
   fields: string;
+  filter?: Object;
 }) => {
   return httpRequest({
     method: "GET",
@@ -60,6 +63,7 @@ const getSingleRecord = ({
     params: {
       guid: guid,
       __fields: fields,
+      ...filter,
     },
   });
 };
@@ -179,8 +183,13 @@ function useDataTable<T, U>(
       entity: param.entity,
       guid: guid,
       fields: param.fields ? param.fields.join() : "*",
+      filter: param.filter,
     });
     setData((prevData) => {
+      if (Array.isArray(response.data) && response.data.length == 0) {
+        if (Array.isArray(prevData))
+          return [...prevData.filter((d) => d.guid != guid)] as any;
+      }
       if (Array.isArray(prevData)) {
         setHighlightedRow(response.data.map((d: any) => d.guid));
 
@@ -279,6 +288,7 @@ function useDataTable<T, U>(
 
   useEffect(() => {
     setLoading(true);
+
     fetchData({
       entity: param.entity,
       fields: fieldsEntity || undefined,

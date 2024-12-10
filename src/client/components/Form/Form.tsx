@@ -267,13 +267,19 @@ const Form = ({
   }, [reset, data]);
 
   const findChanges = (current, initial) => {
+    _.keys(current).forEach((f) => {
+      if (entity && schema[entity].fields[f].link && current[f] === "") {
+        current[f] = undefined;
+      }
+    });
+
     if (_.isEqual(current, initial)) return {}; // Pokud je identické, vrátíme prázdný objekt
 
     // Najdeme rozdíly mezi objekty
     return _.reduce(
       current,
       (result, value, key) => {
-        if (!_.isEqual(value, (initial && initial[key]) || {})) {
+        if (!_.isEqual(value, initial && initial[key])) {
           result[key] =
             _.isObject(value) && !Array.isArray(value)
               ? findChanges(value, initial[key]) // Rekurzivní kontrola objektů
@@ -286,7 +292,11 @@ const Form = ({
   };
 
   const formSubmit = (formdata: any, e: any) => {
-    const changedData = findChanges(formdata, data);
+    debugger;
+    const changedData: any = findChanges(formdata, data);
+    if (formdata.guid) {
+      changedData.guid = formdata.guid;
+    }
     onSubmit &&
       onSubmit({
         data: changedData,

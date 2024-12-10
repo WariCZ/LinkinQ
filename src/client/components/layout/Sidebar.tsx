@@ -13,6 +13,7 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { FaHubspot } from "react-icons/fa";
 import useStore from "@/client/store";
 import logo from "../../static/logo.png";
+import { FaCircle } from "react-icons/fa";
 
 type Label = {
   label: string;
@@ -85,8 +86,29 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
     },
     {
       label: "Tasks",
-      to: "/tasks",
       icon: FaTasks,
+      children: [
+        {
+          // icon: FaCircle,
+          label: "All tasks",
+          to: "/tasks",
+        },
+        {
+          // icon: FaCircle,
+          label: "My tasks",
+          to: "/tasks?filter=mytasks",
+        },
+        {
+          // icon: FaCircle,
+          label: "Open tasks",
+          to: "/tasks?filter=open",
+        },
+        {
+          // icon: FaCircle,
+          label: "K pozornosti",
+          to: "/tasks?filter=attn",
+        },
+      ],
     },
   ];
 

@@ -147,9 +147,16 @@ class DataStore extends ServerComponent implements IDataStore {
       instance.id = instance.guid;
       instance.dbId = ic[0].id;
     } else {
+      // saveObject.items = JSON.stringify(saveObject.items);
+      // saveObject.loops = JSON.stringify(saveObject.loops);
+      // saveObject.tokens = JSON.stringify(saveObject.tokens);
+      // saveObject.logs = JSON.stringify(saveObject.logs);
+      // saveObject.data = JSON.stringify(saveObject.data);
+      // saveObject.savePoints = JSON.stringify(saveObject.savePoints);
+
       await db(Instance_collection)
         .setUser({ id: 1 })
-        .where({ guid: instance.id })
+        .where({ id: instance.id })
         .update(saveObject);
     }
 

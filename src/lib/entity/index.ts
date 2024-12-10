@@ -624,7 +624,6 @@ export class Entity {
     // Dohledani tabulek a slopupcu ktere jsou ve Schematu a pridam je do DB
     const actualDBSchema = await this.getTablesAndColumns(entityDef);
     const differencesAdd = findDifferences(actualDBSchema, entityDef);
-    console.log("differencesAdd", differencesAdd);
 
     console.log("Create tables");
     await this.createTables({
@@ -651,8 +650,6 @@ export class Entity {
       user: { id: 1 } as any,
     });
 
-    //
-    console.log("Create data");
     await this.createData({
       data: defaultUsers(),
       sqlAdmin,

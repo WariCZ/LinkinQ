@@ -13,12 +13,14 @@ type SelectEntityType = {
   nJoin?: string;
   onlyIds?: boolean;
   orderBy?: string[];
+  user: User;
 };
 
 export const whereQueries = ({
   schema,
   entity,
   where,
+  user,
 }: SelectEntityType & { schema: EntitySchema }) => {
   const modelFields = schema[entity];
   if (!modelFields) {
@@ -44,16 +46,43 @@ export const whereQueries = ({
             return acc + (word && word?.indexOf(f || "-1") > -1 ? 1 : 0);
           }, 0);
 
-          f = f + ".id";
+          //f = f + ".id";
           if (exitsOthers == 1) {
             onlyIds = true;
           }
         }
       }
-      if (f && f.indexOf(".") > -1) {
-        const fSplit = f.split(".");
+
+      if (
+        f &&
+        typeof where[f] == "string" &&
+        where[f] == "$user" &&
+        modelFields.fields &&
+        modelFields.fields[f]
+      ) {
+        where[f] = user.id;
+      } else {
+        if (
+          f &&
+          typeof where[f] == "string" &&
+          modelFields.fields &&
+          modelFields.fields[f] &&
+          modelFields.fields[f].link &&
+          !modelFields.fields[f].nlinkTable
+        ) {
+          const newF = f + ".guid";
+          where[newF] = where[f];
+          delete where[f];
+          f = newF;
+        }
+      }
+      if ((f && f.indexOf(".") > -1) || isNlink) {
+        let fSplit = f.split(".");
         const field = fSplit[0];
         const fieldNext = fSplit.shift();
+        if (fSplit.length == 0 && isNlink) {
+          fSplit = ["id"];
+        }
         if (
           fieldNext &&
           modelFields.fields &&
@@ -71,6 +100,7 @@ export const whereQueries = ({
             entity: relTable,
             fieldsArr: ["id"],
             where: { [fSplit.join(".")]: where ? where[f] : undefined },
+            user,
           });
           //
           if (queries[field]) {
@@ -121,7 +151,7 @@ export const whereQueries = ({
     .filter((f) => f);
   // odfiltruju nlinky
   // fieldsArrSel = _.uniq(fieldsArrSel);
-  return { entity, fieldsArr: ["id"], where, queries };
+  return { entity, fieldsArr: ["id"], where, queries, user };
 };
 
 export const getQueries = ({
@@ -129,6 +159,7 @@ export const getQueries = ({
   entity,
   fieldsArr,
   where,
+  user,
 }: SelectEntityType & { schema: EntitySchema }) => {
   if (fieldsArr && fieldsArr[0] !== "*") {
     const modelFields = schema[entity];
@@ -180,6 +211,7 @@ export const getQueries = ({
               schema,
               entity: relTable,
               fieldsArr: [fSplit.join(".")],
+              user,
             });
             //
             if (queries[field]) {
@@ -228,9 +260,9 @@ export const getQueries = ({
       .filter((f) => f);
     // odfiltruju nlinky
     fieldsArrSel = _.uniq(fieldsArrSel);
-    return { entity, fieldsArr: fieldsArrSel, where, queries };
+    return { entity, fieldsArr: fieldsArrSel, where, queries, user };
   } else {
-    return { entity, fieldsArr, where };
+    return { entity, fieldsArr, where, user };
   }
 };
 
@@ -240,6 +272,7 @@ export const addWhere = async ({
   entity,
   schema,
   where,
+  user,
 }: {
   db: dbType;
   query: Knex.QueryBuilder;
@@ -248,6 +281,8 @@ export const addWhere = async ({
   where:
     | Record<string, string | number | string[] | number[] | undefined>
     | undefined;
+
+  user: User;
 }) => {
   const mainWhere: Record<string, any> = {};
   if (where && Object.keys(where).length > 0) {
@@ -256,11 +291,12 @@ export const addWhere = async ({
       entity,
       fieldsArr: [],
       where: where,
+      user,
     });
 
     for (let field in where) {
       let val;
-      if (field.indexOf(".") > -1) {
+      if (field.indexOf(".") > -1 || schema[entity].fields[field].nlinkTable) {
         const fieldWhere = field.split(".")[0];
         const fieldsArr = field.split(".");
         const query = joinQueries.queries[fieldsArr[0]];
@@ -271,6 +307,7 @@ export const addWhere = async ({
           entity: query.entity,
           fieldsArr: query.fieldsArr,
           where: query.where,
+          user,
         });
 
         delete where[field];
@@ -411,6 +448,7 @@ export const getData = async ({
   where,
   nJoin,
   orderBy,
+  user,
 }: SelectEntityType & {
   db: dbType;
   schema: EntitySchema;
@@ -457,6 +495,7 @@ export const getData = async ({
       entity,
       schema,
       where,
+      user,
     });
   }
 
@@ -477,6 +516,7 @@ export const getData = async ({
         queries: query.queries,
         where: { id: ids },
         nJoin: query.nJoin,
+        user,
       });
       if (query.nJoin) {
         data = data.map((d) => {

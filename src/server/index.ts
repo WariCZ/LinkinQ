@@ -14,15 +14,9 @@ import { BPMNServer, configuration, BPMNAPI, Logger } from "../lib/bpmn-web";
 import { Sql } from "@/lib/entity/sql";
 import { Adapters } from "../lib/entity/adapters";
 import { mailAdapter } from "../lib/entity/adaptersDef/mail";
+import { BpmnRoutes } from "../lib/bpmn-web/routes";
 
 dotenv.config();
-
-// const schema = checkSchema();
-// console.log("schema", schema);
-
-// app.use("/", authRoutes);
-
-// app.use("/entity", entityRoutes);
 
 declare global {
   var prodigi: {
@@ -33,13 +27,12 @@ declare global {
 export class WebApp {
   app: Express;
   entity: EntityRoutes;
-  // userManager;
-  bpmnServer: any;
+  bpmnRoutes: BpmnRoutes;
+  bpmnServer: BPMNServer;
   packageJson;
   viteRunning: boolean;
 
   constructor() {
-    // console.log("ENV", process.env);
     this.viteRunning = false;
     const fs = require("fs");
 
@@ -51,10 +44,6 @@ export class WebApp {
     }
 
     this.app = this.initExpress();
-
-    // this.userManager = new UserManager(this.app);
-
-    // this.userManager.init();
 
     this.entity = new EntityRoutes();
 
@@ -69,56 +58,33 @@ export class WebApp {
     ad.loadAdapters();
 
     console.log("After start adapter");
-
-    this.entity
-      .prepareSchema()
-      .then(async ({ schema, sqlAdmin }) => {
-        const wflogger = new Logger({ toConsole: true });
-        this.bpmnServer = new BPMNServer(configuration, wflogger);
-
-        const bpmnAPI = new BPMNAPI(this.bpmnServer);
-
-        this.entity.triggers.startWorkflow = async ({ table, data }) => {
-          var caseId = Math.floor(Math.random() * 10000);
-          let context = await bpmnAPI.engine.start(
-            "Cash Request",
-            { caseId: caseId++ },
-            { userName: "admin" } as any
-          );
-          return (context.instance as any).dbId;
-        };
-        // console.log("context", context);
-        this.setupExpress({ schema, sqlAdmin });
-      })
-      .catch((e) => {
-        // debugger;
-
-        logger.error(e);
-        if (e.stack) logger.error(e.stack);
-      });
   }
 
-  // router.post("/runWorkflow", async (req: Request, res: Response) => {
-  //   try {
-  //     if (req.user) {
-  //       debugger;
-  //       this.
-  //       let processName = "Cash Request";
-  //       // req.session.processName = processName;
-  //       let context = await bpmnAPI.engine.start(
-  //         processName,
-  //         { caseId: 1 },
-  //         1
-  //       );
-  //     } else {
-  //       res.sendStatus(401);
-  //     }
-  //   } catch (error: any) {
-  //     debugger;
-  //     console.error("Error fetching data from external API:", error?.stack);
-  //     res.status(500).send("Error fetching data from external API");
-  //   }
-  // });
+  async initApp() {
+    const { schema, sqlAdmin } = await this.entity.prepareSchema();
+
+    const wflogger = new Logger({ toConsole: true });
+    this.bpmnServer = new BPMNServer(configuration, wflogger);
+
+    const bpmnAPI = new BPMNAPI(this.bpmnServer);
+
+    this.entity.triggers.startWorkflow = async ({ table, data }) => {
+      var caseId = Math.floor(Math.random() * 10000);
+      let context = await bpmnAPI.engine.start(
+        "Tasks schema",
+        { caseId: caseId++ },
+        { userName: "admin" } as any
+      );
+      return (context.instance as any).dbId;
+    };
+
+    this.bpmnRoutes = new BpmnRoutes(bpmnAPI, sqlAdmin, this.bpmnServer);
+
+    this.setupExpress({
+      schema,
+      sqlAdmin,
+    });
+  }
 
   initExpress() {
     const app = express();
@@ -135,8 +101,6 @@ export class WebApp {
     app.use(bodyParser.json({ limit: "200mb" }));
     app.use(bodyParser.urlencoded({ limit: "200mb", extended: true }));
     app.use(cookieParser());
-
-    // app.use(busboy());
 
     return app;
   }
@@ -213,6 +177,7 @@ export class WebApp {
     // });
     app.use("/", authRoutes({ schema, sqlAdmin }));
     app.use("/api", authenticate, this.entity.config());
+    app.use("/bpmnapi", authenticate, this.bpmnRoutes.config());
 
     app.get("/protected2", authenticate, (req: Request, res: Response) => {
       res.json({ message: "This is a protected route", user: req.user });
@@ -246,5 +211,6 @@ function setupEnvVars() {
 setupEnvVars();
 
 const webApp = new WebApp();
+webApp.initApp();
 
 module.exports = webApp.app;

@@ -127,6 +127,11 @@ div:has(> span > span.errorHighlight) {
 
 .flowbite-select__option {
   @apply cursor-pointer px-4 py-2 text-sm text-gray-900 hover:bg-gray-100;
+  min-height: 25px !important;
+}
+
+.flowbite-select__option:hover {
+  @apply text-gray-900;
 }
 
 .flowbite-select__option--is-selected {
