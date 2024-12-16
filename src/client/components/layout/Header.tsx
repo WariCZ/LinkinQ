@@ -21,6 +21,7 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 // import NotificationButton from "../notifications/notificationButton";
 
 import logo from "../../static/logo.png";
+import { useTranslation } from "react-i18next";
 // const logo = require("../../static/logo.png");
 
 const isSmallScreen = () => {
@@ -40,9 +41,14 @@ const getUserInitials = function (user: string) {
 };
 
 const UserAvatar = () => {
-  // const { data: session } = useSession();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
   const user = useStore((state) => state.user);
   const logout = useStore((state) => state.logout);
+
+  const goTo = (to: string) => {
+    navigate(to);
+  };
 
   if (!user) return null;
   return (
@@ -63,20 +69,32 @@ const UserAvatar = () => {
       <Dropdown.Header>
         <span className="block text-sm font-bold">{user.fullname}</span>
       </Dropdown.Header>
-      {/* <Link href="/profile"> */}
-      <Dropdown.Item>Profile</Dropdown.Item>
-      {/* </Link> */}
-      <Dropdown.Item>Settings</Dropdown.Item>
-      <Dropdown.Item>
-        <Link to="/admin">Administration</Link>
+      <Dropdown.Item
+        onClick={() => {
+          goTo("/profile");
+        }}
+      >
+        {t("header.profile")}
+      </Dropdown.Item>
+      {/* <Dropdown.Item>{t("header.settings")}</Dropdown.Item> */}
+      <Dropdown.Item
+        onClick={() => {
+          goTo("/admin");
+        }}
+      >
+        {t("header.administration")}
       </Dropdown.Item>
       <Dropdown.Divider />
-      <Dropdown.Item onClick={() => logout()}>Sign out</Dropdown.Item>
+      <Dropdown.Item onClick={() => logout()}>
+        {t("header.signout")}
+      </Dropdown.Item>
     </Dropdown>
   );
 };
 
 export const DashboardHeader = function (props: { admin?: boolean }) {
+  const { t } = useTranslation();
+
   const sidebar = useStore((state) => state.sidebar);
   const setSidebar = useStore((state) => state.setSidebar);
 
@@ -114,7 +132,7 @@ export const DashboardHeader = function (props: { admin?: boolean }) {
                   </Link>
                   {props.admin ? (
                     <span className="font-bold px-2 mt-0 text-2xl">
-                      Administration
+                      {t("header.administration")}
                     </span>
                   ) : null}
                 </Navbar.Brand>

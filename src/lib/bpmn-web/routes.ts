@@ -97,13 +97,29 @@ export class BpmnRoutes {
             req.user
           );
 
+          let x = await this.getNodeInfo(
+            this.bpmnServer,
+            processName,
+            elementId
+          );
+
           let { node, fields } = await this.getNodeInfo(
             this.bpmnServer,
             processName,
             elementId
           );
 
-          return res.json({ fields });
+          const flows = node.outbounds.map((flow) => {
+            return {
+              name: flow.name,
+              value: flow?.def?.conditionExpression?.body?.replace(
+                /\$\(item.data.move=="(.*)"\)/,
+                "$1"
+              ),
+            };
+          });
+
+          return res.json({ flows, fields });
         }
       } catch (error) {
         console.error("Error fetching data from external API:", error);
@@ -118,19 +134,17 @@ export class BpmnRoutes {
           //
           let id = req.body.id;
 
-          const { processName, elementId } = await this.getInstanceByItemId(
-            id,
-            req.user
-          );
+          const { instance, processName, elementId } =
+            await this.getInstanceByItemId(id, req.user);
 
           let { node, fields } = await this.getNodeInfo(
             this.bpmnServer,
             processName,
             elementId
           );
-
+          let result;
           if (fields && fields.length > 0) {
-            let result = await this.bpmnAPI.engine.invoke(
+            result = await this.bpmnAPI.engine.invoke(
               { "items.id": id },
               req.body.itemFields,
               this.getSecureUser(req.user) as any
@@ -138,14 +152,48 @@ export class BpmnRoutes {
 
             //TODO: workflow.ts
           } else {
-            let result = await this.bpmnAPI.engine.invoke(
+            result = await this.bpmnAPI.engine.invoke(
               { "items.id": id },
               {},
               this.getSecureUser(req.user) as any
             );
-
-            return res.json({});
           }
+
+          if (
+            result?.item?.node?.def?.$attrs &&
+            _.keys(result.item.node.def.$attrs).length > 0
+          ) {
+            const entityData = {};
+            _.keys(result.item.node.def.$attrs).forEach((attr) => {
+              if (attr.indexOf("linkinq:") > -1) {
+                if (result.item.node.def.$attrs[attr] === "$user") {
+                  entityData[attr.replace("linkinq:", "")] = (
+                    req.user as any
+                  ).guid;
+                } else {
+                  entityData[attr.replace("linkinq:", "")] =
+                    result.item.node.def.$attrs[attr];
+                }
+              }
+            });
+
+            if (_.keys(entityData).length > 0) {
+              if (node.process.def.$attrs["linkinq:entity"]) {
+                const entity: string =
+                  node.process.def.$attrs["linkinq:entity"];
+
+                const x = await this.sqlAdmin.update({
+                  entity,
+                  where: { "workflowInstance.id": instance.id },
+                  data: entityData,
+                });
+                console.log("x");
+              } else {
+                throw "Error worflow cannot defined entity";
+              }
+            }
+          }
+
           return res.json({});
         } else {
           res.sendStatus(401);

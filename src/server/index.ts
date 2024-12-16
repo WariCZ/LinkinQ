@@ -75,7 +75,18 @@ export class WebApp {
         { caseId: caseId++ },
         { userName: "admin" } as any
       );
-      return (context.instance as any).dbId;
+
+      const entityData = {};
+      Object.keys(context.item.element.def.$attrs).forEach((attr) => {
+        if (attr.indexOf("linkinq:") > -1) {
+          entityData[attr.replace("linkinq:", "")] =
+            context.item.element.def.$attrs[attr];
+        }
+      });
+      return {
+        id: (context.instance as any).dbId,
+        data: entityData,
+      };
     };
 
     this.bpmnRoutes = new BpmnRoutes(bpmnAPI, sqlAdmin, this.bpmnServer);

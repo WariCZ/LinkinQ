@@ -56,7 +56,12 @@ const Journal: React.FC = () => {
     <div>
       <h1>Journal</h1>
       <Button onClick={() => refresh()}>reload</Button>
-      <Table data={data} columns={columns} highlightedRow={highlightedRow} />
+      <Table
+        data={data}
+        columns={columns}
+        highlightedRow={highlightedRow}
+        entity="journal"
+      />
     </div>
   );
 };

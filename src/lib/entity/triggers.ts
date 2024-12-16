@@ -407,12 +407,17 @@ export class Triggers {
                 };
 
                 if (that.schema?.[table]?.workflow && that.startWorkflow) {
-                  const workflowInstance = await that.startWorkflow({
+                  const workflowData: any = await that.startWorkflow({
                     table,
                     data: runner.builder._single.insert,
                   });
                   runner.builder._single.insert.workflowInstance =
-                    workflowInstance;
+                    workflowData.id;
+
+                  runner.builder._single.insert = {
+                    ...runner.builder._single.insert,
+                    ...workflowData.data,
+                  };
                 }
                 // returningFields = [
                 //   ...returningFields,

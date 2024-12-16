@@ -8,12 +8,14 @@ import { FaBuffer } from "react-icons/fa";
 import { FaCode } from "react-icons/fa";
 import { FaProjectDiagram } from "react-icons/fa";
 import { FaTable } from "react-icons/fa";
+import { FaDatabase } from "react-icons/fa";
 import { FaTasks } from "react-icons/fa";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { FaHubspot } from "react-icons/fa";
 import useStore from "@/client/store";
 import logo from "../../static/logo.png";
 import { FaCircle } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 type Label = {
   label: string;
@@ -33,6 +35,7 @@ type WithChildren = Label & {
 type MenuItemType = WithTo | WithChildren;
 
 export default function DashboardSidebar(props: { admin?: boolean }) {
+  const { t } = useTranslation();
   const sidebar = useStore((state) => state.sidebar);
   const setSidebar = useStore((state) => state.setSidebar);
   const navigate = useNavigate();
@@ -75,44 +78,50 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
     {
       label: "Entity",
       to: "/admin/entity",
-      icon: FaTable,
+      icon: FaDatabase,
     },
     {
       label: "Triggers",
       to: "/admin/triggers",
       icon: FaHubspot,
     },
+    {
+      label: "Query builder",
+      to: "/admin/querybuilder",
+      icon: FaTable,
+    },
   ];
 
   const menu: MenuItemType[] = [
     {
-      label: "Home",
+      label: t("sidebar.home"),
       to: "/",
       icon: IoMdHome,
     },
     {
-      label: "Tasks",
+      label: t("sidebar.tasks.parent"),
       icon: FaTasks,
       children: [
         {
           // icon: FaCircle,
-          label: "All tasks",
+          label: t("sidebar.tasks.all"),
           to: "/tasks",
         },
         {
           // icon: FaCircle,
-          label: "My tasks",
+          label: t("sidebar.tasks.my"),
           to: "/tasks",
           filter: { assignee: "$user" },
         },
         {
           // icon: FaCircle,
-          label: "Open tasks",
+          label: t("sidebar.tasks.new"),
           to: "/tasks",
+          filter: { status: "New" },
         },
         {
           // icon: FaCircle,
-          label: "K pozornosti",
+          label: t("sidebar.tasks.attn"),
           to: "/tasks",
           filter: { attn: "$user" },
         },

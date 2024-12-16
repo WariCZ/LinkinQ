@@ -7,97 +7,165 @@
   xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
   id="sample-diagram"
   targetNamespace="http://bpmn.io/schema/bpmn"
+  xmlns:linkinq="http://linkinq.physter.com"
   xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
   <bpmn2:process id="Process_1"
+    linkinq:entity="tasks"
     isExecutable="false">
     <bpmn2:startEvent id="StartEvent_1">
       <bpmn2:outgoing>Flow_0bzpzvg</bpmn2:outgoing>
     </bpmn2:startEvent>
     <bpmn2:userTask id="Activity_18jjnij"
       name="Nový"
+      linkinq:status="New"
       camunda:formKey="move1">
       <bpmn2:extensionElements>
         <camunda:formData>
           <camunda:formField id="move"
             label="MoveTo"
             type="enum">
-            <camunda:value id="move3"
-              name="toAssignee" />
+            <camunda:value id="toAssignee"
+              name="Assign" />
             <camunda:value id="toClose"
-              name="to Close" />
+              name="Close" />
           </camunda:formField>
         </camunda:formData>
       </bpmn2:extensionElements>
       <bpmn2:incoming>Flow_0bzpzvg</bpmn2:incoming>
       <bpmn2:outgoing>Flow_0zv3jdc</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_1et8mvy</bpmn2:outgoing>
     </bpmn2:userTask>
     <bpmn2:sequenceFlow id="Flow_0bzpzvg"
       sourceRef="StartEvent_1"
       targetRef="Activity_18jjnij" />
     <bpmn2:endEvent id="Event_1pamluw"
+      linkinq:status="Closed"
       name="Uzavřeno">
-      <bpmn2:incoming>Flow_09spex4</bpmn2:incoming>
-      <bpmn2:incoming>Flow_1wadhw3</bpmn2:incoming>
+      <bpmn2:incoming>Flow_0wopcd0</bpmn2:incoming>
+      <bpmn2:incoming>Flow_0zv3jdc</bpmn2:incoming>
     </bpmn2:endEvent>
-    <bpmn2:sequenceFlow id="Flow_09spex4"
-      name="Uzavřít"
-      sourceRef="Gateway_1wo3631"
+    <bpmn2:userTask id="Activity_1tnilen"
+      name="Přiděleno"
+      linkinq:status="Assign"
+      linkinq:assignee="$user"
+      camunda:formKey="move2">
+      <bpmn2:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="move"
+            type="enum">
+            <camunda:value id="toPause"
+              name="Pause" />
+            <camunda:value id="toClose"
+              name="Close" />
+          </camunda:formField>
+        </camunda:formData>
+      </bpmn2:extensionElements>
+      <bpmn2:incoming>Flow_1et8mvy</bpmn2:incoming>
+      <bpmn2:incoming>Flow_0114fg0</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_0wopcd0</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_0zzkew6</bpmn2:outgoing>
+    </bpmn2:userTask>
+    <bpmn2:sequenceFlow id="Flow_0zv3jdc"
+      name="Close"
+      sourceRef="Activity_18jjnij"
       targetRef="Event_1pamluw">
       <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"
         language="JavaScript">$(item.data.move=="toClose")</bpmn2:conditionExpression>
     </bpmn2:sequenceFlow>
-    <bpmn2:userTask id="Activity_1tnilen"
-      name="Přiděleno">
-      <bpmn2:incoming>Flow_0qvcwgu</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_1wadhw3</bpmn2:outgoing>
-    </bpmn2:userTask>
-    <bpmn2:exclusiveGateway id="Gateway_1wo3631">
-      <bpmn2:incoming>Flow_0zv3jdc</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_0qvcwgu</bpmn2:outgoing>
-      <bpmn2:outgoing>Flow_09spex4</bpmn2:outgoing>
-    </bpmn2:exclusiveGateway>
-    <bpmn2:sequenceFlow id="Flow_0zv3jdc"
-      sourceRef="Activity_18jjnij"
-      targetRef="Gateway_1wo3631" />
-    <bpmn2:sequenceFlow id="Flow_0qvcwgu"
-      name="Přidělit"
-      sourceRef="Gateway_1wo3631"
-      targetRef="Activity_1tnilen" />
-    <bpmn2:sequenceFlow id="Flow_1wadhw3"
-      name="Uzavřít"
+    <bpmn2:sequenceFlow id="Flow_0wopcd0"
+      name="Close"
       sourceRef="Activity_1tnilen"
-      targetRef="Event_1pamluw" />
+      targetRef="Event_1pamluw">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"
+        language="JavaScript">$(item.data.move=="toClose")</bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="Flow_1et8mvy"
+      name="Assign"
+      sourceRef="Activity_18jjnij"
+      targetRef="Activity_1tnilen">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"
+        language="JavaScript">$(item.data.move=="toAssignee")</bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="Flow_0zzkew6"
+      name="Pause"
+      sourceRef="Activity_1tnilen"
+      targetRef="Activity_1clrplr">
+      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"
+        language="JavaScript">$(item.data.move=="toPause")</bpmn2:conditionExpression>
+    </bpmn2:sequenceFlow>
+    <bpmn2:sequenceFlow id="Flow_0114fg0"
+      name="Assign"
+      sourceRef="Activity_1clrplr"
+      targetRef="Activity_1tnilen" />
+    <bpmn2:userTask id="Activity_1clrplr"
+      linkinq:status="Pause"
+      name="Pause">
+      <bpmn2:incoming>Flow_0zzkew6</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_0114fg0</bpmn2:outgoing>
+    </bpmn2:userTask>
   </bpmn2:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1"
       bpmnElement="Process_1">
-      <bpmndi:BPMNEdge id="Flow_1wadhw3_di"
-        bpmnElement="Flow_1wadhw3">
-        <di:waypoint x="950"
-          y="100" />
-        <di:waypoint x="1040"
-          y="100" />
-        <di:waypoint x="1040"
-          y="240" />
+      <bpmndi:BPMNEdge id="Flow_0114fg0_di"
+        bpmnElement="Flow_0114fg0">
+        <di:waypoint x="980"
+          y="60" />
+        <di:waypoint x="980"
+          y="30" />
+        <di:waypoint x="770"
+          y="30" />
+        <di:waypoint x="770"
+          y="60" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="977"
-            y="82"
-            width="36"
+          <dc:Bounds x="859"
+            y="12"
+            width="33"
             height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0qvcwgu_di"
-        bpmnElement="Flow_0qvcwgu">
-        <di:waypoint x="670"
-          y="233" />
-        <di:waypoint x="670"
+      <bpmndi:BPMNEdge id="Flow_0zzkew6_di"
+        bpmnElement="Flow_0zzkew6">
+        <di:waypoint x="820"
           y="100" />
-        <di:waypoint x="850"
+        <di:waypoint x="930"
           y="100" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="669"
-            y="164"
-            width="35"
+          <dc:Bounds x="859"
+            y="82"
+            width="32"
+            height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1et8mvy_di"
+        bpmnElement="Flow_1et8mvy">
+        <di:waypoint x="550"
+          y="218" />
+        <di:waypoint x="550"
+          y="100" />
+        <di:waypoint x="720"
+          y="100" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="550"
+            y="83"
+            width="33"
+            height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wopcd0_di"
+        bpmnElement="Flow_0wopcd0">
+        <di:waypoint x="770"
+          y="140" />
+        <di:waypoint x="770"
+          y="190" />
+        <di:waypoint x="1040"
+          y="190" />
+        <di:waypoint x="1040"
+          y="240" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="891"
+            y="172"
+            width="29"
             height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
@@ -105,19 +173,12 @@
         bpmnElement="Flow_0zv3jdc">
         <di:waypoint x="600"
           y="258" />
-        <di:waypoint x="645"
-          y="258" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_09spex4_di"
-        bpmnElement="Flow_09spex4">
-        <di:waypoint x="695"
-          y="258" />
         <di:waypoint x="1022"
           y="258" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="846"
+          <dc:Bounds x="797"
             y="240"
-            width="36"
+            width="29"
             height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
@@ -157,18 +218,17 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1gwu496_di"
         bpmnElement="Activity_1tnilen">
-        <dc:Bounds x="850"
+        <dc:Bounds x="720"
           y="60"
           width="100"
           height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_1wo3631_di"
-        bpmnElement="Gateway_1wo3631"
-        isMarkerVisible="true">
-        <dc:Bounds x="645"
-          y="233"
-          width="50"
-          height="50" />
+      <bpmndi:BPMNShape id="Activity_13ndt8q_di"
+        bpmnElement="Activity_1clrplr">
+        <dc:Bounds x="930"
+          y="60"
+          width="100"
+          height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

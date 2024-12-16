@@ -21,6 +21,8 @@ import Entity from "./pages/admin/Entity";
 import Tasks from "./pages/Tasks";
 import Triggers from "./pages/admin/Triggers";
 import AppToast from "./components/Toast";
+import Profile from "./pages/Profile";
+import QueryBuilder from "./pages/admin/QueryBuilder";
 
 const PrivateLayout = (props: { admin?: boolean }) => {
   return (
@@ -63,6 +65,7 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<PublicPage />} />
+            <Route path="profile" element={<Profile />} />
             <Route path="tasks" element={<Tasks />} />
           </Route>
           {/* <Route path="/logout" element={<Logout />} /> */}
@@ -73,6 +76,7 @@ const App: React.FC = () => {
             <Route path="serverScript" element={<ServerScript />} />
             <Route path="entity" element={<Entity />} />
             <Route path="triggers" element={<Triggers />} />
+            <Route path="querybuilder" element={<QueryBuilder />} />
             {/* <Route path="*" element={<Navigate to="" replace />} /> */}
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

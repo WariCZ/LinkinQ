@@ -287,20 +287,6 @@ function useDataTable<T, U>(
     }
   };
 
-  // useEffect(() => {
-  //   debugger;
-
-  //   setLoading(true);
-
-  //   setFilter(param.filter);
-  //   fetchData({
-  //     entity: param.entity,
-  //     fields: fieldsEntity || undefined,
-  //     filter: filter || undefined,
-  //     ordering: ordering || undefined,
-  //   });
-  // }, [param.filter]);
-
   useEffect(() => {
     setLoading(true);
 

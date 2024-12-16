@@ -1,11 +1,24 @@
+import { Button, Spinner } from "flowbite-react";
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import Form from "../components/Form/Form";
 import { useTranslation } from "react-i18next";
 
-const PublicPage: React.FC = () => {
+const Profile: React.FC = () => {
   const { t, i18n } = useTranslation();
+
+  const changeLanguage = (language) => {
+    i18n.changeLanguage(language);
+  };
+
   return (
     <div className="p-3">
-      <h1 className="font-bold">Dashboard</h1>
+      {/* <p>{t("home.description")}</p> */}
+      <span>
+        <button onClick={() => changeLanguage("en")}>English</button>
+        {" | "}
+        <button onClick={() => changeLanguage("cs")}>Čeština</button>
+      </span>
 
       {/* <p>This page is accessible by anyone.</p>
       <Spinner aria-label="Default status example" />
@@ -146,4 +159,4 @@ const PublicPage: React.FC = () => {
   );
 };
 
-export default PublicPage;
+export default Profile;
