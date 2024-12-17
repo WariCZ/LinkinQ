@@ -53,7 +53,7 @@ const ModalContainer = () => {
                   {content?.props.modalLabel}
                 </h3>
               </Modal.Header>
-              <Modal.Body>
+              <Modal.Body className="max-h-[800px]">
                 {/* <ModalContent.content formRef={formRef} /> */}
                 {ComponentWithProps}
               </Modal.Body>

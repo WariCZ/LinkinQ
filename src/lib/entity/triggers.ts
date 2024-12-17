@@ -152,6 +152,10 @@ export class Triggers {
     }
   };
 
+  setSchema = (schema: EntitySchema) => {
+    this.schema = schema;
+  };
+
   initTriggers = async (schema: EntitySchema) => {
     this.schema = schema;
 

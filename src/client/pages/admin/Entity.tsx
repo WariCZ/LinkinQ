@@ -199,7 +199,7 @@ const DeleteEntity = (props: { entity: string } & ModalPropsType) => {
           type: "text",
         },
       ]}
-      {...props}
+      formRef={props.formRef}
     />
   );
 };
@@ -319,7 +319,7 @@ const FieldDetail = (
           type: "text",
         },
       ]}
-      {...props}
+      formRef={props.formRef}
     />
   );
 };

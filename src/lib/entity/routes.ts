@@ -269,13 +269,13 @@ export class EntityRoutes extends Entity {
     });
 
     router.get("/schema", async (req: Request, res: Response) => {
-      function getFields(obj: any) {
-        const newObj: any = {};
-        Object.keys(obj).map((o: any) => {
-          newObj[o] = obj[o].fields;
-        });
-        return newObj;
-      }
+      // function getFields(obj: any) {
+      //   const newObj: any = {};
+      //   Object.keys(obj).map((o: any) => {
+      //     newObj[o] = obj[o].fields;
+      //   });
+      //   return newObj;
+      // }
       try {
         if (req.user) {
           return res.json(this.schema);
@@ -300,7 +300,8 @@ export class EntityRoutes extends Entity {
               schemaDefinition: entDefinition,
             });
 
-            this.setSchema({ ...this.schema, ...entDefinition });
+            const x = this.addAttributesToSchema(entDefinition);
+            this.setSchema({ ...this.schema, ...x });
 
             return res.json({});
           }

@@ -56,7 +56,7 @@ const translateColumns = ({
     if (typeof c === "string") {
       const s = schema && schema[entity] && schema[entity].fields[c];
       if (c.indexOf(".") === -1) {
-        if (s.type == "datetime") {
+        if (s && s.type == "datetime") {
           col = {
             id: c,
             header: s?.label || c,
@@ -70,6 +70,20 @@ const translateColumns = ({
             },
           };
         } else {
+          // if (c == "status") {
+          //   col = {
+          //     id: c,
+          //     header: s?.label || c,
+          //     accessorKey: c,
+          //     cell: (info) => {
+          //       const val = info.getValue();
+
+          //       return "aaa";
+          //     },
+          //   };
+          //   debugger;
+          // }
+
           col = {
             id: c,
             header: s?.label || c,
@@ -219,13 +233,13 @@ const Table = <T, U>({
                   </tr>
                 ))
               )
-            : getRowModel().rows.map((row) => {
+            : getRowModel().rows.map((row, i) => {
                 return (
                   <tr
                     onClick={() => {
                       rowClick && rowClick(row.original);
                     }}
-                    key={row.id}
+                    key={row.id + "-" + i}
                     className={`hover:bg-gray-100 dark:hover:bg-gray-600 ${
                       highlightedRow &&
                       highlightedRow.indexOf((row.original as any).guid) > -1

@@ -280,6 +280,13 @@ const Form = ({
       current,
       (result, value, key) => {
         if (!_.isEqual(value, initial && initial[key])) {
+          if (
+            (typeof value === "string" && initial && initial[key]) ||
+            "" === value
+          ) {
+            //Jsou stejne takze to zahazuju
+            return result;
+          }
           result[key] =
             _.isObject(value) && !Array.isArray(value)
               ? findChanges(value, initial[key]) // Rekurzivní kontrola objektů
@@ -292,7 +299,6 @@ const Form = ({
   };
 
   const formSubmit = (formdata: any, e: any) => {
-    debugger;
     const changedData: any = findChanges(formdata, data);
     if (formdata.guid) {
       changedData.guid = formdata.guid;

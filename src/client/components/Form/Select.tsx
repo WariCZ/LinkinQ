@@ -6,7 +6,11 @@ import AsyncSelect from "react-select/async";
 
 const Select = React.forwardRef(
   (
-    props: ReactSelectProps & { entity?: string; labelFields?: string },
+    props: ReactSelectProps & {
+      entity?: string;
+      labelFields?: string;
+      readOnly?: boolean;
+    },
     ref
   ) => {
     const [options, setOptions] = useState([]);
@@ -71,6 +75,7 @@ const Select = React.forwardRef(
         <AsyncSelect
           {...props}
           value={value}
+          isDisabled={props.readOnly}
           // ref={ref}
           // menuIsOpen
           cacheOptions
@@ -104,6 +109,7 @@ const Select = React.forwardRef(
         <ReactSelect
           {...props}
           value={value}
+          isDisabled={props.readOnly}
           // ref={ref}
           // menuIsOpen
           classNamePrefix="flowbite-select"

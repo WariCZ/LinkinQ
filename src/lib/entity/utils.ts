@@ -31,11 +31,13 @@ export const translateDataTypesDBtoSchema = ({
   entity,
   column_name,
   entityDef,
+  foreignTable,
 }: {
   type: string;
   entity: string;
   column_name: string;
   entityDef: EntitySchema;
+  foreignTable?: string;
 }) => {
   if (type === "character varying" && column_name == "password") {
     return "password";
@@ -52,6 +54,7 @@ export const translateDataTypesDBtoSchema = ({
   // if (type === "bigint" && column_name == "id") {
   //   return "uuid";
   // }
+  //
 
   if (type === "bigint") {
     const type =
@@ -60,6 +63,14 @@ export const translateDataTypesDBtoSchema = ({
       entityDef[entity].fields[column_name].type;
     if (type && type.indexOf("link(") > -1) {
       return entityDef[entity].fields[column_name].type;
+    }
+
+    if (
+      foreignTable &&
+      entity.indexOf("2") == -1 &&
+      entity.indexOf("4") == -1
+    ) {
+      return `link(${foreignTable})`;
     }
     return "bigint";
   }

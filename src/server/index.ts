@@ -61,7 +61,7 @@ export class WebApp {
   }
 
   async initApp() {
-    const { schema, sqlAdmin } = await this.entity.prepareSchema();
+    const { schema, sqlAdmin, db } = await this.entity.prepareSchema();
 
     const wflogger = new Logger({ toConsole: true });
     this.bpmnServer = new BPMNServer(configuration, wflogger);
@@ -89,7 +89,13 @@ export class WebApp {
       };
     };
 
-    this.bpmnRoutes = new BpmnRoutes(bpmnAPI, sqlAdmin, this.bpmnServer);
+    this.bpmnRoutes = new BpmnRoutes({
+      bpmnAPI,
+      sqlAdmin,
+      bpmnServer: this.bpmnServer,
+      schema,
+      db,
+    });
 
     this.setupExpress({
       schema,

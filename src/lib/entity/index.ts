@@ -97,10 +97,24 @@ export class Entity {
 
         const foreignKeyInfo = foreignKeys.length > 0 ? foreignKeys[0] : null;
 
-        // if (column_name == "lockedby") debugger;
-        // let referencedtableName;
-        if (foreignKeyInfo) {
+        let foreignTable;
+        if (
+          foreignKeyInfo &&
+          foreignKeyInfo.constraint_name.indexOf("_foreign") > -1
+        ) {
           dbSchema.foreignKeys.push(foreignKeyInfo.constraint_name);
+
+          const constraint_name = foreignKeyInfo.constraint_name;
+
+          const foreignTableRows = await this.db
+            .select("table_name")
+            .setUser({ id: 1 })
+            .from("information_schema.constraint_column_usage")
+            .where("table_schema", "public")
+            .where("constraint_name", constraint_name);
+
+          foreignTable =
+            foreignTableRows.length > 0 ? foreignTableRows[0].table_name : null;
 
           // const referencedTable = await this.db
           //   .select("unique_constraint_name")
@@ -144,6 +158,7 @@ export class Entity {
             entity: table_name,
             column_name,
             entityDef,
+            foreignTable,
           }),
           ...(desc_result.rows[0].col_description
             ? { description: desc_result.rows[0].col_description }
@@ -157,6 +172,7 @@ export class Entity {
           ...(entityDef[table_name]?.fields[column_name]?.system
             ? { system: true }
             : {}),
+          ...(foreignTable ? { link: foreignTable } : {}),
           // "isList": false,
           // "isRelation": false
           // is_nullable,
@@ -248,7 +264,10 @@ export class Entity {
 
           if (rel) {
             const foreignKey = rel[1] + "_" + columnName + "_foreign";
-            if (actualDBSchema?.foreignKeys.indexOf(foreignKey) == -1) {
+            if (
+              !actualDBSchema ||
+              actualDBSchema?.foreignKeys.indexOf(foreignKey) == -1
+            ) {
               table.foreign(columnName).references(rel[1] + "." + this.MAIN_ID);
             }
           } else {
@@ -551,6 +570,7 @@ export class Entity {
     return this.schema;
   }
   setSchema(schema: EntitySchema) {
+    this.triggers.setSchema(schema);
     return (this.schema = schema);
   }
   //
@@ -665,6 +685,6 @@ export class Entity {
 
     await wait(2000);
 
-    return { schema: this.schema, sqlAdmin };
+    return { schema: this.schema, sqlAdmin, Sql, db: this.db };
   }
 }

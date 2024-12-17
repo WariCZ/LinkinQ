@@ -153,6 +153,7 @@ function useDataTable<T, U>(
   const [data, setData] = useState(initialState as T);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [entity, setEntity] = useState(param.entity);
   const [fieldsEntity, setFieldsEntity] = useState(param.fields || []);
   const [filter, setFilter] = useState(param.filter || {});
   const [ordering, setOrdering] = useState(param.ordering || []);
@@ -181,7 +182,7 @@ function useDataTable<T, U>(
 
   const actualizeData = async ({ guid }: { guid: string }) => {
     const response = await getSingleRecord({
-      entity: param.entity,
+      entity: entity,
       guid: guid,
       fields: param.fields ? param.fields.join() : "*",
       filter: param.filter,
@@ -233,13 +234,13 @@ function useDataTable<T, U>(
       // Update
       if (guid) {
         const response = await httpRequest({
-          entity: param.entity,
+          entity: entity,
           method: "PUT",
           data: { where: { guid: guid }, data: data },
         });
       } else {
         const response = await httpRequest({
-          entity: param.entity,
+          entity: entity,
           method: "POST",
           data: data,
         });
@@ -301,6 +302,7 @@ function useDataTable<T, U>(
   const refresh = async (params?: {
     fields?: string[];
     filter?: Object;
+    entity?: string;
     ordering?: {
       id: string;
       desc: boolean;
@@ -317,6 +319,9 @@ function useDataTable<T, U>(
     }
     if (params && params.ordering) {
       await setOrdering(params.ordering);
+    }
+    if (params && params.entity) {
+      await setEntity(params.entity);
     }
     await fetchData({
       entity: param.entity,
