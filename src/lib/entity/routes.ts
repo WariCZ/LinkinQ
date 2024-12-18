@@ -171,6 +171,7 @@ export class EntityRoutes extends Entity {
       }
     });
 
+    //
     // INSERT
     router.post("/entity/:entity", async (req: Request, res: Response) => {
       try {
@@ -389,6 +390,7 @@ export class EntityRoutes extends Entity {
       }
     });
 
+    //
     router.delete("/triggers", async (req: Request, res: Response) => {
       try {
         if (req.user) {

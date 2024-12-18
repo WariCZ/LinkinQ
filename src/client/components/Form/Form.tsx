@@ -262,7 +262,7 @@ const Form = ({
           if (
             typeof value === "string" &&
             initial &&
-            initial[key] &&
+            initial[key] === undefined &&
             "" === value
           ) {
             //Jsou stejne takze to zahazuju
