@@ -96,6 +96,7 @@ export class Triggers {
       }
 
       trigger.code = new Function("return " + trigger.code)();
+      this.prepareDefinition(trigger);
       this.definitions[trigger.type][trigger.method][trigger.entity][
         trigger.guid
       ] = {
@@ -106,7 +107,7 @@ export class Triggers {
         method: trigger.method,
         type: trigger.type,
         guid: trigger.guid,
-        updatetime: DateTime.now(),
+        updatetime: DateTime.utc(),
       };
     } catch (e) {
       throw e;
@@ -401,11 +402,11 @@ export class Triggers {
                 runner.builder._single.insert = {
                   ...runner.builder._single.insert,
                   createdby: runner.builder?._user.id,
-                  createtime: DateTime.now().toFormat(
+                  createtime: DateTime.utc().toFormat(
                     "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
                   ),
                   updatedby: runner.builder?._user.id,
-                  updatetime: DateTime.now().toFormat(
+                  updatetime: DateTime.utc().toFormat(
                     "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
                   ),
                 };
@@ -437,7 +438,7 @@ export class Triggers {
                     upd = {
                       ...upd,
                       updatedby: runner.builder?._user.id,
-                      updatetime: DateTime.now().toFormat(
+                      updatetime: DateTime.utc().toFormat(
                         "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
                       ),
                     };
@@ -448,7 +449,7 @@ export class Triggers {
                 runner.builder._single.update = {
                   ...runner.builder._single.update,
                   updatedby: runner.builder?._user.id,
-                  updatetime: DateTime.now().toFormat(
+                  updatetime: DateTime.utc().toFormat(
                     "yyyy-MM-dd HH:mm:ss.SSSZZ"
                   ),
                 };
@@ -619,6 +620,7 @@ export class Triggers {
   }) {
     await this.db("journal").insert({
       caption: entity,
+      user,
       entity,
       fields_old,
       fields_diff,

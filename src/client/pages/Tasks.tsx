@@ -15,6 +15,7 @@ import { useLocation } from "react-router-dom";
 import _, { assign } from "lodash";
 import { useTranslation } from "react-i18next";
 import ButtonExecuteBpmn from "../components/ButtonExecuteBpmn";
+import { DateTime } from "luxon";
 
 const Tasks = () => {
   const { t } = useTranslation();
@@ -29,6 +30,7 @@ const Tasks = () => {
     ...[
       /*"guid",*/ "caption",
       "createtime",
+      "updatetime",
       "createdby.fullname",
       "updatedby.fullname",
     ],
@@ -153,6 +155,10 @@ const TaskDetail = (props: any) => {
         "workflowInstance.source",
         "workflowInstance.items",
         "status",
+        "createtime",
+        "createdby",
+        "updatetime",
+        "updatedby",
       ],
     },
     {} as any
@@ -174,9 +180,61 @@ const TaskDetail = (props: any) => {
           props.closeModal && props.closeModal();
         }}
         {...props}
-        data={data}
+        data={{
+          ...data,
+          createtime: data.createtime
+            ? DateTime.fromISO(data.createtime).toFormat("dd.MM.yyyy HH:mm:ss")
+            : "",
+          updatetime: data.updatetime
+            ? DateTime.fromISO(data.updatetime).toFormat("dd.MM.yyyy HH:mm:ss")
+            : "",
+        }}
         entity={entity}
-        formFields={fields}
+        formFields={[
+          {
+            type: "text",
+            field: "caption",
+            label: "Title",
+          },
+          {
+            type: "Section",
+            columns: 2,
+            colSpan: 2,
+            fields: [
+              {
+                field: "createdby",
+                required: false,
+                readOnly: true,
+              },
+              {
+                field: "createtime",
+                required: false,
+                readOnly: true,
+              },
+              {
+                field: "updatedby",
+                required: false,
+                readOnly: true,
+              },
+              {
+                field: "updatetime",
+                required: false,
+                readOnly: true,
+              },
+              {
+                field: "assignee",
+              },
+            ],
+          },
+          {
+            field: "attn",
+          },
+          {
+            type: "text",
+            field: "description",
+            label: "Description",
+          },
+        ]}
       />
     </>
   );

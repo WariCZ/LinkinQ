@@ -118,6 +118,7 @@ div:has(> span > span.errorHighlight) {
 .flowbite-select__value-container {
   line-height: 20px;
   padding-top: 0px !important;
+  flex-wrap: nowrap !important;
 }
 
 .flowbite-select__menu {

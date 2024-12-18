@@ -359,7 +359,7 @@ export class EntityRoutes extends Entity {
               });
               entityFields[f.name] = f;
 
-              this.setSchema({ ...this.schema });
+              this.setSchema({ ...this.addAttributesToSchema(this.schema) });
             }
 
             return res.json({});

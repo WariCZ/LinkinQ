@@ -23,6 +23,9 @@ i18n.use(initReactI18next).init({
           administration: "Administration",
           signout: "Sign out",
         },
+        page: {
+          tasks: "All tasks",
+        },
         sidebar: {
           home: "Home",
           tasks: {
@@ -45,6 +48,9 @@ i18n.use(initReactI18next).init({
           profile: "Profil",
           administration: "Administrace",
           signout: "Odhlásit",
+        },
+        page: {
+          tasks: "Všechny úkoly",
         },
         sidebar: {
           home: "Domů",

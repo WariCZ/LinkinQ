@@ -554,54 +554,58 @@ export const getData = async ({
   if (queries && Object.keys(queries).length > 0) {
     for (const field in queries) {
       const query = queries[field];
-      const ids = data.map((d) => {
-        return query.nJoin ? d[MAIN_ID] : d[field];
-      });
+      const ids = data
+        .map((d) => {
+          return query.nJoin ? d[MAIN_ID] : d[field];
+        })
+        .filter((id) => id);
 
-      const joindata = await getData({
-        db,
-        schema,
-        entity: query.entity,
-        fieldsArr: [MAIN_ID, MAIN_GUID, ...query.fieldsArr],
-        queries: query.queries,
-        where: { id: ids },
-        nJoin: query.nJoin,
-        user,
-      });
-      if (query.nJoin) {
-        data = data.map((d) => {
-          const jd = joindata
-            .filter((j) => j.source == d[MAIN_ID])
-            .map((j) => {
-              delete j.source;
-              // pokud se nechteji zadana dalsi data posilam jen pole id aby nlink fungoval stejne jako link
-              if (query.onlyIds) {
-                // return j.id;
-                return j[MAIN_GUID];
-              }
-              delete j[MAIN_ID];
-              return j;
-            });
+      if (ids.length > 0) {
+        const joindata = await getData({
+          db,
+          schema,
+          entity: query.entity,
+          fieldsArr: [MAIN_ID, MAIN_GUID, ...query.fieldsArr],
+          queries: query.queries,
+          where: { id: ids },
+          nJoin: query.nJoin,
+          user,
+        });
+        if (query.nJoin) {
+          data = data.map((d) => {
+            const jd = joindata
+              .filter((j) => j.source == d[MAIN_ID])
+              .map((j) => {
+                delete j.source;
+                // pokud se nechteji zadana dalsi data posilam jen pole id aby nlink fungoval stejne jako link
+                if (query.onlyIds) {
+                  // return j.id;
+                  return j[MAIN_GUID];
+                }
+                delete j[MAIN_ID];
+                return j;
+              });
 
-          return {
+            return {
+              ...d,
+              [field]: jd.length > 0 ? jd : undefined, //pokud je pole prazdne neposilam ho
+            };
+          });
+        } else {
+          const byIds = _.keyBy(joindata, MAIN_ID);
+
+          // Odebrání `MAIN_ID` a případný převod na hodnotu, pokud zůstane jen jeden atribut
+          const result = _.mapValues(byIds, (obj) => {
+            // const newObj = _.omit(obj, MAIN_ID); // Odebere `MAIN_ID`
+            delete obj[MAIN_ID];
+            return Object.keys(obj).length === 1 ? Object.values(obj)[0] : obj; // Převod na hodnotu, pokud je jen jeden klíč
+          });
+
+          data = data.map((d) => ({
             ...d,
-            [field]: jd.length > 0 ? jd : undefined, //pokud je pole prazdne neposilam ho
-          };
-        });
-      } else {
-        const byIds = _.keyBy(joindata, MAIN_ID);
-
-        // Odebrání `MAIN_ID` a případný převod na hodnotu, pokud zůstane jen jeden atribut
-        const result = _.mapValues(byIds, (obj) => {
-          // const newObj = _.omit(obj, MAIN_ID); // Odebere `MAIN_ID`
-          delete obj[MAIN_ID];
-          return Object.keys(obj).length === 1 ? Object.values(obj)[0] : obj; // Převod na hodnotu, pokud je jen jeden klíč
-        });
-
-        data = data.map((d) => ({
-          ...d,
-          [field]: result[d[field]],
-        }));
+            [field]: result[d[field]],
+          }));
+        }
       }
     }
   }

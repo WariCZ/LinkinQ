@@ -14,6 +14,7 @@ import MonacoEditor from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
 import Tree, { TreeNode } from "@/client/components/Tree";
 import axios from "axios";
+import _ from "lodash";
 
 const fieldFormTriggers = (schema): (string | FormFieldType)[] => [
   {
@@ -164,58 +165,63 @@ const Triggers = () => {
             />
           </div>
         </div>
-        <div className="w-2/12 p-2">
-          <Form
-            data={selectedTriggers}
-            onSubmit={async ({ data }) => {
-              await axios.post("/api/triggers", {
-                ...selectedTriggers,
-                ...data,
-              });
-            }}
-            formFields={[
-              {
-                label: "Active",
-                field: "active",
-                type: "checkbox",
-              },
-              ...fieldFormTriggers(schema),
-            ]}
-          >
-            <div className="my-2">
-              <Button type="submit" className="inline-block">
-                Ulozit
-              </Button>
-              <Button
-                color="failure"
-                className="inline-block float-right"
-                onClick={async () => {
-                  await axios.delete("/api/triggers", {
-                    data: {
-                      guid: selectedTriggers.guid as any,
-                    },
+        {_.keys(selectedTriggers).length > 0 ? (
+          <>
+            <div className="w-2/12 p-2">
+              <Form
+                data={selectedTriggers}
+                onSubmit={async ({ data }) => {
+                  await axios.post("/api/triggers", {
+                    ...selectedTriggers,
+                    ...data,
                   });
-                  setSelectedTriggers({});
                   refresh();
                 }}
+                formFields={[
+                  {
+                    label: "Active",
+                    field: "active",
+                    type: "checkbox",
+                  },
+                  ...fieldFormTriggers(schema),
+                ]}
               >
-                Smazat
-              </Button>
+                <div className="my-2">
+                  <Button type="submit" className="inline-block">
+                    Ulozit
+                  </Button>
+                  <Button
+                    color="failure"
+                    className="inline-block float-right"
+                    onClick={async () => {
+                      await axios.delete("/api/triggers", {
+                        data: {
+                          guid: selectedTriggers.guid as any,
+                        },
+                      });
+                      setSelectedTriggers({});
+                      refresh();
+                    }}
+                  >
+                    Smazat
+                  </Button>
+                </div>
+              </Form>
             </div>
-          </Form>
-        </div>
-        <MonacoEditor
-          className="w-8/12"
-          value={selectedTriggers.code}
-          height="60vh"
-          defaultLanguage="javascript"
-          defaultValue="// Začni psát svůj kód zde..."
-          theme="light"
-          onMount={handleEditorDidMount}
-          onChange={(code) => {
-            setSelectedTriggers({ ...selectedTriggers, code });
-          }}
-        />
+            <MonacoEditor
+              className="w-8/12"
+              value={selectedTriggers.code}
+              height="60vh"
+              defaultLanguage="javascript"
+              defaultValue="// Začni psát svůj kód zde..."
+              theme="light"
+              onMount={handleEditorDidMount}
+              onChange={(code) => {
+                setSelectedTriggers({ ...selectedTriggers, code });
+              }}
+            />
+          </>
+        ) : null}
       </div>
     </div>
   );

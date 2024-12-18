@@ -37,13 +37,15 @@ export class mailAdapter {
     });
   };
 
-  send = async (data) => {
-    console.log("Email notification sended to: " + data?.to);
-    await this.transporter.sendMail({
-      from: "jakub.vareka@physter.com",
-      to: "jakub.vareka@gmail.com",
-      subject: "Test e-mail",
-      text: "Toto je testovací e-mail.",
-    });
+  send = async (props) => {
+    console.log("Email notification sended to: " + props?.to);
+    if (props.method === "insert") {
+      await this.transporter.sendMail({
+        from: "jakub.vareka@physter.com",
+        to: "jakub.vareka@gmail.com",
+        subject: `Vytvoren task - ${props.data.caption}`,
+        text: `Byl vytvoren task s popisem:  ${props.data.description}`,
+      });
+    }
   };
 }

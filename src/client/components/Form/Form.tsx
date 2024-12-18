@@ -62,31 +62,7 @@ type Section = {
   colSpan?: number;
 } & FormFieldDefault;
 
-export type FormFieldType =
-  // | {
-  //     id?: string;
-  //     field: string;
-  //     label?: string;
-  //     description?: string;
-  //     default?: string;
-  //     rules?: {
-  //       type: RuleType; // Typ pravidla
-  //       conditions: Condition[]; // Pole podmínek
-  //     }[];
-  //     type?: // | "text"
-  //     | "textarea"
-  //       | "number"
-  //       | "datetime"
-  //       | "Filepicker"
-  //       | "checkbox"
-  //       | "radiobutton"
-  //       | "group"
-  //       | "separator";
-  //     readOnly?: boolean;
-  //     disabled?: boolean;
-  //     required?: boolean;
-  //   }
-  FormFieldSelect | FormFieldText | Section;
+export type FormFieldType = FormFieldSelect | FormFieldText | Section;
 
 interface DynamicFormProps {
   formFields: (FormFieldType | string)[];
@@ -167,7 +143,7 @@ const translateFormField = ({
 }): FormFieldType => {
   if (typeof field == "string") {
     const s = schema?.fields[field];
-    if (s.link) {
+    if (s && s.link) {
       return {
         field: field,
         label: s?.label || "",
@@ -191,21 +167,25 @@ const translateFormField = ({
       return field;
     }
     const s = schema?.fields[field.field];
-    if (s.link) {
+    if (s && s.link) {
       return {
+        ...field,
         field: field.field,
         label: field.label || s?.label || "",
-        required: field.required || s?.isRequired,
+        required: field.required !== undefined ? field.required : s?.isRequired,
         default: field.default || s?.default,
+        entity: s.link,
+        isMulti: s.nlinkTable ? true : false,
         type: "select",
       };
     } else {
       return {
+        ...field,
         field: field.field,
         label: field.label || s?.label || "",
-        required: field.required || s?.isRequired,
+        required: field.required !== undefined ? field.required : s?.isRequired,
         default: field.default || s?.default,
-        type: "text",
+        type: field.type || "text",
       };
     }
   }
@@ -241,7 +221,6 @@ const Form = ({
   const watchAllFields = watch();
 
   useEffect(() => {
-    // debugger;
     if (!data || (data && Object.keys(data).length === 0)) {
       const resVal = formFields
         .map((ff) => {
@@ -281,7 +260,9 @@ const Form = ({
       (result, value, key) => {
         if (!_.isEqual(value, initial && initial[key])) {
           if (
-            (typeof value === "string" && initial && initial[key]) ||
+            typeof value === "string" &&
+            initial &&
+            initial[key] &&
             "" === value
           ) {
             //Jsou stejne takze to zahazuju
@@ -317,10 +298,10 @@ const Form = ({
       className={columns && `grid lg:grid-cols-${columns} gap-${gap || 2}`}
     >
       {formFields.map((item, index) => {
-        let formField: FormFieldType =
-          typeof item === "string"
-            ? translateFormField({ schema: schema[entity], field: item })
-            : item;
+        let formField: FormFieldType = translateFormField({
+          schema: schema[entity],
+          field: item,
+        });
 
         if (formField.rules) {
           console.log("formField.rules");
@@ -394,9 +375,14 @@ const FormSection = ({
       }
     >
       {section.label && <h3 className="col-span-full">{section.label}</h3>}
-      {section.fields.map((field, index) =>
-        renderItem({ formField: field, key: index, control: control, schema })
-      )}
+      {section.fields.map((field, index) => {
+        let formField: FormFieldType = translateFormField({
+          schema: schema,
+          field: field,
+        });
+
+        return renderItem({ formField, key: index, control: control, schema });
+      })}
     </div>
   );
 };
@@ -485,27 +471,27 @@ const FormField = ({
     //     </div>
     //   );
 
-    // case "checkbox":
-    //   return (
-    //     <div key={formField.field}>
-    //       <Label htmlFor={formField.field}>{formField.label}</Label>
-    //       <Controller
-    //         name={formField.field}
-    //         control={control}
-    //         defaultValue={false}
-    //         rules={{ required: formField.required }}
-    //         render={({ field }) => (
-    //           <Checkbox
-    //             className="block"
-    //             {...field}
-    //             checked={field.value}
-    //             id={formField.field}
-    //             disabled={formField.disabled}
-    //           />
-    //         )}
-    //       />
-    //     </div>
-    //   );
+    case "checkbox":
+      return (
+        <div key={formField.field}>
+          <Label htmlFor={formField.field}>{formField.label}</Label>
+          <Controller
+            name={formField.field}
+            control={control}
+            defaultValue={false}
+            rules={{ required: formField.required }}
+            render={({ field }) => (
+              <Checkbox
+                className="block"
+                {...field}
+                checked={field.value}
+                id={formField.field}
+                disabled={formField.disabled}
+              />
+            )}
+          />
+        </div>
+      );
 
     // case "radiobutton":
     //   return (

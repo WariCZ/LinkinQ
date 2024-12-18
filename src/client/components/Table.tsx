@@ -19,6 +19,8 @@ export type TableFieldType =
       label?: string;
       className?: string;
       cell?: ({ getValue }: CellContext<any, unknown>) => string;
+      size?: number;
+      maxSize?: number;
     }
   | string;
 
@@ -64,26 +66,10 @@ const translateColumns = ({
             cell: (info) => {
               const val = info.getValue();
 
-              return DateTime.fromISO(val, { zone: "utc" }).toFormat(
-                "dd.MM.yyyy HH:mm:ss"
-              );
+              return DateTime.fromISO(val).toFormat("dd.MM.yyyy HH:mm:ss");
             },
           };
         } else {
-          // if (c == "status") {
-          //   col = {
-          //     id: c,
-          //     header: s?.label || c,
-          //     accessorKey: c,
-          //     cell: (info) => {
-          //       const val = info.getValue();
-
-          //       return "aaa";
-          //     },
-          //   };
-          //   debugger;
-          // }
-
           col = {
             id: c,
             header: s?.label || c,
@@ -116,6 +102,8 @@ const translateColumns = ({
         id: c.field,
         header: c.label || s?.label || c.field,
         accessorKey: c.field,
+        maxSize: c.maxSize,
+        size: c.size,
         cell:
           c.cell ||
           ((info) => (
@@ -169,6 +157,11 @@ const Table = <T, U>({
     state: {
       sorting: ordering?.map((o) => ({ ...o, desc: o.desc || false })),
     },
+    defaultColumn: {
+      size: 200,
+      minSize: 50,
+      maxSize: 500,
+    },
   });
 
   return (
@@ -180,6 +173,10 @@ const Table = <T, U>({
               {headerGroup.headers.map((header) => {
                 return (
                   <th
+                    // style={{
+                    //   width: `${header.column.getSize()}px`,
+                    //   maxWidth: `${header.column.getSize()}px`,
+                    // }}
                     className="px-4 py-2"
                     key={header.id}
                     colSpan={header.colSpan}
@@ -251,7 +248,7 @@ const Table = <T, U>({
                       return (
                         <td
                           key={cell.id}
-                          className="px-4 py-2 whitespace-nowrap"
+                          className="px-4 py-2 whitespace-nowrap text-ellipsis overflow-hidden max-w-80"
                         >
                           {flexRender(
                             cell.column.columnDef.cell,

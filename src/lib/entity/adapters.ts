@@ -24,14 +24,14 @@ export class Adapters {
 
     this.eventsOnEntities.on("afterTrigger", (msg) => {
       console.log("message for ", msg);
-      //   if (msg.entity == "tasks") {
-      //     const data = { ...msg.before, ...msg.beforeData };
-      //     this.findNotifications({
-      //       data,
-      //       entity: msg.entity,
-      //       method: msg.method,
-      //     });
-      //   }
+      if (msg.entity == "tasks") {
+        const data = { ...msg.before, ...msg.beforeData };
+        this.findNotifications({
+          data,
+          entity: msg.entity,
+          method: msg.method,
+        });
+      }
     });
   }
 
@@ -89,7 +89,7 @@ export class Adapters {
     }
   };
 
-  findNotifications = async ({ data, entity, method }) => {
+  findNotifications = async (props /*{ data, entity, method }*/) => {
     // const ntfs = await this.db("notifications")
     //   .select("filter,adapters")
     //   .where({
@@ -97,22 +97,12 @@ export class Adapters {
     //     active: true,
     //     method,
     //   });
-    debugger;
 
     this.adapters["mailAdapter"].instances.map((instance) => {
-      debugger;
-      instance.send();
+      instance.send(props);
     });
     // for (const ntf of ntfs) {
     //   debugger;
     // }
   };
-
-  //   notifyUser = async () => {
-  //     const userEmail = "jakub.vareka@gmail.com";
-  //     const subject = "Notifikace";
-  //     const message = "Toto je vaše notifikace!";
-
-  //     await sendEmail(userEmail, subject, message);
-  //   };
 }

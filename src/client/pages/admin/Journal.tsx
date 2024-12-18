@@ -16,6 +16,7 @@ const Journal: React.FC = () => {
       entity: "journal",
       fields: [
         "id",
+        "user",
         "fields_old",
         "fields_diff",
         "fields_new",
@@ -37,11 +38,8 @@ const Journal: React.FC = () => {
   const columns: TableFieldType[] = [
     "id",
     "entity",
+    "user",
     "operation",
-    {
-      field: "fields_old",
-      cell: ({ getValue }) => JSON.stringify(getValue()),
-    },
     {
       field: "fields_diff",
       cell: ({ getValue }) => JSON.stringify(getValue()),
@@ -49,6 +47,13 @@ const Journal: React.FC = () => {
     {
       field: "fields_new",
       cell: ({ getValue }) => JSON.stringify(getValue()),
+      size: 150,
+      maxSize: 200,
+    },
+    {
+      field: "fields_old",
+      cell: ({ getValue }) => JSON.stringify(getValue()),
+      size: 150,
     },
   ];
 
