@@ -63,12 +63,10 @@ const QueryBuilder = () => {
 
   console.log("fields", fields);
   return (
-    <div className="mx-3">
-      <div className="flex items-center justify-between my-3">
-        <div className="flex space-x-2">
-          <h1 className="text-2xl font-bold">
-            {header || t("page.admin.querybuilder")}
-          </h1>
+    <div className="h-full">
+      <div className="flex items-center p-2 justify-between border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
+        <div className="font-bold">
+          {header || t("page.admin.querybuilder")}
         </div>
         <div>
           <Button
@@ -88,7 +86,7 @@ const QueryBuilder = () => {
           </Button>
         </div>
       </div>
-      <div className="pb-3">
+      <div className="p-2">
         <ReactSelect
           className="inline-block min-w-64"
           classNamePrefix="flowbite-select"
@@ -118,25 +116,27 @@ const QueryBuilder = () => {
           value={columnsInput}
         />
       </div>
-      <Table
-        entity={entity}
-        data={data}
-        rowClick={(data) =>
-          openModal(
-            <QueryBuilderDetail
-              refresh={refresh}
-              modalLabel={"Detail " + entity}
-              data={data}
-              entity={entity}
-            />
-          )
-        }
-        columns={fields}
-        loading={loading}
-        highlightedRow={highlightedRow}
-        ordering={ordering}
-        setOrdering={setOrdering}
-      />
+      <div className="p-2 pt-0">
+        <Table
+          entity={entity}
+          data={data}
+          rowClick={(data) =>
+            openModal(
+              <QueryBuilderDetail
+                refresh={refresh}
+                modalLabel={"Detail " + entity}
+                data={data}
+                entity={entity}
+              />
+            )
+          }
+          columns={fields}
+          loading={loading}
+          highlightedRow={highlightedRow}
+          ordering={ordering}
+          setOrdering={setOrdering}
+        />
+      </div>
     </div>
   );
 };

@@ -23,6 +23,7 @@ import Triggers from "./pages/admin/Triggers";
 import AppToast from "./components/Toast";
 import Profile from "./pages/Profile";
 import QueryBuilder from "./pages/admin/QueryBuilder";
+import Notifications from "./pages/admin/Notifications";
 
 const PrivateLayout = (props: { admin?: boolean }) => {
   return (
@@ -77,6 +78,7 @@ const App: React.FC = () => {
             <Route path="entity" element={<Entity />} />
             <Route path="triggers" element={<Triggers />} />
             <Route path="querybuilder" element={<QueryBuilder />} />
+            <Route path="notifications" element={<Notifications />} />
             {/* <Route path="*" element={<Navigate to="" replace />} /> */}
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />

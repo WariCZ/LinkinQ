@@ -145,6 +145,7 @@ export const defaultData = () => {
     // ...lov.defaultData,
     // ...users.defaultData,
     ...userroles.defaultData,
+    ...notifications.defaultData,
   };
 };
 

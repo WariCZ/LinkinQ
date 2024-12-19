@@ -592,6 +592,7 @@ export class Triggers {
               beforeData: afterDataDataItem,
               entity: table,
               method: method,
+              user: runner.builder?._user,
             });
           }
         }

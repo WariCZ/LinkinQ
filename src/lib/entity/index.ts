@@ -542,7 +542,7 @@ export class Entity {
         }
       }
     }
-    ////
+
     if (updateData) {
       for (const [name, dataArray] of Object.entries(updateData)) {
         for (const d of dataArray) {

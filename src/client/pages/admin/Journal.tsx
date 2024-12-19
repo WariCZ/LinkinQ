@@ -58,15 +58,21 @@ const Journal: React.FC = () => {
   ];
 
   return (
-    <div>
-      <h1>Journal</h1>
-      <Button onClick={() => refresh()}>reload</Button>
-      <Table
-        data={data}
-        columns={columns}
-        highlightedRow={highlightedRow}
-        entity="journal"
-      />
+    <div className="h-full">
+      <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
+        <span className="font-bold">Journal</span>
+      </div>
+      <div className="p-2">
+        <Button className="mb-2" onClick={() => refresh()}>
+          reload
+        </Button>
+        <Table
+          data={data}
+          columns={columns}
+          highlightedRow={highlightedRow}
+          entity="journal"
+        />
+      </div>
     </div>
   );
 };

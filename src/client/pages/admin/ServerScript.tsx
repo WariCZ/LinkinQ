@@ -63,11 +63,13 @@ const ServerScript = () => {
   };
 
   return (
-    <div className="p-2">
-      <h1 className="font-bold py-2">Server side scripts</h1>
-      <Button className="absolute top-2 right-3" onClick={runCode}>
-        Spustit kód
-      </Button>
+    <div className="h-full">
+      <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
+        <span className="font-bold">Server side scripts</span>
+        <Button className="absolute top-2 right-3" onClick={runCode}>
+          Spustit kód
+        </Button>
+      </div>
       <div className="border rounded-md">
         <MonacoEditor
           value={code}

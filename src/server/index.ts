@@ -31,6 +31,7 @@ export class WebApp {
   bpmnServer: BPMNServer;
   packageJson;
   viteRunning: boolean;
+  ad: Adapters;
 
   constructor() {
     this.viteRunning = false;
@@ -48,14 +49,12 @@ export class WebApp {
     this.entity = new EntityRoutes();
 
     console.log("Before start adapter");
-    const ad = new Adapters({
+    this.ad = new Adapters({
       db: this.entity.db,
       eventsOnEntities: this.entity.eventsOnEntities,
     });
 
-    ad.registerAdapter({ adapter: mailAdapter });
-
-    ad.loadAdapters();
+    this.ad.registerAdapter({ adapter: mailAdapter });
 
     console.log("After start adapter");
   }
@@ -63,6 +62,7 @@ export class WebApp {
   async initApp() {
     const { schema, sqlAdmin, db } = await this.entity.prepareSchema();
 
+    this.ad.loadAdapters(schema);
     const wflogger = new Logger({ toConsole: true });
     this.bpmnServer = new BPMNServer(configuration, wflogger);
 

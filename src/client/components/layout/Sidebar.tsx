@@ -16,6 +16,7 @@ import useStore from "@/client/store";
 import logo from "../../static/logo.png";
 import { FaCircle } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { FaMailBulk } from "react-icons/fa";
 
 type Label = {
   label: string;
@@ -89,6 +90,11 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
       label: "Query builder",
       to: "/admin/querybuilder",
       icon: FaTable,
+    },
+    {
+      label: "Notifications",
+      to: "/admin/notifications",
+      icon: FaMailBulk,
     },
   ];
 

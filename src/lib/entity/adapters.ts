@@ -1,15 +1,15 @@
 import { Knex } from "knex";
 import EventEmitter from "events";
-import { EntitySchema } from "./types";
 import { dbType, Sql } from "./sql";
 // import { sendEmail } from "./adaptersDef/mail";
 import _, { before } from "lodash";
-import { Settings } from "luxon";
+import { EntitySchema } from "./types";
 
 export class Adapters {
   db: dbType;
   eventsOnEntities: EventEmitter;
   adapters: Record<string, any>;
+  schema: EntitySchema;
 
   constructor({
     db,
@@ -43,7 +43,8 @@ export class Adapters {
     this.adapters[adapter.name] = { class: adapter, instances: [] };
   };
 
-  loadAdapters = async () => {
+  loadAdapters = async (schema: EntitySchema) => {
+    this.schema = schema;
     // var adapters = await this.db("adapters").select("*").where({
     //     active: true
     // });
@@ -59,7 +60,10 @@ export class Adapters {
       },
     ].map((adapter) => {
       if (this.adapters[adapter.type]) {
-        const classInstance = new this.adapters[adapter.type].class();
+        const classInstance = new this.adapters[adapter.type].class({
+          db: this.db,
+          schema: this.schema,
+        });
         classInstance.init(adapter.settings);
         this.adapters[adapter.type].instances.push(classInstance);
       } else {
@@ -73,7 +77,10 @@ export class Adapters {
   setAdapter = async ({ caption, type, settings, active }) => {
     if (this.adapters[type]) {
       if (active) {
-        const classInstance = new this.adapters[type].class();
+        const classInstance = new this.adapters[type].class({
+          db: this.db,
+          schema: this.schema,
+        });
         classInstance.init(settings);
         this.adapters[type].instances.push(classInstance);
       }
