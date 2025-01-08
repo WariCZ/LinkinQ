@@ -70,6 +70,7 @@ interface DynamicFormProps {
     data: Record<string, any>;
     setError: UseFormSetError<any>;
   }) => void;
+  onChange?: (props: { data: Record<string, any> }) => void;
   formRef?: React.LegacyRef<HTMLFormElement>;
   entity?: string;
   data?: Record<string, any>;
@@ -194,6 +195,7 @@ const translateFormField = ({
 const Form = ({
   formFields,
   onSubmit,
+  onChange,
   formRef,
   entity,
   data,
@@ -216,7 +218,7 @@ const Form = ({
     register,
     watch,
     formState: { errors },
-  } = useForm({ disabled: disabled, defaultValues: { caption: "" } });
+  } = useForm({ disabled: disabled, defaultValues: {} });
 
   const watchAllFields = watch();
 
@@ -247,7 +249,12 @@ const Form = ({
 
   const findChanges = (current, initial) => {
     _.keys(current).forEach((f) => {
-      if (entity && schema[entity].fields[f].link && current[f] === "") {
+      if (
+        entity &&
+        schema[entity].fields[f] &&
+        schema[entity].fields[f].link &&
+        current[f] === ""
+      ) {
         current[f] = undefined;
       }
     });
@@ -278,6 +285,10 @@ const Form = ({
       {}
     );
   };
+
+  useEffect(() => {
+    onChange && onChange({ data: watchAllFields });
+  }, [watchAllFields]); // Spustí se při změně jakéhokoliv pole
 
   const formSubmit = (formdata: any, e: any) => {
     const changedData: any = findChanges(formdata, data);

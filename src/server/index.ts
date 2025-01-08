@@ -195,6 +195,7 @@ export class WebApp {
     app.use("/", authRoutes({ schema, sqlAdmin }));
     app.use("/api", authenticate, this.entity.config());
     app.use("/bpmnapi", authenticate, this.bpmnRoutes.config());
+    app.use("/adapters", authenticate, this.ad.configRoutes());
 
     app.get("/protected2", authenticate, (req: Request, res: Response) => {
       res.json({ message: "This is a protected route", user: req.user });

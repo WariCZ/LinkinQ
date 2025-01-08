@@ -3,6 +3,7 @@ import _, { before } from "lodash";
 import nodemailer from "nodemailer";
 import { Sql } from "../sql";
 import { EntitySchema } from "../types";
+import { FormFieldType } from "@/client/components/Form/Form";
 
 export class mailAdapter {
   transporter: any;
@@ -10,6 +11,15 @@ export class mailAdapter {
   status: number = 0; // 0 - not run; 1 - run
   db: Knex<any, unknown[]>;
   schema: EntitySchema;
+  static form: FormFieldType[] = [
+    {
+      type: "text",
+      field: "host",
+      required: true,
+      label: "Host",
+    },
+  ];
+
   constructor({
     db,
     schema,
@@ -21,7 +31,7 @@ export class mailAdapter {
     this.schema = schema;
   }
 
-  init = (settings) => {
+  init = (settings, cb) => {
     this.transporter = nodemailer.createTransport({
       host: settings.host,
       port: settings.port,
@@ -47,10 +57,11 @@ export class mailAdapter {
         console.error("Chyba při připojení k serveru:", error);
       } else {
         console.log("Připojení k serveru je úspěšné!");
-        this.status = 1;
+        cb(true);
       }
     });
   };
+
   extractKeys = (input: string): string[] => {
     const regex = /\${{\s*([a-zA-Z0-9._]+)\s*}}/g;
     const matches: string[] = [];
@@ -79,6 +90,8 @@ export class mailAdapter {
       .select("*")
       .where({
         method: props.method,
+        entity: props.entity,
+        active: true,
       });
 
     for (const ntf of ntfs) {
@@ -98,6 +111,7 @@ export class mailAdapter {
           entity: ntf.entity,
           fields,
           where: {
+            ...ntf.filter,
             id: props.data.id,
           },
         });
