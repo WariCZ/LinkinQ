@@ -1,20 +1,59 @@
+import axios from "axios";
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
+import { debug } from "winston";
 
 interface UploadedFile {
   id: string;
   file: File;
+  guid?: string;
 }
 
-const FileUpload: React.FC = () => {
+const FileUpload = (props: { onChange?: (guids: string[]) => void }) => {
   const [files, setFiles] = useState<UploadedFile[]>([]);
+
+  const uploadFileToServer = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await axios.post("/api/uploadFile", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Nastavení správného typu obsahu
+        },
+      });
+
+      return response?.data?.guid; // Úspěšné nahrání
+    } catch (error) {
+      console.error("Upload failed:", error);
+      return false; // Selhání
+    }
+  };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map((file) => ({
       id: crypto.randomUUID(),
       file,
+      status: "pending",
     }));
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+
+    // Nahrajeme soubory na server
+    newFiles.forEach(async (fileEntry) => {
+      const guid = await uploadFileToServer(fileEntry.file);
+
+      setFiles((prevFiles) => {
+        const files = prevFiles.map((f) =>
+          f.id === fileEntry.id
+            ? { ...f, status: guid ? "uploaded" : "error", guid }
+            : f
+        );
+        if (props.onChange) {
+          props.onChange(files.filter((f) => f.guid).map((f) => f.guid));
+        }
+        return files;
+      });
+    });
   }, []);
 
   const removeFile = (id: string) => {

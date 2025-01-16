@@ -12,7 +12,7 @@ type FormFieldDefault = {
   id?: string;
   required?: boolean;
   visible?: boolean;
-  default?: string;
+  default?: string | number;
   rules?: {
     type: RuleType; // Typ pravidla
     conditions: ConditionType[]; // Pole podmínek

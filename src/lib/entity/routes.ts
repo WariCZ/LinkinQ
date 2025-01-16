@@ -2,6 +2,7 @@ import express from "express";
 import type { NextFunction, Request, Response, Router } from "express";
 import { getData, getQueries } from "./methodsDB";
 
+import fs from "fs";
 import { apiError } from "../logger";
 import _ from "lodash";
 import { Entity } from ".";
@@ -9,12 +10,15 @@ import { DateTime } from "luxon";
 import { Sql } from "./sql";
 import { c } from "vite/dist/node/types.d-aGj9QkWt";
 import { addDefaultFields } from "./utils";
+import multer from "multer";
 
 export type ServerSideOutputType = {
   time: string;
   type: "log" | "error";
   msg: string;
 };
+
+const upload = multer(); // Ukládá soubory pouze do paměti
 
 export class EntityRoutes extends Entity {
   config(): Router {
@@ -406,13 +410,28 @@ export class EntityRoutes extends Entity {
       }
     });
 
-    router.post("/uploadFile", async (req: Request, res: Response) => {
-      if (req.user) {
-        return res.json({});
-      } else {
-        res.sendStatus(401);
+    router.post(
+      "/uploadFile",
+      upload.single("file"),
+      async (req: Request, res: Response) => {
+        if (req.user) {
+          const file = (req as any).file;
+
+          const attachments: any = await this.db("attachments_history")
+            .setUser({ id: 1 })
+            .insert({
+              caption: file.originalname,
+              data: file.buffer,
+            });
+
+          console.log("File inserted successfully!");
+
+          return res.json({ guid: attachments[0].guid });
+        } else {
+          res.sendStatus(401);
+        }
       }
-    });
+    );
     return router;
   }
 }

@@ -35,7 +35,11 @@ const PublicPage: React.FC = () => {
           console.log("form 1", data);
         }}
       />
-      <FileUpload />
+      <FileUpload
+        onChange={(guids) => {
+          debugger;
+        }}
+      />
       {/* <div>-----------------------------</div> */}
       {/* <Form
         entity="tasks"

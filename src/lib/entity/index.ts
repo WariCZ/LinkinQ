@@ -254,6 +254,8 @@ export class Entity {
           column = table.boolean(columnName);
         } else if (columnDef.type == "password") {
           column = table.string(columnName);
+        } else if (columnDef.type == "blob") {
+          column = table.specificType(columnName, "BYTEA");
         } else if (columnDef.type?.match(/^link\(\w+\)$/)) {
           if (columnDef.type.indexOf("wf_") > -1) {
             column = table.uuid(columnName);

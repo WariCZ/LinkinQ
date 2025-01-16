@@ -24,7 +24,7 @@ export type FieldType = {
   name?: string;
   description?: string;
   isRequired?: boolean;
-  default?: string;
+  default?: string | number;
   isRelation?: string;
   isArray?: boolean;
   isUnique?: boolean;

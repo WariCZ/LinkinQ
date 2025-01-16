@@ -1,5 +1,6 @@
 import { assign } from "lodash";
 import { EntitySchema } from "../types";
+import attachments from "./attachments";
 const entityFields: EntitySchema = {
   tasks: {
     system: true,
@@ -38,6 +39,11 @@ const entityFields: EntitySchema = {
         type: "link(users)",
         label: "Assignee",
         description: "Assignee",
+      },
+      attachments: {
+        type: "nlink(attachments)",
+        label: "Attachments",
+        description: "Attachments",
       },
     },
   },

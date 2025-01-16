@@ -12,6 +12,8 @@ import triggers from "./triggers";
 import tasks from "./tasks";
 import adapters from "./adapters";
 import notifications from "./notifications";
+import attachments from "./attachments";
+import attachments_history from "./attachments_history";
 
 export const defaultExecute = () => {
   return ['CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'];
@@ -126,6 +128,8 @@ export const defaultEntities = (): EntitySchema => {
     ...wf_locks,
     ...wf_model,
     ...journal,
+    ...attachments_history.entityFields,
+    ...attachments.entityFields,
     ...triggers.entityFields,
     ...adapters.entityFields,
     ...notifications.entityFields,
