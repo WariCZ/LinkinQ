@@ -17,7 +17,7 @@ const entityFields: EntitySchema = {
           },
           {
             type: "role",
-            roles: ["prodigi.admin"],
+            roles: ["linkinq.admin"],
             filter: {},
           },
         ],

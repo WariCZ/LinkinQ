@@ -1,0 +1,77 @@
+import React, { useState, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+
+interface UploadedFile {
+  id: string;
+  file: File;
+}
+
+const FileUpload: React.FC = () => {
+  const [files, setFiles] = useState<UploadedFile[]>([]);
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    const newFiles = acceptedFiles.map((file) => ({
+      id: crypto.randomUUID(),
+      file,
+    }));
+    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+  }, []);
+
+  const removeFile = (id: string) => {
+    setFiles((prevFiles) => prevFiles.filter((f) => f.id !== id));
+  };
+
+  const handleFileClick = (file: File) => {
+    alert(
+      `Detail souboru:\n\nNázev: ${file.name}\nVelikost: ${file.size} bajtů`
+    );
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: true,
+  });
+
+  return (
+    <div className=" mx-auto">
+      <div
+        {...getRootProps()}
+        className={`h-8 relative border rounded-lg p-1 cursor-pointer ${
+          isDragActive
+            ? "border-blue-500 bg-blue-100"
+            : "border-gray-300 bg-white"
+        }`}
+      >
+        <input {...getInputProps()} />
+        <div className="flex flex-wrap items-center gap-2" style={{}}>
+          {files.length === 0 && (
+            <p className="text-gray-500 text-sm">
+              Přetáhněte soubory sem nebo klikněte pro výběr
+            </p>
+          )}
+          {files.map(({ id, file }) => (
+            <div
+              key={id}
+              className="justify-center top-2 flex items-center gap-2 bg-gray-100 rounded-md px-3 py-0.5 text-xs"
+            >
+              <span
+                className="cursor-pointer hover:underline"
+                onClick={() => handleFileClick(file)}
+              >
+                {file.name}
+              </span>
+              <button
+                className="text-red-500 hover:text-red-700"
+                onClick={() => removeFile(id)}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FileUpload;

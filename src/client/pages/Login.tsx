@@ -42,7 +42,7 @@ const Login: React.FC = () => {
       <div className="relative hidden h-full flex-col bg-muted p-10 border-r dark:border-r lg:flex">
         <div className="absolute inset-0" />
         <div className="relative z-20 flex items-center text-lg font-medium">
-          <img alt="Prodigi logo" src={logo} width="100" height="30" />
+          <img alt="Linkinq" src={logo} width="100" height="30" />
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
@@ -63,7 +63,7 @@ const Login: React.FC = () => {
           </div> */}
 
           <div className="relative z-20 flex items-center text-lg font-medium lg:hidden">
-            <img alt="Prodigi logo" src={logo} width="100" height="30" />
+            <img alt="Linkinq logo" src={logo} width="100" height="30" />
           </div>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 w-full">
             <div>

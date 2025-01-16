@@ -3,7 +3,7 @@ import _, { before } from "lodash";
 import nodemailer from "nodemailer";
 import { Sql } from "../sql";
 import { EntitySchema } from "../types";
-import { FormFieldType } from "@/client/components/Form/Form";
+import { FormFieldType } from "../../../client/components/Form/types";
 
 export class mailAdapter {
   transporter: any;
@@ -17,6 +17,27 @@ export class mailAdapter {
       field: "host",
       required: true,
       label: "Host",
+    },
+    {
+      type: "text",
+      field: "port",
+      required: true,
+      label: "Port",
+    },
+    {
+      type: "text",
+      field: "login",
+      label: "Login",
+    },
+    {
+      type: "text",
+      field: "password",
+      label: "Password",
+    },
+    {
+      type: "checkbox",
+      field: "ignoreCertificates",
+      label: "Ignore certificate",
     },
   ];
 

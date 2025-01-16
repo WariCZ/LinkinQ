@@ -25,6 +25,7 @@ import Profile from "./pages/Profile";
 import QueryBuilder from "./pages/admin/QueryBuilder";
 import Notifications from "./pages/admin/Notifications";
 import Adapters from "./pages/admin/Adapters";
+import Pageflow from "./Pageflow";
 
 const PrivateLayout = (props: { admin?: boolean }) => {
   return (
@@ -69,6 +70,7 @@ const App: React.FC = () => {
             <Route path="/" element={<PublicPage />} />
             <Route path="profile" element={<Profile />} />
             <Route path="tasks" element={<Tasks />} />
+            <Route path="entity/:entity" element={<Pageflow />} />
           </Route>
           {/* <Route path="/logout" element={<Logout />} /> */}
           <Route path="/admin/" element={<PrivateRoute admin={true} />}>

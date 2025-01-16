@@ -1,4 +1,4 @@
-import express, { Request, Response, NextFunction } from "express";
+import express, { Request, Response, NextFunction, Router } from "express";
 import jwt from "jsonwebtoken";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
@@ -75,7 +75,7 @@ const authRoutes = ({
 }: {
   schema: EntitySchema;
   sqlAdmin: Sql;
-}) => {
+}): Router => {
   const router = express.Router();
   router.use(passport.initialize());
 

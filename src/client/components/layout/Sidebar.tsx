@@ -139,6 +139,11 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
         },
       ],
     },
+    {
+      label: "testy tasks pageflow",
+      to: "/entity/tasks",
+      icon: IoMdHome,
+    },
   ];
 
   return (
@@ -154,7 +159,7 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
         <Sidebar.ItemGroup>
           <div className="flex justify-center lg:hidden pb-2">
             <Link to="/">
-              <img alt="Prodigi logo" src={logo} style={{ height: "20px" }} />
+              <img alt="Linkinq" src={logo} style={{ height: "20px" }} />
             </Link>
           </div>
           {renderMenuItems(props.admin ? menuAdmin : menu, goTo)}

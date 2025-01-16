@@ -200,3 +200,7 @@ div:has(> span > span.errorHighlight) {
   box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
     var(--tw-shadow) !important;
 }
+
+div.datetimepicker {
+  min-width: auto !important;
+}

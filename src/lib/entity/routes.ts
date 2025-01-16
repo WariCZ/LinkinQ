@@ -1,5 +1,5 @@
 import express from "express";
-import type { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response, Router } from "express";
 import { getData, getQueries } from "./methodsDB";
 
 import { apiError } from "../logger";
@@ -17,7 +17,7 @@ export type ServerSideOutputType = {
 };
 
 export class EntityRoutes extends Entity {
-  config() {
+  config(): Router {
     const router = express.Router();
 
     router.post("/run-code", async (req: Request, res: Response) => {
@@ -144,7 +144,7 @@ export class EntityRoutes extends Entity {
               ]),
             });
 
-            if ((req.user as any)?.roles?.indexOf("prodigi.admin") > -1) {
+            if ((req.user as any)?.roles?.indexOf("linkinq.admin") > -1) {
               return res.json(ret);
             } else {
               return res.json(
@@ -187,7 +187,7 @@ export class EntityRoutes extends Entity {
             data: req.body,
           });
 
-          if ((req.user as any)?.roles?.indexOf("prodigi.admin") > -1) {
+          if ((req.user as any)?.roles?.indexOf("linkinq.admin") > -1) {
             return res.json(ret);
           } else {
             return res.json(
@@ -406,6 +406,13 @@ export class EntityRoutes extends Entity {
       }
     });
 
+    router.post("/uploadFile", async (req: Request, res: Response) => {
+      if (req.user) {
+        return res.json({});
+      } else {
+        res.sendStatus(401);
+      }
+    });
     return router;
   }
 }

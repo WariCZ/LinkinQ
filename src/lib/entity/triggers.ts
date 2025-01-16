@@ -180,6 +180,7 @@ export class Triggers {
 
     // nactu vsechny triggery z FS
     let triggersFS: TriggerItemInternalType[] = [];
+
     for (const filename of fs.readdirSync(this.path)) {
       const path = require("path");
       if (path.extname(filename) == ".ts") {

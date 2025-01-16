@@ -1,6 +1,6 @@
 import { BPMNAPI, BPMNServer, Behaviour_names } from "bpmn-server";
 import express from "express";
-import type { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response, Router } from "express";
 
 import _ from "lodash";
 import { Sql } from "../entity/sql";
@@ -66,7 +66,7 @@ export class BpmnRoutes {
     return { node, fields };
   }
 
-  config() {
+  config(): Router {
     const router = express.Router();
 
     router.post("/invokeHaveFields", async (req: Request, res: Response) => {

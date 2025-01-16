@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import Form from "../components/Form/Form";
+import DateTimePicker from "../components/Form/Datetimepicker";
+import FileUpload from "../components/Form/FileUpload";
 
 const PublicPage: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -18,24 +21,21 @@ const PublicPage: React.FC = () => {
         <div className="col-span-1 bg-red-500 p-4">Item 2 (1 column)</div>
         <div className="col-span-1 bg-green-500 p-4">Item 3 (1 column)</div>
       </div> */}
-      {/* <Form
-        entity="tasks"
+
+      {/* <DateTimePicker onlydate value="2024-06-10T14:51:35.465+02:00" /> */}
+      <DateTimePicker />
+      <Form
         formFields={[
-          { field: "caption" },
-          {
-            type: "Section",
-            columns: 2,
-            fields: [
-              { label: "Nazev", field: "caption" },
-              { field: "description" },
-            ],
-          },
-          { field: "description" },
+          { label: "text", field: "text", type: "text" },
+          { label: "number", field: "number", type: "number" },
+          { label: "password", field: "password", type: "password" },
+          { label: "datetime", field: "datetime", type: "datetime" },
         ]}
         onSubmit={({ data }) => {
           console.log("form 1", data);
         }}
-      /> */}
+      />
+      <FileUpload />
       {/* <div>-----------------------------</div> */}
       {/* <Form
         entity="tasks"

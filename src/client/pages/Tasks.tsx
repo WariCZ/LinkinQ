@@ -4,7 +4,8 @@ import { Button, Dropdown } from "flowbite-react";
 import Table from "../components/Table";
 
 import useDataTable from "../hooks/useDataTable";
-import Form, { FormFieldType } from "../components/Form/Form";
+import Form from "../components/Form/Form";
+import { FormFieldType } from "../components/Form/types";
 import { useModalStore } from "../components/Modal/modalStore";
 import useDataDetail from "../hooks/useDataDetail";
 import { BpmnJsReact, useBpmnJsReact } from "bpmn-js-react";

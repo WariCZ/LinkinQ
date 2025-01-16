@@ -1,7 +1,9 @@
 {
-  "name": "prodigi-node",
+  "name": "linkinq",
   "version": "1.0.2",
   "description": "",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "vite:build": "vite build",
     "build": "tsc --build",
@@ -51,6 +53,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.6",
+    "react-dropzone": "^14.3.5",
     "react-hook-form": "^7.52.1",
     "react-i18next": "^15.1.0",
     "react-router-dom": "^6.25.1",

@@ -88,6 +88,7 @@ const UserAvatar = () => {
       <Dropdown.Item onClick={() => logout()}>
         {t("header.signout")}
       </Dropdown.Item>
+      <Dropdown.Item onClick={() => console.log("kuk")}>test</Dropdown.Item>
     </Dropdown>
   );
 };
@@ -124,11 +125,7 @@ export const DashboardHeader = function (props: { admin?: boolean }) {
               <div className="hidden md:block">
                 <Navbar.Brand as="span">
                   <Link to="/">
-                    <img
-                      alt="Prodigi logo"
-                      src={logo}
-                      style={{ height: "25px" }}
-                    />
+                    <img alt="Linkinq" src={logo} style={{ height: "25px" }} />
                   </Link>
                   {props.admin ? (
                     <span className="font-bold px-2 mt-0 text-2xl">

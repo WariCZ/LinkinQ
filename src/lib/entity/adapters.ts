@@ -1,6 +1,6 @@
 import { Knex } from "knex";
 import express from "express";
-import type { NextFunction, Request, Response } from "express";
+import type { NextFunction, Request, Response, Router } from "express";
 import EventEmitter from "events";
 import { dbType, Sql } from "./sql";
 // import { sendEmail } from "./adaptersDef/mail";
@@ -145,7 +145,7 @@ export class Adapters {
     });
   };
 
-  configRoutes = () => {
+  configRoutes = (): Router => {
     const router = express.Router();
 
     router.get("/adaptersType", async (req: Request, res: Response) => {

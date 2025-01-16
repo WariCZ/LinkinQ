@@ -14,55 +14,16 @@ import {
   Label,
   TextInput,
   TextInputProps,
+  Datepicker,
 } from "flowbite-react";
 import useStore from "../../store";
-import { EntitySchema, EntityType, FieldType } from "@/lib/entity/types";
-import _, { debounce } from "lodash";
+import { EntityType } from "@/lib/entity/types";
+import _ from "lodash";
 import Select from "./Select";
-import { debug } from "winston";
+import { ConditionType, FormFieldType, SectionType } from "./types";
+import DateTimePicker from "./Datetimepicker";
 
-type RuleType = "show" | "hide" | "required" | "optional";
-
-type Condition = Record<string, string | number>;
-
-type FormFieldDefault = {
-  label?: string;
-  field?: string;
-  readOnly?: boolean;
-  disabled?: boolean;
-  id?: string;
-  required?: boolean;
-  visible?: boolean;
-  default?: string;
-  rules?: {
-    type: RuleType; // Typ pravidla
-    conditions: Condition[]; // Pole podmínek
-  }[];
-  colSpan?: number;
-};
-
-type FormFieldSelect = {
-  type: "select";
-  options?: { value: string | number; label: string }[];
-  entity?: string;
-  isMulti?: boolean;
-} & FormFieldDefault;
-
-type FormFieldText = {
-  type: "text" | "checkbox";
-} & FormFieldDefault &
-  TextInputProps &
-  React.RefAttributes<HTMLInputElement>;
-
-type Section = {
-  type: "Section";
-  label?: string;
-  columns?: 1 | 2 | 3 | 4 | 6 | 12;
-  fields: (FormFieldType | Section)[];
-  colSpan?: number;
-} & FormFieldDefault;
-
-export type FormFieldType = FormFieldSelect | FormFieldText | Section;
+// export { FormFieldType };
 
 interface DynamicFormProps {
   formFields: (FormFieldType | string)[];
@@ -94,7 +55,10 @@ const getFieldsForForm = (
   );
 };
 
-const evaluateConditions = (conditions: Condition[], watchAllFields: any) => {
+const evaluateConditions = (
+  conditions: ConditionType[],
+  watchAllFields: any
+) => {
   return conditions.some((cond) => {
     for (const key in cond) {
       if (watchAllFields[key] !== cond[key]) {
@@ -373,7 +337,7 @@ const FormSection = ({
   gap,
   schema,
 }: {
-  section: Section;
+  section: SectionType;
   control: Control<FieldValues, any>;
   gap?: number;
   schema?: EntityType;
@@ -408,6 +372,8 @@ const FormField = ({
   if (!formField.type) formField.type = "text";
   switch (formField.type) {
     case "text":
+    case "number":
+    case "password":
       console.log("form text ", formField);
       return (
         <div
@@ -429,7 +395,7 @@ const FormField = ({
               <TextInput
                 {...field}
                 {...formField}
-                type="text"
+                type={formField.type}
                 disabled={formField.disabled}
                 readOnly={formField.readOnly}
                 required={formField.required}
@@ -438,49 +404,6 @@ const FormField = ({
           />
         </div>
       );
-
-    // case "textarea":
-    //   return (
-    //     <div key={formField.field}>
-    //       <Label htmlFor={formField.field}>{formField.label}</Label>
-    //       <Controller
-    //         name={formField.field}
-    //         control={control}
-    //         defaultValue={formField.default || ""}
-    //         rules={{ required: formField.required }}
-    //         render={({ field }) => (
-    //           <Textarea
-    //             {...field}
-    //             id={formField.field}
-    //             disabled={formField.disabled}
-    //             readOnly={formField.readOnly}
-    //           />
-    //         )}
-    //       />
-    //     </div>
-    //   );
-
-    // case "number":
-    //   return (
-    //     <div key={formField.field}>
-    //       <Label htmlFor={formField.field}>{formField.label}</Label>
-    //       <Controller
-    //         name={formField.field}
-    //         control={control}
-    //         defaultValue={formField.default || ""}
-    //         rules={{ required: formField.required }}
-    //         render={({ field }) => (
-    //           <TextInput
-    //             {...field}
-    //             id={formField.field}
-    //             type="number"
-    //             disabled={formField.disabled}
-    //             readOnly={formField.readOnly}
-    //           />
-    //         )}
-    //       />
-    //     </div>
-    //   );
 
     case "checkbox":
       return (
@@ -503,30 +426,6 @@ const FormField = ({
           />
         </div>
       );
-
-    // case "radiobutton":
-    //   return (
-    //     <div key={formField.field}>
-    //       <Label>{formField.label}</Label>
-    //       {formField.description?.split(",").map((option) => (
-    //         <Controller
-    //           key={option}
-    //           name={formField.field}
-    //           control={control}
-    //           defaultValue=""
-    //           render={({ field }) => (
-    //             <Radio
-    //               {...field}
-    //               value={option}
-    //               id={`${formField.field}-${option}`}
-    //               disabled={formField.disabled}
-    //             />
-    //           )}
-    //         />
-    //       ))}
-    //     </div>
-    //   );
-
     case "select":
       return (
         <div key={formField.field} className="test select">
@@ -541,6 +440,19 @@ const FormField = ({
             rules={{ required: formField.required }}
             render={({ field }) => <Select {...field} {...formField} />}
           ></Controller>
+        </div>
+      );
+    case "datetime":
+      return (
+        <div key={formField.field}>
+          <Label htmlFor={formField.field}>{formField.label}</Label>
+          <Controller
+            name={formField.field}
+            control={control}
+            defaultValue={false}
+            rules={{ required: formField.required }}
+            render={({ field }) => <DateTimePicker />}
+          />
         </div>
       );
 
