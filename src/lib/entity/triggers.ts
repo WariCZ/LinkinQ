@@ -6,6 +6,7 @@ import EventEmitter from "events";
 import { EntitySchema } from "./types";
 import { dbType, Sql } from "./sql";
 import { MAIN_GUID, MAIN_ID } from "../knex";
+import { hashPassword } from "./utils";
 
 export type CodeType = {
   beforeData: Record<string, any>;
@@ -259,11 +260,11 @@ export class Triggers {
     return [...existingKeys, ...uniqueKeys];
   }
 
-  translateIdsToNumber(table: string, data: any) {
+  translateIdsToNumber = async (table: string, data: any) => {
     const fields = this.schema?.[table].fields;
 
     for (const d of Array.isArray(data) ? data : [data]) {
-      Object.keys(d).map((f) => {
+      for (const f of Object.keys(d)) {
         if (d[f]) {
           if (
             fields[f].link ||
@@ -275,14 +276,41 @@ export class Triggers {
             } else {
               d[f] = parseInt(d[f]);
             }
-            // } else {
-            //   console.log("f", f, fields[f].type);
           }
         }
-      });
+      }
     }
     return data;
-  }
+  };
+
+  translateData = async (table: string, data: any) => {
+    if (data) {
+      try {
+        const fields = this.schema?.[table].fields;
+
+        for (const d of Array.isArray(data) ? data : [data]) {
+          for (const f of Object.keys(d)) {
+            if (d[f]) {
+              if (
+                fields[f].link &&
+                fields[f].type.indexOf("(attachments)") > -1
+              ) {
+                debugger;
+              }
+            }
+
+            if (fields[f].type == "password") {
+              d[f] = await hashPassword(d[f]);
+            }
+          }
+        }
+
+        // return data;
+      } catch (e) {
+        debugger;
+      }
+    }
+  };
 
   registerTriggers(db: Knex) {
     const that = this;
@@ -293,17 +321,6 @@ export class Triggers {
           debugger;
           return false;
         }
-        if (
-          runner.builder._method == "select" &&
-          runner.builder._single.table == "tasks"
-        ) {
-          console.log(
-            "SELECT - ",
-            runner.builder.toSQL().sql,
-            runner.builder.toSQL().bindings
-          );
-        }
-        //
 
         if (["insert", "update", "del"].indexOf(runner.builder._method) > -1) {
           const table = runner.builder._single.table;
@@ -311,6 +328,7 @@ export class Triggers {
           if (!that.schema[table]) {
             return;
           }
+
           if (table == "journal") return;
 
           if (
@@ -344,7 +362,7 @@ export class Triggers {
                     return { ...bd, ...d };
                   });
 
-                beforeData = that.translateIdsToNumber(table, beforeData);
+                beforeData = await that.translateIdsToNumber(table, beforeData);
               }
             }
           }
@@ -357,13 +375,15 @@ export class Triggers {
 
           const method =
             runner.builder._method == "del" ? "delete" : runner.builder._method;
+          const data = runner.builder._single[runner.builder._method];
+
+          await that.translateData(table, data);
           if (
             that.definitions["before"] &&
             that.definitions["before"][method] &&
             that.definitions["before"][method][table]
           ) {
             //
-            const data = runner.builder._single[runner.builder._method];
             for (const guid in that.definitions["before"][method][table]) {
               const trigger = that.definitions["before"][method][table][guid];
               if (trigger.code && trigger.active) {
@@ -425,10 +445,6 @@ export class Triggers {
                     ...workflowData.data,
                   };
                 }
-                // returningFields = [
-                //   ...returningFields,
-                //   ..._.keys(runner.builder._single.insert),
-                // ];
               }
             }
 
@@ -443,7 +459,6 @@ export class Triggers {
                         "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
                       ),
                     };
-                    // returningFields = that.addUniqueKeys(returningFields, upd);
                     return upd;
                   });
               } else {
@@ -454,10 +469,6 @@ export class Triggers {
                     "yyyy-MM-dd HH:mm:ss.SSSZZ"
                   ),
                 };
-                // returningFields = [
-                //   ...returningFields,
-                //   ..._.keys(runner.builder._single.update),
-                // ];
               }
             }
             if (runner.builder._single.returning) {
@@ -509,7 +520,7 @@ export class Triggers {
           }
           if (operation == "C") {
             afterData = [
-              that.translateIdsToNumber(table, {
+              await that.translateIdsToNumber(table, {
                 ...changedData,
                 ...runner.builder._single.insert,
                 ...afterData[0],

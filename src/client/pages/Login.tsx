@@ -28,6 +28,7 @@ const Login: React.FC = () => {
         username: data.email,
         password: data.password,
       });
+      debugger;
       if (response.data.message === "Login successful") {
         setUser(data);
         navigate("/admin/protected");

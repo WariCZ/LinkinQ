@@ -5,6 +5,7 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { BasicStrategy } from "passport-http";
 import { Sql } from "./entity/sql";
 import { EntitySchema } from "./entity/types";
+import { verifyPassword } from "./entity/utils";
 
 export type User = {
   id: number;
@@ -83,7 +84,7 @@ const authRoutes = ({
     new BasicStrategy(async (username, password, done) => {
       const dbUser = await sqlAdmin.select({
         entity: "users",
-        fields: ["fullname", "email", "id", "guid", "roles.key"],
+        fields: ["password", "fullname", "email", "id", "guid", "roles.key"],
         where: {
           password: password,
           email: username,
@@ -94,15 +95,19 @@ const authRoutes = ({
         throw "too many users";
       }
       if (dbUser.length > 0) {
-        const user: User = {
-          id: dbUser[0].id,
-          name: dbUser[0].fullname,
-          fullname: dbUser[0].fullname,
-          email: dbUser[0].email,
-          guid: dbUser[0].guid,
-          roles: dbUser[0].roles?.map((r: any) => r.key) || [],
-        };
-        return done(null, user);
+        if (verifyPassword(password, dbUser[0].password)) {
+          const user: User = {
+            id: dbUser[0].id,
+            name: dbUser[0].fullname,
+            fullname: dbUser[0].fullname,
+            email: dbUser[0].email,
+            guid: dbUser[0].guid,
+            roles: dbUser[0].roles?.map((r: any) => r.key) || [],
+          };
+          return done(null, user);
+        } else {
+          return done(null, false);
+        }
       } else {
         return done(null, false); //  { message: "Incorrect username or password." }
       }
@@ -113,24 +118,27 @@ const authRoutes = ({
     new LocalStrategy(async (username, password, done) => {
       const dbUser = await sqlAdmin.select({
         entity: "users",
-        fields: ["fullname", "email", "id", "guid", "roles.key"],
+        fields: ["password", "fullname", "email", "id", "guid", "roles.key"],
         where: {
-          password: password,
           email: username,
         },
       });
       if (dbUser.length > 0) {
-        const user: User = {
-          id: dbUser[0].id,
-          name: dbUser[0].fullname,
-          fullname: dbUser[0].fullname,
-          email: dbUser[0].email,
-          guid: dbUser[0].guid,
-          roles: dbUser[0].roles?.map((r: any) => r.key) || [],
-        };
-        return done(null, user);
+        if (verifyPassword(password, dbUser[0].password)) {
+          const user: User = {
+            id: dbUser[0].id,
+            name: dbUser[0].fullname,
+            fullname: dbUser[0].fullname,
+            email: dbUser[0].email,
+            guid: dbUser[0].guid,
+            roles: dbUser[0].roles?.map((r: any) => r.key) || [],
+          };
+          return done(null, user);
+        } else {
+          return done(null, false);
+        }
       } else {
-        return done(null, false); //  { message: "Incorrect username or password." }
+        return done(null, false);
       }
     })
   );

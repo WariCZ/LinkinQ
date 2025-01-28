@@ -353,15 +353,16 @@ export class EntityRoutes extends Entity {
           ) {
             const entityFields = this.schema[req.body.entity].fields;
             for (const f of req.body.fields) {
-              await this.createField({
-                tableName: req.body.entity,
-                columnName: f.name,
-                columnDef: {
-                  type: f.type,
-                  name: f.name,
-                  description: f.description,
-                },
-              });
+              ///TODO: ZAAA
+              // await this.createField({
+              //   tableName: req.body.entity,
+              //   columnName: f.name,
+              //   columnDef: {
+              //     type: f.type,
+              //     name: f.name,
+              //     description: f.description,
+              //   },
+              // });
               entityFields[f.name] = f;
 
               this.setSchema({ ...this.addAttributesToSchema(this.schema) });

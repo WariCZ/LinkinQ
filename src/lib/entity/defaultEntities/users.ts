@@ -30,14 +30,14 @@ const entityFields: EntitySchema = {
   },
 };
 
-const defaultData = {
+const defaultData = ({ password }) => ({
   users: [
     {
       guid: "9500b584-fa8a-4a3c-8f94-92f2221db78b",
       caption: "admin",
       fullname: "admin",
       email: "admin@admin.cz",
-      password: "Vorvan5678x",
+      password: password, //process.env.DEFAULT_PASSWORD,
       createdby: 1,
       updatedby: 1,
       kind: 1,
@@ -47,13 +47,13 @@ const defaultData = {
       caption: "user",
       fullname: "user",
       email: "user@user.cz",
-      password: "Vorvan5678x",
+      password: password,
       createdby: 1,
       updatedby: 1,
       kind: 1,
     },
   ],
-};
+});
 const updateData = {
   users: [
     {

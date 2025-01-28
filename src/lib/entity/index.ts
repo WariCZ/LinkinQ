@@ -14,15 +14,11 @@ import {
   defaultEntities,
   defaultExecute,
   defaultFields,
-  defaultUsers,
-  updateData,
 } from "./defaultEntities";
 import logger from "../logger";
 import EventEmitter from "events";
-import { getData, getQueries } from "./methodsDB";
 import { Sql } from "./sql";
 import { Triggers } from "./triggers";
-import { DateTime } from "luxon";
 
 export class Entity {
   db: Knex;
@@ -186,52 +182,55 @@ export class Entity {
     }
   }
 
-  async createField({
+  async createFields({
     tableName,
-    columnName,
-    columnDef,
+    fields,
     actualDBSchema,
   }: {
     tableName: string;
-    columnName: string;
-    columnDef: FieldType;
+    fields: Record<string, FieldType>;
     actualDBSchema?: DbSchemaType;
   }) {
-    if (columnName == this.MAIN_ID) {
-      return;
-    }
+    const foreignKeys = [];
+    const createLinkTables = [];
 
-    let columnExists = false;
-    let actualDBColumn: FieldType | undefined;
+    for (const columnName in fields) {
+      const columnDef = fields[columnName];
+      if (columnName == this.MAIN_ID) {
+        continue;
+      }
 
-    // if (columnName == "id") debugger;
-    if (
-      await this.db.schema.setUser({ id: 1 }).hasColumn(tableName, columnName)
-    ) {
-      columnExists = true;
-      actualDBColumn = actualDBSchema?.tables[tableName]?.fields[columnName];
-    }
+      let columnExists = false;
+      let actualDBColumn: FieldType | undefined;
 
-    await this.db.schema
-      .setUser({ id: 1 })
-      .alterTable(tableName, async (table) => {
-        let column: Knex.ColumnBuilder | undefined = undefined;
+      // if (columnName == "id") debugger;
+      if (
+        await this.db.schema.setUser({ id: 1 }).hasColumn(tableName, columnName)
+      ) {
+        columnExists = true;
+        actualDBColumn = actualDBSchema?.tables[tableName]?.fields[columnName];
+      }
 
-        if (
-          columnExists &&
-          columnDef.type &&
-          actualDBColumn &&
-          actualDBColumn?.type !== columnDef.type
-        ) {
-          logger.error(
-            `Pretypovani sloupce ${columnName} v entite ${tableName} z typu ${actualDBColumn?.type} na typ ${columnDef.type} není možný.`
-          );
-          return;
-        } else {
-          if (columnExists) {
-            columnDef = { ...actualDBColumn, ...columnDef };
-          }
+      let column: Knex.ColumnBuilder | undefined = undefined;
+
+      if (
+        columnExists &&
+        columnDef.type &&
+        actualDBColumn &&
+        actualDBColumn?.type !== columnDef.type
+      ) {
+        logger.error(
+          `Pretypovani sloupce ${columnName} v entite ${tableName} z typu ${actualDBColumn?.type} na typ ${columnDef.type} není možný.`
+        );
+        return;
+      } else {
+        if (columnExists) {
+          // TODO: pretypovani
+          // columnDef = { ...actualDBColumn, ...columnDef };
         }
+      }
+
+      await this.db.schema.setUser({ id: 1 }).alterTable(tableName, (table) => {
         //
 
         if (columnDef.type == "text") {
@@ -265,13 +264,21 @@ export class Entity {
           const rel = columnDef.type.match(/^link\((\w+)\)$/);
 
           if (rel) {
-            const foreignKey = rel[1] + "_" + columnName + "_foreign";
-            if (
-              !actualDBSchema ||
-              actualDBSchema?.foreignKeys.indexOf(foreignKey) == -1
-            ) {
-              table.foreign(columnName).references(rel[1] + "." + this.MAIN_ID);
-            }
+            // const foreignKey = rel[1] + "_" + columnName + "_foreign";
+            // if (
+            //   !actualDBSchema ||
+            //   actualDBSchema?.foreignKeys.indexOf(foreignKey) == -1
+            // ) {
+            //   table.foreign(columnName).references(rel[1] + "." + this.MAIN_ID);
+            // }
+
+            foreignKeys.push({
+              table: tableName,
+              column: columnName,
+              refTable: rel[1],
+              refCol: this.MAIN_ID,
+              onDelete: false,
+            });
           } else {
             logger.info(
               `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ link ${columnDef.type}.`
@@ -281,50 +288,76 @@ export class Entity {
           // return;
           const rel = columnDef.type.match(/^nlink\((\w+)\)$/);
           if (rel) {
-            if (
-              !(await this.db.schema
-                .setUser({ id: 1 })
-                .hasTable(tableName + "2" + rel[1] + "4" + columnName))
-            ) {
-              await this.db.schema
-                .setUser({ id: 1 })
-                .createTable(
-                  tableName + "2" + rel[1] + "4" + columnName,
-                  (table: any) => {
-                    table.bigIncrements(this.MAIN_ID).primary([this.MAIN_ID]);
+            const linkTable = `${tableName}2${rel[1]}4${columnName}`;
+            // if (
+            //   !(await this.db.schema
+            //     .setUser({ id: 1 })
+            //     .hasTable(tableName + "2" + rel[1] + "4" + columnName))
+            // ) {
 
-                    table.bigint("source");
-                    table.bigint("target");
+            createLinkTables.push({
+              tableName: linkTable,
+              sourceTable: tableName,
+              targetTable: rel[1],
+            });
+            // t.bigIncrements(this.MAIN_ID).primary([this.MAIN_ID]);
+            // t.bigint("source");
+            // t.bigint("target");
 
-                    table
-                      .foreign("source")
-                      .references(tableName + "." + this.MAIN_ID)
-                      .onDelete("CASCADE");
-                    //TODO: musi se provest az uplne na konci Conclusion nema taky :-)
+            // foreignKeys.push({
+            //   table: linkTable,
+            //   column: "source",
+            //   refTable: tableName,
+            //   refCol: this.MAIN_ID,
+            //   onDelete: true,
+            // });
+            // foreignKeys.push({
+            //   table: linkTable,
+            //   column: "target",
+            //   refTable: rel[1],
+            //   refCol: this.MAIN_ID,
+            //   onDelete: true,
+            // });
 
-                    table
-                      .foreign("target")
-                      .references(rel[1] + "." + this.MAIN_ID)
-                      .onDelete("CASCADE");
-                  }
-                );
-            } else {
-              logger.info(
-                `Tabulka ${
-                  tableName + "2" + rel[1] + "4" + columnName
-                } již existuje.`
-              );
-            }
+            // await this.db.schema
+            //   .setUser({ id: 1 })
+            //   .createTable(
+            //     tableName + "2" + rel[1] + "4" + columnName,
+            //     (table: any) => {
+            //       table.bigIncrements(this.MAIN_ID).primary([this.MAIN_ID]);
+
+            //       table.bigint("source");
+            //       table.bigint("target");
+
+            //       table
+            //         .foreign("source")
+            //         .references(tableName + "." + this.MAIN_ID)
+            //         .onDelete("CASCADE");
+            //       //TODO: musi se provest az uplne na konci Conclusion nema taky :-)
+
+            //       table
+            //         .foreign("target")
+            //         .references(rel[1] + "." + this.MAIN_ID)
+            //         .onDelete("CASCADE");
+            //     }
+            //   );
           } else {
-            logger.error(
-              `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ nlink ${columnDef.type}.`
+            logger.info(
+              `Tabulka ${
+                tableName + "2" + rel[1] + "4" + columnName
+              } již existuje.`
             );
           }
         } else {
           logger.error(
-            `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ ${columnDef.type}.`
+            `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ nlink ${columnDef.type}.`
           );
         }
+        // } else {
+        //   logger.error(
+        //     `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ ${columnDef.type}.`
+        //   );
+        // }
 
         if (column && columnDef.isUnique) {
           column.unique({
@@ -367,7 +400,27 @@ export class Entity {
             );
         }
       });
-    // }
+    }
+
+    return { foreignKeys, createLinkTables };
+  }
+
+  async createForeignKeys({ table, foreignKeys, actualDBSchema }) {
+    for (const fk of foreignKeys) {
+      if (fk) {
+        await this.db.schema.setUser({ id: 1 }).alterTable(table, (table) => {
+          const foreignKey = fk.refTable + "_" + fk.column + "_foreign";
+          if (
+            !actualDBSchema ||
+            actualDBSchema?.foreignKeys.indexOf(foreignKey) == -1
+          ) {
+            table
+              .foreign(fk.column)
+              .references(fk.refTable + "." + this.MAIN_ID);
+          }
+        });
+      }
+    }
   }
 
   async deleteColumn({
@@ -488,6 +541,37 @@ export class Entity {
     }
   }
 
+  async createLinkTables({ linkTable }) {
+    for (const lt of linkTable) {
+      if (lt) {
+        if (await this.db.schema.setUser({ id: 1 }).hasTable(lt.tableName)) {
+          continue;
+        }
+
+        //if (!lt.table) debugger;
+        await this.db.schema
+          .setUser({ id: 1 })
+          .createTable(lt.tableName, (table: any) => {
+            table.bigIncrements(this.MAIN_ID).primary([this.MAIN_ID]);
+
+            table.bigint("source");
+            table.bigint("target");
+
+            table
+              .foreign("source")
+              .references(lt.sourceTable + "." + this.MAIN_ID)
+              .onDelete("CASCADE");
+            //TODO: musi se provest az uplne na konci Conclusion nema taky :-)
+
+            table
+              .foreign("target")
+              .references(lt.targetTable + "." + this.MAIN_ID)
+              .onDelete("CASCADE");
+          });
+      }
+    }
+  }
+
   async createTables({
     schemaDefinition,
     actualDBSchema,
@@ -502,31 +586,40 @@ export class Entity {
       });
     }
 
+    const fieldsAdd = {};
     for (const tableName in schemaDefinition) {
       const fields = {
         ...schemaDefinition[tableName].fields,
       };
       // Zacnu pridavat sloupce
       logger.info(`Kontrola sloupcu pro tabulku ${tableName}`);
-      for (const columnName in fields) {
-        await this.createField({
-          tableName,
-          columnName: columnName,
-          columnDef: fields[columnName],
-          actualDBSchema: actualDBSchema,
+      // for (const columnName in fields) {
+      fieldsAdd[tableName] = await this.createFields({
+        tableName,
+        fields,
+        actualDBSchema: actualDBSchema,
+      });
+    }
+
+    for (const tableName in schemaDefinition) {
+      if (fieldsAdd[tableName]?.createLinkTables) {
+        await this.createLinkTables({
+          linkTable: fieldsAdd[tableName].createLinkTables,
         });
       }
     }
+
+    return { fieldsAdd: fieldsAdd };
   }
 
   async createData({
     data,
-    updateData,
+    // updateData,
     sqlAdmin,
   }: {
     data: Object;
     sqlAdmin: Sql;
-    updateData?: Object;
+    // updateData?: Object;
   }) {
     //
     for (const [name, dataArray] of Object.entries(data)) {
@@ -545,27 +638,27 @@ export class Entity {
       }
     }
 
-    if (updateData) {
-      for (const [name, dataArray] of Object.entries(updateData)) {
-        for (const d of dataArray) {
-          var rows = await sqlAdmin.select({
-            entity: name,
-            fields: [this.MAIN_ID],
-            where: { guid: d.guid },
-          });
+    // if (updateData) {
+    //   for (const [name, dataArray] of Object.entries(updateData)) {
+    //     for (const d of dataArray) {
+    //       var rows = await sqlAdmin.select({
+    //         entity: name,
+    //         fields: [this.MAIN_ID],
+    //         where: { guid: d.guid },
+    //       });
 
-          if (rows.length === 1) {
-            await sqlAdmin.update({
-              entity: name,
-              data: d,
-              where: { guid: d.guid },
-            });
-          } else {
-            console.warn("NOt found");
-          }
-        }
-      }
-    }
+    //       if (rows.length === 1) {
+    //         await sqlAdmin.update({
+    //           entity: name,
+    //           data: d,
+    //           where: { guid: d.guid },
+    //         });
+    //       } else {
+    //         console.warn("NOt found");
+    //       }
+    //     }
+    //   }
+    // }
   }
 
   getSchema() {
@@ -648,7 +741,7 @@ export class Entity {
     const differencesAdd = findDifferences(actualDBSchema, entityDef);
 
     console.log("Create tables");
-    await this.createTables({
+    const { fieldsAdd } = await this.createTables({
       schemaDefinition: differencesAdd,
       actualDBSchema: actualDBSchema,
     });
@@ -672,18 +765,28 @@ export class Entity {
       user: { id: 1 } as any,
     });
 
-    await this.createData({
-      data: defaultUsers(),
-      sqlAdmin,
-    });
+    // await this.createData({
+    //   data: defaultUsers(),
+    //   sqlAdmin,
+    // });
 
     await this.triggers.initTriggers(this.schema);
 
     await this.createData({
       data: defaultData(),
       sqlAdmin,
-      updateData: updateData(),
+      // updateData: updateData(),
     });
+
+    for (const tableName in schemaDefinition) {
+      if (fieldsAdd[tableName]?.foreignKeys) {
+        await this.createForeignKeys({
+          table: tableName,
+          foreignKeys: fieldsAdd[tableName].foreignKeys,
+          actualDBSchema,
+        });
+      }
+    }
 
     await wait(2000);
 

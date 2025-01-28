@@ -1,5 +1,6 @@
 import { defaultFields, workflowFields } from "./defaultEntities";
 import { DbSchemaType, EntitySchema, EntityType, FieldType } from "./types";
+import bcrypt from "bcryptjs";
 import _ from "lodash";
 
 export const addDefaultFields = (schemaDefinition: EntitySchema) => {
@@ -141,4 +142,16 @@ export const findDifferences = (
 
 export function wait(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export async function hashPassword(password) {
+  const saltRounds = process.env.PASSWORD_SALT_ROUNDS || 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
+  return hashedPassword;
+}
+
+export async function verifyPassword(inputPassword, storedHash) {
+  // Porovná zadané heslo s uloženým hashem
+  const isMatch = await bcrypt.compare(inputPassword, storedHash);
+  return isMatch; // Vrátí true, pokud heslo sedí, jinak false
 }

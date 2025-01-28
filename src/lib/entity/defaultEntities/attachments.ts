@@ -16,6 +16,21 @@ const entityFields: EntitySchema = {
         label: "Roles",
         description: "Roles",
       },
+      entity: {
+        type: "text",
+        label: "Entity",
+        description: "Entity",
+      },
+      field: {
+        type: "text",
+        label: "Field",
+        description: "Field",
+      },
+      entityid: {
+        type: "text",
+        label: "Entity ID",
+        description: "Entity ID",
+      },
     },
   },
 };

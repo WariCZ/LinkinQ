@@ -137,24 +137,12 @@ export const defaultEntities = (): EntitySchema => {
   };
 };
 
-export const defaultUsers = () => {
-  return {
-    ...users.defaultData,
-    // ...userroles.defaultData,
-  };
-};
-
 export const defaultData = () => {
   return {
     // ...lov.defaultData,
     // ...users.defaultData,
+    ...users.defaultData({ password: process.env.DEFAULT_PASSWORD }),
     ...userroles.defaultData,
     ...notifications.defaultData,
-  };
-};
-
-export const updateData = () => {
-  return {
-    ...users.updateData,
   };
 };
