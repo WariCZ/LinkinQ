@@ -4,17 +4,11 @@ const entityFields: EntitySchema = {
     system: true,
     fields: {
       currentversion: {
-        type: "bigint",
-        isRequired: true,
+        type: "link(attachments_history)",
         label: "Current version",
         description: "Current version",
-        default: 1,
+        isRequired: true,
         system: true,
-      },
-      roles: {
-        type: `link(attachments_history)`,
-        label: "Roles",
-        description: "Roles",
       },
       entity: {
         type: "text",

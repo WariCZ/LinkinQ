@@ -418,11 +418,18 @@ export class EntityRoutes extends Entity {
         if (req.user) {
           const file = (req as any).file;
 
-          const attachments: any = await this.db("attachments_history")
+          const attachments_history: any = await this.db("attachments_history")
             .setUser({ id: 1 })
             .insert({
               caption: file.originalname,
               data: file.buffer,
+            });
+
+          const attachments: any = await this.db("attachments")
+            .setUser({ id: 1 })
+            .insert({
+              caption: file.originalname,
+              currentversion: attachments_history[0].id,
             });
 
           console.log("File inserted successfully!");

@@ -22,6 +22,7 @@ import _ from "lodash";
 import Select from "./Select";
 import { ConditionType, FormFieldType, SectionType } from "./types";
 import DateTimePicker from "./Datetimepicker";
+import FileUpload from "./FileUpload";
 
 // export { FormFieldType };
 
@@ -108,7 +109,16 @@ const translateFormField = ({
 }): FormFieldType => {
   if (typeof field == "string") {
     const s = schema?.fields[field];
-    if (s && s.link) {
+
+    if (s && s.link && s.link == "attachments") {
+      return {
+        field: field,
+        label: s?.label || "",
+        required: s?.isRequired,
+        multi: s.nlinkTable ? true : false,
+        type: "attachment",
+      };
+    } else if (s && s.link) {
       return {
         field: field,
         label: s?.label || "",
@@ -132,7 +142,15 @@ const translateFormField = ({
       return field;
     }
     const s = schema?.fields[field.field];
-    if (s && s.link) {
+    if (s && s.link && s.link == "attachments") {
+      return {
+        field: field.field,
+        label: field.label || s?.label || "",
+        required: field.required !== undefined ? field.required : s?.isRequired,
+        multi: s.nlinkTable ? true : false,
+        type: "attachment",
+      };
+    } else if (s && s.link) {
       return {
         ...field,
         field: field.field,
@@ -170,10 +188,6 @@ const Form = ({
 }: DynamicFormProps) => {
   const schema: any = useStore((state) => state.schema);
 
-  const formSchema = entity
-    ? getFieldsForForm(formFields, entity && schema[entity])
-    : (formFields as FormFieldType[]);
-
   const {
     control,
     handleSubmit,
@@ -184,7 +198,7 @@ const Form = ({
     formState: { errors },
   } = useForm({ disabled: disabled, defaultValues: {} });
 
-  const watchAllFields = watch();
+  const watchAllFields = onChange ? watch() : null;
 
   useEffect(() => {
     if (!data || (data && Object.keys(data).length === 0)) {
@@ -369,12 +383,15 @@ const FormField = ({
   formField: FormFieldType;
   control: Control<FieldValues, any>;
 }) => {
-  if (!formField.type) formField.type = "text";
+  if (!formField.type) {
+    debugger;
+    formField.type = "text";
+  }
+  console.log("form formField ", formField);
   switch (formField.type) {
     case "text":
     case "number":
     case "password":
-      console.log("form text ", formField);
       return (
         <div
           key={formField.field}
@@ -452,6 +469,27 @@ const FormField = ({
             defaultValue={false}
             rules={{ required: formField.required }}
             render={({ field }) => <DateTimePicker />}
+          />
+        </div>
+      );
+    case "attachment":
+      return (
+        <div key={formField.field}>
+          <Label htmlFor={formField.field}>{formField.label}</Label>
+          <Controller
+            name={formField.field}
+            control={control}
+            rules={{ required: formField.required }}
+            render={({ field }) => (
+              <FileUpload
+                {...field}
+                {...formField}
+                onChange={(guids) => {
+                  console.log("FileUpload returned: ", guids);
+                  field.onChange(guids);
+                }}
+              />
+            )}
           />
         </div>
       );

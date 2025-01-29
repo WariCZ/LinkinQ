@@ -145,7 +145,9 @@ export function wait(ms: number): Promise<void> {
 }
 
 export async function hashPassword(password) {
-  const saltRounds = process.env.PASSWORD_SALT_ROUNDS || 10;
+  const saltRounds = process.env.PASSWORD_SALT_ROUNDS
+    ? parseInt(process.env.PASSWORD_SALT_ROUNDS)
+    : 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
   return hashedPassword;
 }

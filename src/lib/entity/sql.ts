@@ -248,7 +248,11 @@ export class Sql {
         }
 
         if (Object.keys(dataItem).length === 0) {
-          dataItem.guid = this.#knex.raw("??", ["guid"]);
+          if (where.guid) {
+            dataItem.guid = where.guid;
+          } else {
+            dataItem.guid = this.#knex.raw("??", ["guid"]);
+          }
         }
         const ret = await query
           .update(dataItem)

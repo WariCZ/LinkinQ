@@ -126,7 +126,6 @@ const ExecuteForm = (props: { fields: any; id: string } & ModalPropsType) => {
               approved: false,
             },
           });
-
           props.closeModal && props.closeModal();
         }}
         {...props}
@@ -160,6 +159,7 @@ const TaskDetail = (props: any) => {
         "createdby",
         "updatetime",
         "updatedby",
+        "attachments.caption",
       ],
     },
     {} as any
@@ -234,6 +234,11 @@ const TaskDetail = (props: any) => {
             type: "text",
             field: "description",
             label: "Description",
+          },
+          {
+            type: "attachment",
+            field: "attachments",
+            label: "Attachments",
           },
         ]}
       />

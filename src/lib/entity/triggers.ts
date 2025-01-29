@@ -283,7 +283,7 @@ export class Triggers {
     return data;
   };
 
-  translateData = async (table: string, data: any) => {
+  processDataBefore = async ({ table, data }: { table: string; data: any }) => {
     if (data) {
       try {
         const fields = this.schema?.[table].fields;
@@ -291,21 +291,44 @@ export class Triggers {
         for (const d of Array.isArray(data) ? data : [data]) {
           for (const f of Object.keys(d)) {
             if (d[f]) {
-              if (
-                fields[f].link &&
-                fields[f].type.indexOf("(attachments)") > -1
-              ) {
-                debugger;
+              if (fields[f].type == "password") {
+                d[f] = await hashPassword(d[f]);
               }
-            }
-
-            if (fields[f].type == "password") {
-              d[f] = await hashPassword(d[f]);
             }
           }
         }
+      } catch (e) {
+        debugger;
+      }
+    }
+  };
 
-        // return data;
+  processDataAfter = async ({
+    entity,
+    diffDataItem,
+    operation,
+    entityid,
+  }: {
+    entity: string;
+    diffDataItem: Object;
+    operation?: "C" | "D" | "U" | "";
+    entityid: number;
+  }) => {
+    if (diffDataItem) {
+      try {
+        const fields = this.schema?.[entity].fields;
+
+        for (const f of Object.keys(diffDataItem)) {
+          if (fields[f].link && fields[f].link == "attachments") {
+            const data = diffDataItem[f];
+            await this.db("attachments")
+              .setUser({ id: 1 })
+              .whereIn("id", data)
+              .whereNull("entity")
+              .whereNull("entityid")
+              .update({ entity: entity, entityid: entityid, field: f });
+          }
+        }
       } catch (e) {
         debugger;
       }
@@ -328,6 +351,7 @@ export class Triggers {
           if (!that.schema[table]) {
             return;
           }
+          if (table == "tasks") debugger;
 
           if (table == "journal") return;
 
@@ -350,8 +374,7 @@ export class Triggers {
                 .select("*")
                 .whereRaw(whereRaw, selectBinds);
 
-              const link = that.schema?.[table]?.nlinkTables?.[0];
-              if (link) {
+              for (let link of that.schema?.[table]?.nlinkTables || []) {
                 const beforeDataNlinks =
                   runner.builder._params?.beforeDataNlinks &&
                   runner.builder._params?.beforeDataNlinks[link.table];
@@ -377,7 +400,7 @@ export class Triggers {
             runner.builder._method == "del" ? "delete" : runner.builder._method;
           const data = runner.builder._single[runner.builder._method];
 
-          await that.translateData(table, data);
+          await that.processDataBefore({ table, data });
           if (
             that.definitions["before"] &&
             that.definitions["before"][method] &&
@@ -557,6 +580,13 @@ export class Triggers {
               operation + " - ",
               diffDataItem || beforeDataItem || afterDataDataItem
             );
+
+            await that.processDataAfter({
+              entity: table,
+              operation,
+              diffDataItem,
+              entityid: beforeDataItem?.id || afterDataDataItem?.id,
+            });
 
             if (that.schema[table].journal)
               await that.addToJournal({

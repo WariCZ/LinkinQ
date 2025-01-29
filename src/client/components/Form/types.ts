@@ -33,6 +33,11 @@ type FormFieldText = {
   TextInputProps &
   React.RefAttributes<HTMLInputElement>;
 
+type FormFieldAttach = {
+  type: "attachment";
+  multi?: boolean;
+} & FormFieldDefault;
+
 export type SectionType = {
   type: "Section";
   label?: string;
@@ -41,4 +46,8 @@ export type SectionType = {
   colSpan?: number;
 } & FormFieldDefault;
 
-export type FormFieldType = FormFieldSelect | FormFieldText | SectionType;
+export type FormFieldType =
+  | FormFieldSelect
+  | FormFieldText
+  | SectionType
+  | FormFieldAttach;
