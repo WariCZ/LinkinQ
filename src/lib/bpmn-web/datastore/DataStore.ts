@@ -44,7 +44,7 @@ class DataStore extends ServerComponent implements IDataStore {
 
   constructor(server: IBPMNServer) {
     super(server);
-    this.db = db;
+    this.db = db();
     this.locker = new InstanceLocker(this);
   }
 
@@ -141,7 +141,7 @@ class DataStore extends ServerComponent implements IDataStore {
 
       instance.guid = instance.id;
       delete instance.id;
-      const ic = await db(Instance_collection)
+      const ic = await this.db(Instance_collection)
         .setUser({ id: 1 })
         .insert(instance);
       instance.id = instance.guid;
@@ -154,7 +154,7 @@ class DataStore extends ServerComponent implements IDataStore {
       // saveObject.data = JSON.stringify(saveObject.data);
       // saveObject.savePoints = JSON.stringify(saveObject.savePoints);
 
-      await db(Instance_collection)
+      await this.db(Instance_collection)
         .setUser({ id: 1 })
         .where({ id: instance.id })
         .update(saveObject);
@@ -199,7 +199,7 @@ class DataStore extends ServerComponent implements IDataStore {
 
     const { conditions, values } = prepareConditions(query);
 
-    const records = await db(Instance_collection)
+    const records = await this.db(Instance_collection)
       .setUser({ id: 1 })
       .select(projection || "*")
       .whereRaw(conditions.join(" AND "), values);
@@ -212,7 +212,9 @@ class DataStore extends ServerComponent implements IDataStore {
     // const y = trans.translateCriteria(query);
     const { conditions, values } = prepareConditions(query);
 
-    const result = db.raw(conditions.join(" AND "), values).setUser({ id: 1 });
+    const result = this.db
+      .raw(conditions.join(" AND "), values)
+      .setUser({ id: 1 });
     const projection = [
       "guid",
       "id",
@@ -222,7 +224,7 @@ class DataStore extends ServerComponent implements IDataStore {
       "items",
       "tokens",
     ];
-    const records = await db(Instance_collection)
+    const records = await this.db(Instance_collection)
       .setUser({ id: 1 })
       .select(projection)
       .where(result);
@@ -231,13 +233,13 @@ class DataStore extends ServerComponent implements IDataStore {
   }
 
   async deleteInstances(query) {
-    await db(Instance_collection).setUser({ id: 1 }).where(query).del();
+    await this.db(Instance_collection).setUser({ id: 1 }).where(query).del();
   }
 
   async install() {
     debugger;
     return;
-    await db.schema
+    await this.db.schema
       .setUser({ id: 1 })
       .createTableIfNotExists(Instance_collection, (table) => {
         table.increments("id").primary();
@@ -247,7 +249,7 @@ class DataStore extends ServerComponent implements IDataStore {
         table.timestamps(true, true);
       });
 
-    await db.schema
+    await this.db.schema
       .setUser({ id: 1 })
       .createTableIfNotExists(Locks_collection, (table) => {
         table.increments("id").primary();

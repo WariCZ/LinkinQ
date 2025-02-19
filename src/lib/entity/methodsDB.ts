@@ -4,8 +4,6 @@ import { EntitySchema, Rule } from "./types";
 import { Knex } from "knex";
 import { dbType } from "./sql";
 import { User } from "../auth";
-import { s } from "vite/dist/node/types.d-aGj9QkWt";
-import { debug } from "winston";
 
 type SelectEntityType = {
   entity: string;

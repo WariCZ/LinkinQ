@@ -12,8 +12,8 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
 
   const defaultValues = {
-    email: "admin@admin.cz",
-    password: "Vorvan5678x",
+    email: "",
+    password: "",
   };
 
   const {

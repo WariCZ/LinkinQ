@@ -10,9 +10,9 @@ const configDb: Knex.Config = {
       : {
           host: process.env.DB_HOST || "localhost",
           port: parseInt(process.env.DB_PORT ?? "5432", 10),
-          user: process.env.DB_USER || "prisma",
-          password: process.env.DB_PASSWORD || "prisma",
-          database: process.env.DB_DATABASE || "prodigi",
+          user: process.env.DB_USER || "linkinq",
+          password: process.env.DB_PASSWORD || "linkinq",
+          database: process.env.DB_DATABASE || "linkinq",
         }),
   },
   // debug: true,
@@ -27,7 +27,13 @@ const configDb: Knex.Config = {
 export const MAIN_ID = "id";
 export const MAIN_GUID = "guid";
 
-export const db = knex(configDb);
+let dbInstance = null;
+export const db = () => {
+  if (!dbInstance) {
+    dbInstance = knex(configDb);
+  }
+  return dbInstance;
+};
 
 // Typ pro vstupní objekt
 interface QueryObject {

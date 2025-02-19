@@ -95,7 +95,8 @@ const authRoutes = ({
         throw "too many users";
       }
       if (dbUser.length > 0) {
-        if (verifyPassword(password, dbUser[0].password)) {
+        const verified = await verifyPassword(password, dbUser[0].password);
+        if (verified === true) {
           const user: User = {
             id: dbUser[0].id,
             name: dbUser[0].fullname,
@@ -124,7 +125,8 @@ const authRoutes = ({
         },
       });
       if (dbUser.length > 0) {
-        if (verifyPassword(password, dbUser[0].password)) {
+        const verified = await verifyPassword(password, dbUser[0].password);
+        if (verified === true) {
           const user: User = {
             id: dbUser[0].id,
             name: dbUser[0].fullname,

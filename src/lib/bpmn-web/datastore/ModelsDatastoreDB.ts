@@ -28,7 +28,7 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
 
   constructor(server: BPMNServer) {
     super(server);
-    this.db = db;
+    this.db = db();
   }
 
   async get(query = {}): Promise<object[]> {
@@ -114,7 +114,10 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
 
       const { conditions, values } = prepareConditions(query);
 
-      newQuery = db.raw(conditions.join(" AND ").setUser({ id: 1 }), values);
+      newQuery = this.db.raw(
+        conditions.join(" AND ").setUser({ id: 1 }),
+        values
+      );
     }
 
     const records = await this.db(Events_collection)
@@ -155,6 +158,7 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
   }
 
   async import(data: Object, owner = null) {
+    debugger;
     return await this.db(Definition_collection).setUser({ id: 1 }).insert(data);
   }
 
@@ -177,7 +181,6 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
 
   async saveModel(model: IBpmnModelData, owner = null): Promise<boolean> {
     model.saved = new Date();
-
     const existingRecord = await this.db(Definition_collection)
       .setUser({ id: 1 })
       .where({ name: model.name })

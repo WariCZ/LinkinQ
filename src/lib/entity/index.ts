@@ -29,7 +29,7 @@ export class Entity {
   triggers: Triggers;
 
   constructor() {
-    this.db = knexDB;
+    this.db = knexDB();
     this.eventsOnEntities = new EventEmitter();
     this.triggers = new Triggers({
       db: this.db,
