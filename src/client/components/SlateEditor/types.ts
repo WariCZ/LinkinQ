@@ -12,6 +12,7 @@ export interface CustomElement extends BaseElement {
   children: CustomElement[];
   attr?: Record<string, any>;
   url?: string
+  align?: string
 }
 
 export type CustomEditor = BaseEditor & ReactEditor;

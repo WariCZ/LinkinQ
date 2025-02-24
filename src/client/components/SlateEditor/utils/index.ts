@@ -1,9 +1,10 @@
 import { BaseEditor, Editor, Element, Transforms } from "slate";
+import { CustomElement } from "../types";
 
 const LIST_TYPES = ["orderedList", "unorderedList"];
 export const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
 
-export const toggleBlock = (editor, format) => {
+export const toggleBlock = (editor: BaseEditor, format: string) => {
   const isActive = isBlockActive(
     editor,
     format,
@@ -19,7 +20,7 @@ export const toggleBlock = (editor, format) => {
       !TEXT_ALIGN_TYPES.includes(format),
     split: true,
   })
-  let newProperties: Partial<Element>
+  let newProperties: Partial<CustomElement>
   if (TEXT_ALIGN_TYPES.includes(format)) {
     newProperties = {
       align: isActive ? undefined : format,
@@ -36,7 +37,6 @@ export const toggleBlock = (editor, format) => {
     Transforms.wrapNodes(editor, block)
   }
 }
-
 
 export const isBlockActive = (editor: BaseEditor, format: string, blockType = "type") => {
   const { selection } = editor;
