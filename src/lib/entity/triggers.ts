@@ -432,11 +432,11 @@ export class Triggers {
                       ...ins,
                       createdby: runner.builder?._user.id,
                       createtime: DateTime.now().toFormat(
-                        "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
+                        "yyyy-MM-dd HH:mm:ss.SSSZZ"
                       ),
                       updatedby: runner.builder?._user.id,
                       updatetime: DateTime.now().toFormat(
-                        "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
+                        "yyyy-MM-dd HH:mm:ss.SSSZZ"
                       ),
                     };
                     // returningFields = that.addUniqueKeys(returningFields, ins);
@@ -447,11 +447,11 @@ export class Triggers {
                   ...runner.builder._single.insert,
                   createdby: runner.builder?._user.id,
                   createtime: DateTime.utc().toFormat(
-                    "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
+                    "yyyy-MM-dd HH:mm:ss.SSSZZ"
                   ),
                   updatedby: runner.builder?._user.id,
                   updatetime: DateTime.utc().toFormat(
-                    "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
+                    "yyyy-MM-dd HH:mm:ss.SSSZZ"
                   ),
                 };
 
@@ -479,7 +479,7 @@ export class Triggers {
                       ...upd,
                       updatedby: runner.builder?._user.id,
                       updatetime: DateTime.utc().toFormat(
-                        "yyyy-MM-dd HH:mm:ss.SSSSSSZZ"
+                        "yyyy-MM-dd HH:mm:ss.SSSZZ"
                       ),
                     };
                     return upd;

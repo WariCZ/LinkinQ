@@ -23,6 +23,7 @@ import Select from "./Select";
 import { ConditionType, FormFieldType, SectionType } from "./types";
 import DateTimePicker from "./Datetimepicker";
 import FileUpload from "./FileUpload";
+import SlateEditor from "../SlateEditor";
 
 // export { FormFieldType };
 
@@ -488,6 +489,24 @@ const FormField = ({
                   console.log("FileUpload returned: ", guids);
                   field.onChange(guids);
                 }}
+              />
+            )}
+          />
+        </div>
+      );
+    case "richtext":
+      return (
+        <div key={formField.field} className="col-span-full">
+          <Label htmlFor={formField.field}>{formField.label}</Label>
+          <Controller
+            name={formField.field}
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <SlateEditor
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="Enter rich text..."
               />
             )}
           />

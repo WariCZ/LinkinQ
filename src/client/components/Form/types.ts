@@ -38,6 +38,10 @@ type FormFieldAttach = {
   multi?: boolean;
 } & FormFieldDefault;
 
+type FormFieldRichText = {
+  type: "richtext";
+} & FormFieldDefault;
+
 export type SectionType = {
   type: "Section";
   label?: string;
@@ -50,4 +54,5 @@ export type FormFieldType =
   | FormFieldSelect
   | FormFieldText
   | SectionType
-  | FormFieldAttach;
+  | FormFieldAttach
+  | FormFieldRichText;

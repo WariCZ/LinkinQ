@@ -1,0 +1,29 @@
+import { useSlateStatic } from "slate-react"
+import { Button } from "../common/Button"
+import { insertImage, isImageUrl } from "../../plugins/withImages"
+import { Icon } from "../common/Icon"
+import { IconType } from "react-icons";
+import { CustomEditor } from "../../types";
+
+interface InsertImageButtonProps {
+    icon: IconType
+}
+
+export const InsertImageButton = ({ icon }: InsertImageButtonProps) => {
+    const editor = useSlateStatic()
+    return (
+        <Button
+            onMouseDown={(event: MouseEvent) => {
+                event.preventDefault()
+                const url = window.prompt('Enter the URL of the image:')
+                if (url && !isImageUrl(url)) {
+                    alert('URL is not an image')
+                    return
+                }
+                url && insertImage(editor as CustomEditor, url)
+            }}
+        >
+            <Icon IconComponent={icon} />
+        </Button>
+    )
+}

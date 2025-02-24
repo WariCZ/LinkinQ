@@ -3,11 +3,29 @@ import { useTranslation } from "react-i18next";
 import Form from "../components/Form/Form";
 import DateTimePicker from "../components/Form/Datetimepicker";
 import FileUpload from "../components/Form/FileUpload";
+import { BaseElement, Descendant } from "slate";
+import SlateEditor from "../components/SlateEditor";
+
+const initialValue = [
+  {
+    type: 'paragraph',
+    children: [{ text: "" }],
+  },
+]
 
 const PublicPage: React.FC = () => {
   const { t, i18n } = useTranslation();
+  const [content, setContent] = useState<BaseElement[]>(initialValue);
+
+
+  const handleChange = (value: Descendant[]) => {
+    setContent(value as BaseElement[]);
+  };
+
+  console.log(content)
   return (
     <div className="p-3">
+
       <h1 className="font-bold">Dashboard</h1>
 
       {/* <p>This page is accessible by anyone.</p>
@@ -26,7 +44,7 @@ const PublicPage: React.FC = () => {
       <DateTimePicker />
       <Form
         formFields={[
-          { label: "text", field: "text", type: "text" },
+          { label: "text", field: "richtextfield", type: "richtext" },
           { label: "number", field: "number", type: "number" },
           { label: "password", field: "password", type: "password" },
           { label: "datetime", field: "datetime", type: "datetime" },
