@@ -84,7 +84,7 @@ const Tasks = () => {
         <div className="flex space-x-2">
           <Button onClick={() => openModal(<TaskDetail entity={entity} />, {
             title: t("Create tasks"),
-            size: "xl",
+            size: "lg",
             modalSingle: true,
           })}>
             <FaPlus className="ml-0 m-1 h-3 w-3" />

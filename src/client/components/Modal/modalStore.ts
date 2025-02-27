@@ -1,19 +1,18 @@
-import { ModalSizes } from "flowbite-react";
 import create from "zustand";
 
-export interface ModalData {
-  content: React.ReactNode;
+interface ModalData {
+  content: React.ReactNode | ((props: any) => React.ReactNode);
   options?: {
     title?: string;
-    size?: keyof ModalSizes;
+    size?: "sm" | "md" | "lg" | "xl";
     modalSingle?: boolean;
-    [key: string]: any;
+    modalOnSuccess?: (data?: any) => void;
   };
 }
 
 interface StoreState {
   modals: ModalData[];
-  openModal: (content: React.ReactNode, options?: ModalData["options"]) => void;
+  openModal: (content: React.ReactNode | ((props: any) => React.ReactNode), options?: ModalData["options"]) => void;
   closeModal: () => void;
 }
 

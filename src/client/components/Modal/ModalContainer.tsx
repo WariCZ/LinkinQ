@@ -19,53 +19,41 @@ const ModalContainer = () => {
 
   return (
     <>
-      {modals.map((content: any, index) => {
+      {modals.map(({ content, options }, index) => {
 
-        let ComponentWithProps;
+        let ComponentWithProps: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode>;
+
         if (typeof content === "function") {
           ComponentWithProps = content({ formRef, closeModal });
+        } else if (React.isValidElement(content)) {
+          const validProps = { ...(content.props || {}), formRef, closeModal };
+          ComponentWithProps = React.cloneElement(content, validProps);
         } else {
-          ComponentWithProps = React.cloneElement(content, {
-            formRef,
-            closeModal,
-          });
+          console.error("Invalid content type for modal:", content);
+          return null;
         }
-
         return (
           <Draggable handle=".draggable-handle" key={index}>
             <Modal
               key={index}
               show={true}
-              size={content.options.size || "lg"}
+              size={options?.size || "lg"}
               onClose={closeModal}
               className="fixed inset-0 flex items-center justify-center z-50"
-              style={{
-                top: `${index * 20}px`,
-                left: `${index * 20}px`,
-              }}
+              style={{ top: `${index * 20}px`, left: `${index * 20}px` }}
             >
               <Modal.Header className="draggable-handle cursor-move">
-                {content.options?.title &&
-                  <h3 className="text-sm font-semibold">
-                    {content.options?.title}
-                  </h3>
-                }
+                {options?.title && <h3 className="text-sm font-semibold">{options.title}</h3>}
               </Modal.Header>
-              <Modal.Body className="max-h-[800px]">
-                {ComponentWithProps}
-              </Modal.Body>
+              <Modal.Body className="max-h-[800px]">{ComponentWithProps}</Modal.Body>
               <Modal.Footer>
-                <Button onClick={closeModal} color="light">
-                  {t("modal.close")}
-                </Button>
+                <Button onClick={closeModal} color="light">{t("modal.close")}</Button>
                 <Button
                   onClick={() => {
                     if (formRef.current) {
-                      formRef.current.dispatchEvent(
-                        new Event("submit", { cancelable: true, bubbles: true })
-                      );
+                      formRef.current.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
                     } else {
-                      content.options?.modalOnSuccess && content.options.modalOnSuccess();
+                      options?.modalOnSuccess && options.modalOnSuccess();
                     }
                   }}
                 >
