@@ -1,4 +1,4 @@
-import Form from "@/client/components/Form/Form";
+import Form from "@/client/components/Form";
 import { ModalPropsType } from "@/client/components/Modal/ModalContainer";
 import { useModalStore } from "@/client/components/Modal/modalStore";
 import useDataDetail from "@/client/hooks/useDataDetail";
@@ -88,9 +88,8 @@ const Workflow = (props: any) => {
                 <li
                   key={m.name + i}
                   onClick={() => setSelectedWorkflow(m)}
-                  className={`${
-                    selectedWorkflow.name === m.name ? "font-bold" : ""
-                  } cursor-pointer`}
+                  className={`${selectedWorkflow.name === m.name ? "font-bold" : ""
+                    } cursor-pointer`}
                 >
                   {m.name}
                 </li>
@@ -115,7 +114,7 @@ const Workflow = (props: any) => {
                   mode="edit"
                   xml={selectedWorkflow.source || ""}
                   onShown={handleShown}
-                  // click={test}
+                // click={test}
                 />
               </>
             ) : (

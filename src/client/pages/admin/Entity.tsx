@@ -5,7 +5,7 @@ import { FaPlus } from "react-icons/fa";
 import { Button, TextInput } from "flowbite-react";
 import Table from "../../components/Table";
 import { EntitySchema, EntityType, FieldType } from "@/lib/entity/types";
-import Form from "@/client/components/Form/Form";
+import Form from "@/client/components/Form";
 import { useModalStore } from "@/client/components/Modal/modalStore";
 import { httpRequest } from "@/client/hooks/useDataDetail";
 import { ModalPropsType } from "@/client/components/Modal/ModalContainer";
@@ -74,9 +74,8 @@ const Entity = () => {
                 <li
                   key={m}
                   onClick={() => setSelectedEntity(m)}
-                  className={`${
-                    selectedEntity === m ? "font-bold" : ""
-                  } cursor-pointer`}
+                  className={`${selectedEntity === m ? "font-bold" : ""
+                    } cursor-pointer`}
                 >
                   {m}
                 </li>
@@ -102,9 +101,9 @@ const EntityDetail = ({
   const { openModal } = useModalStore();
   const fieldsArray = definition?.fields
     ? Object.entries(definition?.fields).map(([key, value]) => ({
-        name: key,
-        ...value,
-      }))
+      name: key,
+      ...value,
+    }))
     : [];
 
   const exportEntity = () => {
@@ -161,8 +160,8 @@ const EntityDetail = ({
             "description",
             "default",
           ]}
-          // loading={loading}
-          // ordering={[{ id: "name" }]}
+        // loading={loading}
+        // ordering={[{ id: "name" }]}
         />
       </div>
     </div>

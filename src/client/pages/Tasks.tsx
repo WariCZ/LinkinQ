@@ -1,22 +1,20 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect } from "react";
 import useStore from "../store";
-import { Button, Dropdown } from "flowbite-react";
+import { Button } from "flowbite-react";
 import Table from "../components/Table";
-
 import useDataTable from "../hooks/useDataTable";
-import Form from "../components/Form/Form";
+import Form from "../components/Form";
 import { FormFieldType } from "../components/Form/types";
 import { useModalStore } from "../components/Modal/modalStore";
 import useDataDetail from "../hooks/useDataDetail";
-import { BpmnJsReact, useBpmnJsReact } from "bpmn-js-react";
 import axios from "axios";
-import { ModalPropsType } from "../components/Modal/ModalContainer";
 import { FaPlus } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
-import _, { assign } from "lodash";
+import _ from "lodash";
 import { useTranslation } from "react-i18next";
 import ButtonExecuteBpmn from "../components/ButtonExecuteBpmn";
 import { DateTime } from "luxon";
+import { ModalPropsType } from "../components/Modal/ModalContainer";
 
 const Tasks = () => {
   const { t } = useTranslation();
@@ -37,20 +35,20 @@ const Tasks = () => {
     ],
     ...(schema[entity]
       ? Object.keys(schema[entity].fields)
-          .filter((f) => {
-            return !schema[entity].fields[f].system;
-          })
-          .map((f) => {
-            if (schema[entity].fields[f].link) {
-              if (schema[entity].fields[f].link === "users") {
-                return f + ".fullname";
-              } else {
-                return f + ".caption";
-              }
+        .filter((f) => {
+          return !schema[entity].fields[f].system;
+        })
+        .map((f) => {
+          if (schema[entity].fields[f].link) {
+            if (schema[entity].fields[f].link === "users") {
+              return f + ".fullname";
             } else {
-              return f;
+              return f + ".caption";
             }
-          })
+          } else {
+            return f;
+          }
+        })
       : []),
     ...["status"],
   ];
@@ -84,7 +82,11 @@ const Tasks = () => {
     <div className="mx-3">
       <div className="flex items-center justify-between my-3">
         <div className="flex space-x-2">
-          <Button onClick={() => openModal(<TaskDetail entity={entity} />)}>
+          <Button onClick={() => openModal(<TaskDetail entity={entity} />, {
+            title: t("Create tasks"),
+            size: "xl",
+            modalSingle: true,
+          })}>
             <FaPlus className="ml-0 m-1 h-3 w-3" />
             {t("add")}
           </Button>
@@ -193,53 +195,138 @@ const TaskDetail = (props: any) => {
         entity={entity}
         formFields={[
           {
-            type: "text",
-            field: "caption",
-            label: "Title",
+            "type": "text",
+            "field": "caption",
+            "label": "Title"
           },
           {
-            type: "Section",
-            columns: 2,
-            colSpan: 2,
-            fields: [
+            "type": "Section",
+            "columns": 2,
+            "colSpan": 2,
+            "fields": [
               {
-                field: "createdby",
-                required: false,
-                readOnly: true,
+                "field": "createdby",
+                "label": "Created by",
+                "required": false,
+                "readOnly": true
               },
               {
-                field: "createtime",
-                required: false,
-                readOnly: true,
+                "field": "createtime",
+                "label": "Created time",
+                "required": false,
+                "readOnly": true
               },
               {
-                field: "updatedby",
-                required: false,
-                readOnly: true,
+                "field": "updatedby",
+                "label": "Updated by",
+                "required": false,
+                "readOnly": true
               },
               {
-                field: "updatetime",
-                required: false,
-                readOnly: true,
+                "field": "updatetime",
+                "label": "Updated time",
+                "required": false,
+                "readOnly": true
               },
               {
-                field: "assignee",
+                "field": "assignee",
+                "label": "Assignee",
+                "required": false,
+                "readOnly": true
               },
-            ],
+              {
+                "type": "select",
+                "field": "priority",
+                "label": "Priority",
+                "options": [
+                  {
+                    "value": "none",
+                    "label": "Bez priority"
+                  },
+                  {
+                    "value": "low",
+                    "label": "Nízká"
+                  },
+                  {
+                    "value": "medium",
+                    "label": "Střední"
+                  },
+                  {
+                    "value": "high",
+                    "label": "Vysoká"
+                  },
+                  {
+                    "value": "very_high",
+                    "label": "Velmi vysoká"
+                  },
+                  {
+                    "value": "critical",
+                    "label": "Kritická"
+                  }
+                ]
+              }
+            ]
           },
           {
-            field: "attn",
-          },
-          {
-            type: "text",
-            field: "description",
-            label: "Description",
-          },
-          {
-            type: "attachment",
-            field: "attachments",
-            label: "Attachments",
-          },
+            "type": "Tabs",
+            "tabs": [
+              {
+                "name": "General",
+                "fields": [
+                  {
+                    "field": "attn",
+                    "type": "text",
+                    "label": "Attention"
+                  },
+                  {
+                    "type": "richtext",
+                    "field": "richtext",
+                    "label": "Description"
+                  },
+                  {
+                    "type": "Section",
+                    "columns": 2,
+                    "colSpan": 2,
+                    "gap": 1,
+                    "fields": [
+                      {
+                        "field": "effortPlanned",
+                        "label": "Effort Planned (MD)",
+                        "customComponent": "EffortField"
+                      },
+                      {
+                        "field": "effortSpent",
+                        "label": "Effort Spent (MD)",
+                        "readOnly": true,
+                        "customComponent": "EffortField"
+                      },
+                      {
+                        "field": "effortsWorked",
+                        "label": "Efforts Worked (MD)",
+                        "readOnly": true,
+                        "customComponent": "EffortField"
+                      },
+                      {
+                        "field": "reportedEffort",
+                        "label": "Reported Effort (MH)",
+                        "customComponent": "EffortField"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "name": "Attachments",
+                "fields": [
+                  {
+                    "type": "attachment",
+                    "field": "attachments",
+                    "label": "Attachments"
+                  }
+                ]
+              }
+            ]
+          }
         ]}
       />
     </>

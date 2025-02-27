@@ -1,25 +1,28 @@
+import { ModalSizes } from "flowbite-react";
 import create from "zustand";
 
+export interface ModalData {
+  content: React.ReactNode;
+  options?: {
+    title?: string;
+    size?: keyof ModalSizes;
+    modalSingle?: boolean;
+    [key: string]: any;
+  };
+}
+
 interface StoreState {
-  modals: any[];
-  openModal: (
-    content: React.ReactNode | ((props: any) => React.ReactNode)
-  ) => void;
+  modals: ModalData[];
+  openModal: (content: React.ReactNode, options?: ModalData["options"]) => void;
   closeModal: () => void;
 }
 
 export const useModalStore = create<StoreState>((set) => ({
   modals: [],
-  openModal: (content: any) => {
-    if (content.props.modalSingle) {
-      set(() => ({
-        modals: [content],
-      }));
-    } else {
-      set((state) => ({
-        modals: [...state.modals, content],
-      }));
-    }
+  openModal: (content, options = {}) => {
+    set((state) => ({
+      modals: options.modalSingle ? [{ content, options }] : [...state.modals, { content, options }],
+    }));
   },
   closeModal: () => set((state) => ({ modals: state.modals.slice(0, -1) })),
 }));

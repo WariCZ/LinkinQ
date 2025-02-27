@@ -22,7 +22,7 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
       const path = require("path");
       if (path.extname(file) == ".bpmn") {
         let name = path.basename(file);
-        name = name.substring(0, name.length - 5);
+        name = name?.substring(0, name.length - 5);
         files.push({ name, saved: null });
       }
     });

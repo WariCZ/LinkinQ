@@ -5,7 +5,7 @@ import { FaPlus } from "react-icons/fa";
 import { Button, TextInput } from "flowbite-react";
 import Table from "../../components/Table";
 import { EntitySchema, EntityType, FieldType } from "@/lib/entity/types";
-import Form, { FormFieldType } from "@/client/components/Form/Form";
+import Form, { FormFieldType } from "@/client/components/Form";
 import { useModalStore } from "@/client/components/Modal/modalStore";
 import useDataDetail, { httpRequest } from "@/client/hooks/useDataDetail";
 import { ModalPropsType } from "@/client/components/Modal/ModalContainer";

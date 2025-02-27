@@ -1,7 +1,7 @@
 import { Button, Spinner } from "flowbite-react";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Form from "../components/Form/Form";
+import Form from "../components/Form";
 import { useTranslation } from "react-i18next";
 
 const Profile: React.FC = () => {

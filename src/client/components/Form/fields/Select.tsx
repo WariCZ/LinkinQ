@@ -1,6 +1,6 @@
 import { httpRequest } from "@/client/hooks/useDataDetail";
 import _ from "lodash";
-import React, { RefAttributes, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactSelect, { Props as ReactSelectProps } from "react-select";
 import AsyncSelect from "react-select/async";
 

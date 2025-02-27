@@ -5,14 +5,14 @@ import { FaPlus } from "react-icons/fa";
 import { Button, TextInput } from "flowbite-react";
 import Table from "../../components/Table";
 import { EntitySchema, EntityType, FieldType } from "@/lib/entity/types";
-import Form from "@/client/components/Form/Form";
+import Form from "@/client/components/Form";
 import { useModalStore } from "@/client/components/Modal/modalStore";
 import useDataDetail, { httpRequest } from "@/client/hooks/useDataDetail";
 import { ModalPropsType } from "@/client/components/Modal/ModalContainer";
 import { FaFileExport } from "react-icons/fa";
 import useDataTable from "@/client/hooks/useDataTable";
 import axios from "axios";
-import Select from "@/client/components/Form/Select";
+import Select from "@/client/components/Form/fields/Select";
 import _ from "lodash";
 
 const Adapters = () => {
@@ -92,9 +92,8 @@ const Adapters = () => {
                 <li
                   key={m}
                   onClick={() => setSelectedAdapter(m)}
-                  className={`${selectedAdapter === m ? "font-bold" : ""} ${
-                    m.active ? "" : "line-through"
-                  } cursor-pointer`}
+                  className={`${selectedAdapter === m ? "font-bold" : ""} ${m.active ? "" : "line-through"
+                    } cursor-pointer`}
                 >
                   {m.caption}
                 </li>

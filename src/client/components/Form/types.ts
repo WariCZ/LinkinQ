@@ -14,8 +14,8 @@ type FormFieldDefault = {
   visible?: boolean;
   default?: string | number;
   rules?: {
-    type: RuleType; // Typ pravidla
-    conditions: ConditionType[]; // Pole podmínek
+    type: RuleType;
+    conditions: ConditionType[];
   }[];
   colSpan?: number;
 };
@@ -50,9 +50,20 @@ export type SectionType = {
   colSpan?: number;
 } & FormFieldDefault;
 
+export type TabFormType = {
+  name: string;
+  fields: (FormFieldType | SectionType)[];
+}
+
+export type TabsFromType = {
+  type: "Tabs";
+  tabs: TabFormType[];
+}  & FormFieldDefault;
+
 export type FormFieldType =
   | FormFieldSelect
   | FormFieldText
   | SectionType
   | FormFieldAttach
-  | FormFieldRichText;
+  | FormFieldRichText
+  | TabsFromType;

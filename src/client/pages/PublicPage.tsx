@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import Form from "../components/Form/Form";
-import DateTimePicker from "../components/Form/Datetimepicker";
-import FileUpload from "../components/Form/FileUpload";
+import Form from "../components/Form";
+import DateTimePicker from "../components/Form/fields/DateTimePicker";
+import FileUpload from "../components/Form/fields/FileUpload";
 import { BaseElement, Descendant } from "slate";
 import SlateEditor from "../components/SlateEditor";
 

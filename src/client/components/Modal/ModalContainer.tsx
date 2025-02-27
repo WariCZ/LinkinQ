@@ -14,20 +14,16 @@ export type ModalPropsType = {
 
 const ModalContainer = () => {
   const { modals, closeModal } = useModalStore();
-  const formRef: React.LegacyRef<HTMLFormElement> | undefined = useRef(null);
-  const { t, i18n } = useTranslation();
+  const formRef = useRef<HTMLFormElement>(null);
+  const { t } = useTranslation();
 
   return (
     <>
-      {modals.map((content: any, index: number) => {
-        console.log("formRef", formRef);
+      {modals.map((content: any, index) => {
 
         let ComponentWithProps;
         if (typeof content === "function") {
-          ComponentWithProps = content({
-            formRef,
-            closeModal,
-          });
+          ComponentWithProps = content({ formRef, closeModal });
         } else {
           ComponentWithProps = React.cloneElement(content, {
             formRef,
@@ -40,21 +36,22 @@ const ModalContainer = () => {
             <Modal
               key={index}
               show={true}
-              size="lg"
+              size={content.options.size || "lg"}
               onClose={closeModal}
-              className={`fixed inset-0 flex items-center justify-center z-50`}
+              className="fixed inset-0 flex items-center justify-center z-50"
               style={{
-                top: `${index * 20}px`, // Posun nahoru o 20px pro každé nové okno
-                left: `${index * 20}px`, // Posun do strany o 20px pro každé nové okno
+                top: `${index * 20}px`,
+                left: `${index * 20}px`,
               }}
             >
               <Modal.Header className="draggable-handle cursor-move">
-                <h3 className="text-sm font-semibold">
-                  {content?.props.modalLabel}
-                </h3>
+                {content.options?.title &&
+                  <h3 className="text-sm font-semibold">
+                    {content.options?.title}
+                  </h3>
+                }
               </Modal.Header>
               <Modal.Body className="max-h-[800px]">
-                {/* <ModalContent.content formRef={formRef} /> */}
                 {ComponentWithProps}
               </Modal.Body>
               <Modal.Footer>
@@ -65,14 +62,10 @@ const ModalContainer = () => {
                   onClick={() => {
                     if (formRef.current) {
                       formRef.current.dispatchEvent(
-                        new Event("submit", {
-                          cancelable: true,
-                          bubbles: true,
-                        })
+                        new Event("submit", { cancelable: true, bubbles: true })
                       );
                     } else {
-                      content?.props?.modalOnSuccess &&
-                        content?.props?.modalOnSuccess();
+                      content.options?.modalOnSuccess && content.options.modalOnSuccess();
                     }
                   }}
                 >

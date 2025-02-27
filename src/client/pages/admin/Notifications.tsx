@@ -6,7 +6,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import useDataTable from "../../hooks/useDataTable";
 import useDataDetail from "../../hooks/useDataDetail";
 import { useModalStore } from "@/client/components/Modal/modalStore";
-import Form from "@/client/components/Form/Form";
+import Form from "@/client/components/Form";
 
 const Notifications: React.FC = () => {
   const { openModal } = useModalStore();
