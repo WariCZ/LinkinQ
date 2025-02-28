@@ -5,7 +5,7 @@ import {
     Range,
     Element as SlateElement,
 } from "slate";
-import type { CustomEditor, LinkElement } from "../types";
+import type { CustomEditor, LinkElement } from "../../../types/SlateEditor/types";
 
 const isLinkActive = (editor: Editor): boolean => {
     const [link] = Editor.nodes(editor, {

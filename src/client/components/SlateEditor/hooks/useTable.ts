@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { BaseEditor, Editor, Element } from 'slate'
-import { CustomElement } from '../types';
+import { CustomElement } from '../../../types/SlateEditor/types';
 
 const useTable = (editor: BaseEditor) => {
     const [isTable, setIsTable] = useState(false);

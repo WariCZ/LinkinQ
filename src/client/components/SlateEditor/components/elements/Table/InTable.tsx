@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "../../common/Button";
 import { useTableUtil } from "../../../hooks/useTableUtil";
 import { useSlate } from "slate-react";
-import { CustomEditor } from "../../../types";
+import { CustomEditor } from "../../../../../types/SlateEditor/types";
 import { Icon } from "../../common/Icon";
 import { MdTableRows, MdViewColumn, MdDelete } from "react-icons/md";
 
@@ -17,7 +17,7 @@ const InTable = () => {
             </Button>
 
             <Button format="insert column" onClick={insertColumn}>
-                <Icon IconComponent={MdViewColumn} className=" mr-1" /> 
+                <Icon IconComponent={MdViewColumn} className=" mr-1" />
             </Button>
 
             <Button format="remove table" onClick={removeTable}>

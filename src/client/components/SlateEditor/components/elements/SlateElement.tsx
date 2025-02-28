@@ -1,6 +1,6 @@
 import Image from "./Image";
 import { Link } from "./Link";
-import { ElementProps } from "../../types";
+import { ElementProps } from "../../../../types/SlateEditor/types";
 
 export const SlateElement = ({ attributes, children, element }: ElementProps) => {
     switch (element.type) {

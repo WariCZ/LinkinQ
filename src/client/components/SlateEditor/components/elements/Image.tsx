@@ -2,7 +2,7 @@ import React from "react";
 import { useSelected, useFocused, useSlateStatic, ReactEditor } from "slate-react";
 import { Button } from "../common/Button";
 import { Transforms } from "slate";
-import { ElementProps } from "../../types";
+import { ElementProps } from "../../../../types/SlateEditor/types";
 import { Icon } from "../common/Icon";
 import { MdDelete } from "react-icons/md";
 

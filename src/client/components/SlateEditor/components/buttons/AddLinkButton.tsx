@@ -8,7 +8,7 @@ import {
 } from 'slate'
 import { Icon } from "../common/Icon"
 import { MdLink } from "react-icons/md"
-import { CustomEditor, LinkElement } from "../../types"
+import { CustomEditor, LinkElement } from "../../../../types/SlateEditor/types"
 
 export const isLinkActive = (editor: CustomEditor) => {
     const [link] = Editor.nodes(editor, {

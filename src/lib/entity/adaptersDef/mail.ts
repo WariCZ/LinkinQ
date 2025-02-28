@@ -3,7 +3,7 @@ import _, { before } from "lodash";
 import nodemailer from "nodemailer";
 import { Sql } from "../sql";
 import { EntitySchema } from "../types";
-import { FormFieldType } from "../../../client/components/Form/types";
+import { FormFieldType } from "../../../client/types/DynamicForm/types";
 
 export class mailAdapter {
   transporter: any;

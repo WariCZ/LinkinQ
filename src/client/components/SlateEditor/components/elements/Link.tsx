@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ElementProps } from "../../types";
+import { ElementProps } from "../../../../types/SlateEditor/types";
 
 const allowedSchemes = ["http:", "https:", "mailto:", "tel:"];
 

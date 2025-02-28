@@ -4,7 +4,7 @@ import {
     Point,
     Element as SlateElement,
   } from 'slate'
-import { CustomEditor } from '../types'
+import { CustomEditor } from '../../../types/SlateEditor/types'
 
 export const withTables = (editor: CustomEditor) => {
     const { deleteBackward, deleteForward, insertBreak } = editor

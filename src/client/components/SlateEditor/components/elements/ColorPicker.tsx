@@ -5,7 +5,7 @@ import { colors } from '../../utils/defaultColors';
 import { FormEvent } from 'react';
 import { ChangeEvent } from 'react';
 import usePopup from '../../hooks/usePopup';
-import { CustomEditor, FormatType } from '../../types';
+import { CustomEditor, FormatType } from '../../../../types/SlateEditor/types';
 import { Icon } from '../common/Icon';
 import { Button } from '../common/Button';
 

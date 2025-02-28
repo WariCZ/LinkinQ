@@ -4,7 +4,7 @@ import { BaseRange, Transforms } from 'slate';
 import { Icon } from '../../common/Icon';
 import { FaTable } from "react-icons/fa6";
 import { useTableUtil } from '../../../hooks/useTableUtil';
-import { CustomEditor } from '../../../types';
+import { CustomEditor } from '../../../../../types/SlateEditor/types';
 import { Button } from '../../common/Button';
 
 interface TableProps {
