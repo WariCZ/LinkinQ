@@ -9,7 +9,6 @@ interface ModalData {
     modalOnSuccess?: (data?: any) => void;
   };
 }
-
 interface StoreState {
   modals: ModalData[];
   openModal: (content: React.ReactNode | ((props: any) => React.ReactNode), options?: ModalData["options"]) => void;

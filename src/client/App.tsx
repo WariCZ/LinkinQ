@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -7,25 +7,24 @@ import {
   Outlet,
 } from "react-router-dom";
 import useStore from "./store";
-import Login from "./pages/Login";
-
-import PublicPage from "./pages/PublicPage";
 import { DashboardHeader } from "./components/layout/Header";
 import DashboardSidebar from "./components/layout/Sidebar";
-import { Flowbite, Toast } from "flowbite-react";
+import { Flowbite } from "flowbite-react";
 import { customTheme } from "./flowbite";
-import ServerScript from "./pages/admin/ServerScript";
-import Journal from "./pages/admin/Journal";
-import Workflow from "./pages/admin/Workflow";
-import Entity from "./pages/admin/Entity";
-import Tasks from "./pages/Tasks";
-import Triggers from "./pages/admin/Triggers";
 import AppToast from "./components/Toast";
-import Profile from "./pages/Profile";
-import QueryBuilder from "./pages/admin/QueryBuilder";
-import Notifications from "./pages/admin/Notifications";
-import Adapters from "./pages/admin/Adapters";
 import Pageflow from "./Pageflow";
+import { Tasks } from "./app/tasks";
+import { Login } from "./app/login";
+import { Dashboard } from "./app/dashboard";
+import { Profile } from "./app/profile";
+import { Adapters } from "./app/admin/adapters";
+import { Entity } from "./app/admin/entity";
+import { Journal } from "./app/admin/journal";
+import { Workflow } from "./app/admin/workflow";
+import { ServerScript } from "./app/admin/serverScript";
+import { QueryBuilder } from "./app/admin/queryBuilder";
+import { Notifications } from "./app/admin/notifications";
+import { Triggers } from "./app/admin/triggers";
 
 const PrivateLayout = (props: { admin?: boolean }) => {
   return (
@@ -67,7 +66,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route element={<PrivateRoute />}>
-            <Route path="/" element={<PublicPage />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="profile" element={<Profile />} />
             <Route path="tasks" element={<Tasks />} />
             <Route path="entity/:entity" element={<Pageflow />} />

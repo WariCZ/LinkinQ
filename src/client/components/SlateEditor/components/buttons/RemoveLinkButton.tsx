@@ -3,7 +3,7 @@ import { Button } from "../common/Button"
 import { isLinkActive, unwrapLink } from "./AddLinkButton"
 import { Icon } from "../common/Icon"
 import { MdLinkOff } from "react-icons/md"
-import { CustomEditor } from "../../types"
+import { CustomEditor } from "../../../../types/SlateEditor/types"
 
 export const RemoveLinkButton = () => {
     const editor = useSlate()

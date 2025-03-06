@@ -4,14 +4,6 @@ import { useModalStore } from "./modalStore";
 import Draggable from "react-draggable";
 import { useTranslation } from "react-i18next";
 
-export type ModalPropsType = {
-  modalOnSuccess?: (data?: any) => void;
-  closeModal?: () => void;
-  formRef?: React.LegacyRef<HTMLFormElement> | undefined;
-  modalLabel?: string;
-  modalSingle?: boolean;
-};
-
 const ModalContainer = () => {
   const { modals, closeModal } = useModalStore();
   const formRef = useRef<HTMLFormElement>(null);
@@ -42,7 +34,7 @@ const ModalContainer = () => {
               className="fixed inset-0 flex items-center justify-center z-50"
               style={{ top: `${index * 20}px`, left: `${index * 20}px` }}
             >
-              <Modal.Header className="draggable-handle cursor-move">
+              <Modal.Header className="draggable-handle cursor-move pt-2">
                 {options?.title && <h3 className="text-sm font-semibold">{options.title}</h3>}
               </Modal.Header>
               <Modal.Body className="max-h-[800px]">{ComponentWithProps}</Modal.Body>

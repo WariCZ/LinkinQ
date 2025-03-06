@@ -3,7 +3,7 @@ import { Button } from "../common/Button"
 import { insertImage, isImageUrl } from "../../plugins/withImages"
 import { Icon } from "../common/Icon"
 import { IconType } from "react-icons";
-import { CustomEditor } from "../../types";
+import { CustomEditor } from "../../../../types/SlateEditor/types";
 
 interface InsertImageButtonProps {
     icon: IconType

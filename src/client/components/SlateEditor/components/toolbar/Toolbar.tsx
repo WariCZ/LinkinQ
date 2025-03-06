@@ -9,7 +9,7 @@ import { AddLinkButton } from '../buttons/AddLinkButton.jsx';
 import { RemoveLinkButton } from '../buttons/RemoveLinkButton.jsx';
 import InTable from '../elements/Table/InTable.jsx';
 import { ColorPicker } from '../elements/ColorPicker.jsx';
-import { CustomEditor } from '../../types.js';
+import { CustomEditor } from '../../../../types/SlateEditor/types.js';
 import { defaultToolbarGroups } from './defaultToolbarGroups.js';
 
 const Toolbar = () => {

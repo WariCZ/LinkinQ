@@ -1,5 +1,5 @@
 import { Transforms, Editor, Range, Element as SlateElement, Path } from "slate";
-import { CustomEditor, CustomElement } from "../types";
+import { CustomEditor, CustomElement } from "../../../types/SlateEditor/types";
 
 type TableCell = {
     type: "table-cell";

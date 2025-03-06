@@ -1,7 +1,7 @@
 import { Transforms, BaseElement } from 'slate';
 import imageExtensions from 'image-extensions';
 import isUrl from 'is-url';
-import { CustomEditor } from '../types';
+import { CustomEditor } from '../../../types/SlateEditor/types';
 
 type ImageElement = {
     type: 'image';

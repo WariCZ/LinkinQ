@@ -1,5 +1,5 @@
 import { BaseEditor, Editor, Element, Transforms } from "slate";
-import { CustomElement } from "../types";
+import { CustomElement } from "../../../types/SlateEditor/types";
 
 const LIST_TYPES = ["orderedList", "unorderedList"];
 export const TEXT_ALIGN_TYPES = ['left', 'center', 'right', 'justify']
