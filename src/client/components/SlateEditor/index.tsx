@@ -1,7 +1,15 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Editable, withReact, Slate } from "slate-react";
 import { createEditor, Descendant } from "slate";
 import { withHistory } from "slate-history";
+import { v4 as uuidv4 } from "uuid";
+import _ from "lodash";
 import { SlateElement } from "./components/elements/SlateElement";
 import { Leaf } from "./components/elements/Leaf";
 import Toolbar from "./components/toolbar/Toolbar";
@@ -13,6 +21,17 @@ type SlateEditorProps = {
   value: Descendant[] | string;
   onChange: (value: Descendant[]) => void;
   placeholder: string;
+};
+
+const getDefaultValue = (value) => {
+  return Array.isArray(value) && value.length > 0
+    ? value
+    : [
+        {
+          type: "paragraph",
+          children: [{ text: typeof value === "string" ? value : "" }],
+        },
+      ];
 };
 
 const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
@@ -29,8 +48,20 @@ const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
     []
   );
   const toolbarRef = useRef<HTMLDivElement>(null);
-
+  const [slateValue, setSlateValue] = useState(getDefaultValue(value));
   const [isFocused, setIsFocused] = useState(false);
+  const [editorKey, setEditorKey] = useState(uuidv4());
+
+  useEffect(() => {
+    debugger;
+    if (value) {
+      if (!_.isEqual(value, slateValue)) {
+        // Při změně dat z API aktualizujte klíč editoru
+        setSlateValue(getDefaultValue(value));
+        setEditorKey(uuidv4());
+      }
+    }
+  }, [value]);
 
   const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
     if (
@@ -58,6 +89,7 @@ const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
 
   return (
     <Slate
+      key={editorKey}
       editor={editor}
       initialValue={initialValue}
       onChange={(value) => onChange(value)}

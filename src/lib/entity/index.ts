@@ -1,6 +1,12 @@
 import { Knex } from "knex";
 import _ from "lodash";
-import { DbSchemaType, EntitySchema, EntityType, FieldType } from "./types";
+import {
+  DbSchemaType,
+  DBFieldType,
+  EntitySchema,
+  EntityType,
+  FieldType,
+} from "./types";
 import { db as knexDB } from "../knex";
 import {
   addDefaultFields,
@@ -201,7 +207,7 @@ export class Entity {
       }
 
       let columnExists = false;
-      let actualDBColumn: FieldType | undefined;
+      let actualDBColumn: DBFieldType | undefined;
 
       // if (columnName == "id") debugger;
       if (
@@ -245,8 +251,8 @@ export class Entity {
           column = table.bigint(columnName);
         } else if (columnDef.type == "datetime") {
           column = table.datetime(columnName);
-        } else if (columnDef.type == "json") {
-          column = table.json(columnName);
+        } else if (columnDef.type == "richtext") {
+          column = table.specificType(columnName, "jsonb[]");
         } else if (columnDef.type == "jsonb") {
           column = table.jsonb(columnName);
         } else if (columnDef.type == "boolean") {

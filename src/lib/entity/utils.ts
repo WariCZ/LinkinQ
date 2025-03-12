@@ -1,5 +1,12 @@
 import { defaultFields, workflowFields } from "./defaultEntities";
-import { DbSchemaType, EntitySchema, EntityType, FieldType } from "./types";
+import {
+  DBSchema,
+  DbSchemaType,
+  DBFieldType,
+  EntitySchema,
+  EntityType,
+  FieldType,
+} from "./types";
 import bcrypt from "bcryptjs";
 import _ from "lodash";
 
@@ -39,7 +46,7 @@ export const translateDataTypesDBtoSchema = ({
   column_name: string;
   entityDef: EntitySchema;
   foreignTable?: string;
-}) => {
+}): string => {
   if (type === "character varying" && column_name == "password") {
     return "password";
   }
@@ -102,7 +109,7 @@ export const findDifferences = (
   let schemaTmp = schema;
   if (reverse) {
     actualTmp = schema;
-    schemaTmp = actual.tables;
+    schemaTmp = actual.tables as any;
   }
   // Projdeme všechny tabulky v actualDBSchema
   for (const tableName in schemaTmp) {

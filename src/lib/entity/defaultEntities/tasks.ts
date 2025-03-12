@@ -26,7 +26,7 @@ const entityFields: EntitySchema = {
     },
     fields: {
       description: {
-        type: "text",
+        type: "richtext",
         label: "Description",
         description: "Description",
       },

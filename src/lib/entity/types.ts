@@ -1,16 +1,17 @@
 export type EntitySchema = Record<string, EntityType>;
+export type DBSchema = Record<string, EntityType<DBFieldType>>;
 
 export type Rule =
   | { type: "field"; filter: Record<string, string | number> }
   | { type: "role"; roles: string[]; filter: Record<string, string | number> };
 
-export type EntityType = {
+export type EntityType<T = FieldType> = {
   system?: boolean;
   withoutDefaultFields?: boolean;
   journal?: boolean;
   workflow?: boolean;
   nlinkTables?: { table: string; field: string }[];
-  fields: Record<string, FieldType>;
+  fields: Record<string, T>;
   permissions?: {
     get?: {
       default: boolean;
@@ -19,6 +20,34 @@ export type EntityType = {
   };
 };
 export type FieldType = {
+  type:
+    | "uuid"
+    | "richtext"
+    | "jsonb"
+    | "boolean"
+    | "password"
+    | "blob"
+    | "text"
+    | "bigint"
+    | "integer"
+    | "datetime"
+    | `link(${string})`
+    | `nlink(${string})`;
+  label?: string;
+  name?: string;
+  description?: string;
+  isRequired?: boolean;
+  default?: string | number;
+  isRelation?: string;
+  isArray?: boolean;
+  isUnique?: boolean;
+  readonly?: boolean;
+  system?: boolean;
+  nlinkTable?: string;
+  link?: string;
+};
+
+export type DBFieldType = {
   type: string;
   label?: string;
   name?: string;
@@ -34,4 +63,4 @@ export type FieldType = {
   link?: string;
 };
 
-export type DbSchemaType = { tables: EntitySchema; foreignKeys: string[] };
+export type DbSchemaType = { tables: DBSchema; foreignKeys: string[] };

@@ -170,50 +170,50 @@ export const TaskDetail = (props: TaskDetailProps) => {
                   },
                   {
                     type: "richtext",
-                    field: "richtext",
+                    field: "description",
                     label: "Description",
                   },
-                  {
-                    type: "Section",
-                    columns: 2,
-                    colSpan: 2,
-                    fields: [
-                      {
-                        field: "effortPlanned",
-                        type: "number",
-                        label: "Effort planned:",
-                        readOnly: true,
-                        customComponent: EffortField,
-                        unit: "MD",
-                      },
-                      {
-                        field: "effortSpent",
-                        type: "number",
-                        label: "Effort spent:",
-                        readOnly: true,
-                        customComponent: EffortField,
-                        unit: "MD",
-                      },
-                      {
-                        field: "effortsWorked",
-                        type: "number",
-                        label: "Efforts worked (MD):",
-                        customComponent: EffortField,
-                        unit: "MD",
-                        validate: (value) =>
-                          value > 0 || "Value must be greater than 0",
-                      },
-                      {
-                        field: "reportedEffort",
-                        type: "number",
-                        label: "Reported effort (MH):",
-                        customComponent: EffortField,
-                        unit: "MH",
-                        validate: (value) =>
-                          value > 0 || "Value must be greater than 0",
-                      },
-                    ],
-                  },
+                  // {
+                  //   type: "Section",
+                  //   columns: 2,
+                  //   colSpan: 2,
+                  //   fields: [
+                  //     {
+                  //       field: "effortPlanned",
+                  //       type: "number",
+                  //       label: "Effort planned:",
+                  //       readOnly: true,
+                  //       customComponent: EffortField,
+                  //       unit: "MD",
+                  //     },
+                  //     {
+                  //       field: "effortSpent",
+                  //       type: "number",
+                  //       label: "Effort spent:",
+                  //       readOnly: true,
+                  //       customComponent: EffortField,
+                  //       unit: "MD",
+                  //     },
+                  //     {
+                  //       field: "effortsWorked",
+                  //       type: "number",
+                  //       label: "Efforts worked (MD):",
+                  //       customComponent: EffortField,
+                  //       unit: "MD",
+                  //       validate: (value) =>
+                  //         value > 0 || "Value must be greater than 0",
+                  //     },
+                  //     {
+                  //       field: "reportedEffort",
+                  //       type: "number",
+                  //       label: "Reported effort (MH):",
+                  //       customComponent: EffortField,
+                  //       unit: "MH",
+                  //       validate: (value) =>
+                  //         value > 0 || "Value must be greater than 0",
+                  //     },
+                  //   ],
+                  // },
                 ],
               },
               {
