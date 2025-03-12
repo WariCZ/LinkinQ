@@ -68,8 +68,9 @@ export const Entity = () => {
                 <li
                   key={m}
                   onClick={() => setSelectedEntity(m)}
-                  className={`${selectedEntity === m ? "font-bold" : ""
-                    } cursor-pointer`}
+                  className={`${
+                    selectedEntity === m ? "font-bold" : ""
+                  } cursor-pointer`}
                 >
                   {m}
                 </li>
@@ -85,4 +86,3 @@ export const Entity = () => {
     </div>
   );
 };
-

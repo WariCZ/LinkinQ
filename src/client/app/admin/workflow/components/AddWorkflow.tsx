@@ -17,7 +17,9 @@ const defaultXml = `<?xml version="1.0" encoding="UTF-8"?>
 </bpmn2:definitions>
 `;
 
-export const AddWorkflow = (props: ModalPropsType & { refresh: () => void }) => {
+export const AddWorkflow = (
+  props: ModalPropsType & { refresh: () => void }
+) => {
   const [data, setData, { setRecord }] = useDataDetail(
     {
       entity: "wf_models",

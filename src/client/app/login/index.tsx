@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import useStore from "../../store";
 import { Button, Label, TextInput } from "flowbite-react";
 import { useForm } from "react-hook-form";
-import logo from "../../static/logo.png"
+import logo from "../../static/logo.png";
 
 export const Login = () => {
   const setUser = useStore((state) => state.setUser);

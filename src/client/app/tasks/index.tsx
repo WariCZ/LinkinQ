@@ -30,20 +30,20 @@ export const Tasks = () => {
     ],
     ...(schema[entity]
       ? Object.keys(schema[entity].fields)
-        .filter((f) => {
-          return !schema[entity].fields[f].system;
-        })
-        .map((f) => {
-          if (schema[entity].fields[f].link) {
-            if (schema[entity].fields[f].link === "users") {
-              return f + ".fullname";
+          .filter((f) => {
+            return !schema[entity].fields[f].system;
+          })
+          .map((f) => {
+            if (schema[entity].fields[f].link) {
+              if (schema[entity].fields[f].link === "users") {
+                return f + ".fullname";
+              } else {
+                return f + ".caption";
+              }
             } else {
-              return f + ".caption";
+              return f;
             }
-          } else {
-            return f;
-          }
-        })
+          })
       : []),
     ...["status"],
   ];
@@ -68,16 +68,19 @@ export const Tasks = () => {
     }
   }, [filters]);
 
-
   return (
     <div className="mx-3">
       <div className="flex items-center justify-between my-3">
         <div className="flex space-x-2">
-          <Button onClick={() => openModal(<TaskDetail entity={entity} />, {
-            title: t("Create task"),
-            size: "xl",
-            modalSingle: true,
-          })}>
+          <Button
+            onClick={() =>
+              openModal(<TaskDetail entity={entity} />, {
+                title: t("Create task"),
+                size: "xl",
+                modalSingle: true,
+              })
+            }
+          >
             <FaPlus className="ml-0 m-1 h-3 w-3" />
             {t("add")}
           </Button>
@@ -88,13 +91,11 @@ export const Tasks = () => {
         entity={entity}
         data={data}
         rowClick={(data) =>
-          openModal(<TaskDetail data={data} entity={entity} />,
-            {
-              title: t("Detail task"),
-              size: "xl",
-              modalSingle: true,
-            }
-          )
+          openModal(<TaskDetail data={data} entity={entity} />, {
+            title: t("Detail task"),
+            size: "xl",
+            modalSingle: true,
+          })
         }
         columns={columns}
         loading={loading}
@@ -105,4 +106,3 @@ export const Tasks = () => {
     </div>
   );
 };
-

@@ -89,8 +89,9 @@ export const Workflow = () => {
                 <li
                   key={m.name + i}
                   onClick={() => setSelectedWorkflow(m)}
-                  className={`${selectedWorkflow.name === m.name ? "font-bold" : ""
-                    } cursor-pointer`}
+                  className={`${
+                    selectedWorkflow.name === m.name ? "font-bold" : ""
+                  } cursor-pointer`}
                 >
                   {m.name}
                 </li>
@@ -115,7 +116,7 @@ export const Workflow = () => {
                   mode="edit"
                   xml={selectedWorkflow.source || ""}
                   onShown={handleShown}
-                // click={test}
+                  // click={test}
                 />
               </>
             ) : (

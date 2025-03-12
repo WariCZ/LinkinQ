@@ -194,8 +194,8 @@ const Table = <T, U>({
                             ? header.column.getNextSortingOrder() === "asc"
                               ? "Sort ascending"
                               : header.column.getNextSortingOrder() === "desc"
-                              ? "Sort descending"
-                              : "Clear sort"
+                                ? "Sort descending"
+                                : "Clear sort"
                             : undefined
                         }
                       >

@@ -7,24 +7,26 @@ import { Icon } from "../../common/Icon";
 import { MdTableRows, MdViewColumn, MdDelete } from "react-icons/md";
 
 const InTable = () => {
-    const editor = useSlate();
-    const { insertRow, insertColumn, removeTable } = useTableUtil(editor as CustomEditor);
+  const editor = useSlate();
+  const { insertRow, insertColumn, removeTable } = useTableUtil(
+    editor as CustomEditor
+  );
 
-    return (
-        <>
-            <Button format="insert row" onClick={insertRow}>
-                <Icon IconComponent={MdTableRows} className="mr-1" />
-            </Button>
+  return (
+    <>
+      <Button format="insert row" onClick={insertRow}>
+        <Icon IconComponent={MdTableRows} className="mr-1" />
+      </Button>
 
-            <Button format="insert column" onClick={insertColumn}>
-                <Icon IconComponent={MdViewColumn} className=" mr-1" />
-            </Button>
+      <Button format="insert column" onClick={insertColumn}>
+        <Icon IconComponent={MdViewColumn} className=" mr-1" />
+      </Button>
 
-            <Button format="remove table" onClick={removeTable}>
-                <Icon IconComponent={MdDelete} className=" mr-1 text-red-500" />
-            </Button>
-        </>
-    );
+      <Button format="remove table" onClick={removeTable}>
+        <Icon IconComponent={MdDelete} className=" mr-1 text-red-500" />
+      </Button>
+    </>
+  );
 };
 
 export default InTable;

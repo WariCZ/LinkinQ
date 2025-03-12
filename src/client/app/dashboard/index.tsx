@@ -6,7 +6,6 @@ import React from "react";
 export const Dashboard = () => {
   return (
     <div className="p-3">
-
       <h1 className="font-bold">Dashboard</h1>
 
       {/* <p>This page is accessible by anyone.</p>
@@ -37,7 +36,9 @@ export const Dashboard = () => {
       <FileUpload
         onChange={(guids) => {
           debugger;
-        }} value={undefined} />
+        }}
+        value={undefined}
+      />
       {/* <div>-----------------------------</div> */}
       {/* <Form
         entity="tasks"

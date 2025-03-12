@@ -108,7 +108,7 @@ function useDataDetail<T, U>(
     deleteRecord: (guid: string) => void;
     refresh: (params?: { fields?: string[]; filter?: Object }) => void;
     fields: string[];
-  }
+  },
 ] {
   const setToast = useStore((state) => state.setToast);
   const [data, setData] = useState(initialState as T);

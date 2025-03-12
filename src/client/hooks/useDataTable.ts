@@ -148,7 +148,7 @@ function useDataTable<T, U>(
         }[]
       >
     >;
-  }
+  },
 ] {
   const [data, setData] = useState(initialState as T);
   const [loading, setLoading] = useState(true);

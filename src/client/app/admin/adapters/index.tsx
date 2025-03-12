@@ -85,8 +85,9 @@ export const Adapters = () => {
                 <li
                   key={m}
                   onClick={() => setSelectedAdapter(m)}
-                  className={`${selectedAdapter === m ? "font-bold" : ""} ${m.active ? "" : "line-through"
-                    } cursor-pointer`}
+                  className={`${selectedAdapter === m ? "font-bold" : ""} ${
+                    m.active ? "" : "line-through"
+                  } cursor-pointer`}
                 >
                   {m.caption}
                 </li>

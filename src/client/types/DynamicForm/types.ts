@@ -60,12 +60,12 @@ export type SectionType = {
 export type TabFormType = {
   name: string;
   fields: (FormFieldType | SectionType)[];
-}
+};
 
 export type TabsFromType = {
   type: "Tabs";
   tabs: TabFormType[];
-}  & FormFieldDefault;
+} & FormFieldDefault;
 
 export type FormFieldType =
   | FormFieldSelect

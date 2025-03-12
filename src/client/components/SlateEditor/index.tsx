@@ -1,13 +1,13 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react'
-import { Editable, withReact, Slate } from 'slate-react'
-import { createEditor, Descendant } from 'slate'
-import { withHistory } from 'slate-history'
-import { SlateElement } from './components/elements/SlateElement'
-import { Leaf } from './components/elements/Leaf'
-import Toolbar from './components/toolbar/Toolbar'
-import { withImages } from './plugins/withImages'
-import { withInlines } from './plugins/withInlines'
-import { withTables } from './plugins/withTables'
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { Editable, withReact, Slate } from "slate-react";
+import { createEditor, Descendant } from "slate";
+import { withHistory } from "slate-history";
+import { SlateElement } from "./components/elements/SlateElement";
+import { Leaf } from "./components/elements/Leaf";
+import Toolbar from "./components/toolbar/Toolbar";
+import { withImages } from "./plugins/withImages";
+import { withInlines } from "./plugins/withInlines";
+import { withTables } from "./plugins/withTables";
 
 type SlateEditorProps = {
   value: Descendant[] | string;
@@ -16,9 +16,18 @@ type SlateEditorProps = {
 };
 
 const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
-  const renderElement = useCallback((props: any) => <SlateElement {...props} />, [])
-  const renderLeaf = useCallback((props: any) => <Leaf {...props} />, [])
-  const editor = useMemo(() => withInlines(withTables(withImages(withHistory(withReact(createEditor()))))), [])
+  const renderElement = useCallback(
+    (props: any) => <SlateElement {...props} />,
+    []
+  );
+  const renderLeaf = useCallback((props: any) => <Leaf {...props} />, []);
+  const editor = useMemo(
+    () =>
+      withInlines(
+        withTables(withImages(withHistory(withReact(createEditor()))))
+      ),
+    []
+  );
   const toolbarRef = useRef<HTMLDivElement>(null);
 
   const [isFocused, setIsFocused] = useState(false);
@@ -40,10 +49,19 @@ const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
   const initialValue: Descendant[] =
     Array.isArray(value) && value.length > 0
       ? value
-      : [{ type: "paragraph", children: [{ text: typeof value === "string" ? value : "" }] }];
+      : [
+          {
+            type: "paragraph",
+            children: [{ text: typeof value === "string" ? value : "" }],
+          },
+        ];
 
   return (
-    <Slate editor={editor} initialValue={initialValue} onChange={(value) => onChange(value)}>
+    <Slate
+      editor={editor}
+      initialValue={initialValue}
+      onChange={(value) => onChange(value)}
+    >
       {isFocused && (
         <div ref={toolbarRef} onMouseDown={handleToolbarMouseDown}>
           <Toolbar />
@@ -60,8 +78,7 @@ const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
              focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-y-auto resize-y overflow-x-hidden"
       />
     </Slate>
-  )
-}
+  );
+};
 
-
-export default SlateEditor
+export default SlateEditor;

@@ -4,30 +4,30 @@ import useStore from "@/client/store";
 import { httpRequest } from "@/client/hooks/useDataDetail";
 
 export const AddEntity = (props: ModalPropsType) => {
-    const getSchema = useStore((state) => state.getSchema);
-    return (
-        <Form
-            onSubmit={async ({ data }) => {
-                await httpRequest({
-                    url: "/api/entity",
-                    method: "POST",
-                    entity: "",
-                    data: {
-                        entity: data.entity,
-                    },
-                });
-                getSchema();
-                props.closeModal && props.closeModal();
-            }}
-            formFields={[
-                {
-                    label: "Entity",
-                    field: "entity",
-                    required: true,
-                    type: "text",
-                },
-            ]}
-            {...props}
-        />
-    );
+  const getSchema = useStore((state) => state.getSchema);
+  return (
+    <Form
+      onSubmit={async ({ data }) => {
+        await httpRequest({
+          url: "/api/entity",
+          method: "POST",
+          entity: "",
+          data: {
+            entity: data.entity,
+          },
+        });
+        getSchema();
+        props.closeModal && props.closeModal();
+      }}
+      formFields={[
+        {
+          label: "Entity",
+          field: "entity",
+          required: true,
+          type: "text",
+        },
+      ]}
+      {...props}
+    />
+  );
 };

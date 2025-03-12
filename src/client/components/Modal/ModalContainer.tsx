@@ -12,8 +12,12 @@ const ModalContainer = () => {
   return (
     <>
       {modals.map(({ content, options }, index) => {
-
-        let ComponentWithProps: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode>;
+        let ComponentWithProps:
+          | string
+          | number
+          | boolean
+          | React.ReactElement<any, string | React.JSXElementConstructor<any>>
+          | Iterable<React.ReactNode>;
 
         if (typeof content === "function") {
           ComponentWithProps = content({ formRef, closeModal });
@@ -35,15 +39,26 @@ const ModalContainer = () => {
               style={{ top: `${index * 20}px`, left: `${index * 20}px` }}
             >
               <Modal.Header className="draggable-handle cursor-move pt-2">
-                {options?.title && <h3 className="text-sm font-semibold">{options.title}</h3>}
+                {options?.title && (
+                  <h3 className="text-sm font-semibold">{options.title}</h3>
+                )}
               </Modal.Header>
-              <Modal.Body className="max-h-[800px]">{ComponentWithProps}</Modal.Body>
+              <Modal.Body className="max-h-[800px]">
+                {ComponentWithProps}
+              </Modal.Body>
               <Modal.Footer>
-                <Button onClick={closeModal} color="light">{t("modal.close")}</Button>
+                <Button onClick={closeModal} color="light">
+                  {t("modal.close")}
+                </Button>
                 <Button
                   onClick={() => {
                     if (formRef.current) {
-                      formRef.current.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+                      formRef.current.dispatchEvent(
+                        new Event("submit", {
+                          cancelable: true,
+                          bubbles: true,
+                        })
+                      );
                     } else {
                       options?.modalOnSuccess && options.modalOnSuccess();
                     }

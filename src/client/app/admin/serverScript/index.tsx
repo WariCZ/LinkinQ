@@ -84,8 +84,9 @@ export const ServerScript = () => {
             {output.map((out, i) => (
               <tr
                 key={i}
-                className={`border-b ${out.type == "error" ? "bg-red-200" : ""
-                  }`}
+                className={`border-b ${
+                  out.type == "error" ? "bg-red-200" : ""
+                }`}
               >
                 <td className="text-sm text-gray-400 w-48">{out.time}</td>
                 <td className="pl-2">{out.msg}</td>
@@ -97,4 +98,3 @@ export const ServerScript = () => {
     </div>
   );
 };
-

@@ -99,13 +99,10 @@ const DynamicForm = ({
 }: DynamicFormProps) => {
   const schema: any = useStore((state) => state.schema);
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    setError,
-    watch,
-  } = useForm({ disabled: disabled, defaultValues: {} });
+  const { control, handleSubmit, reset, setError, watch } = useForm({
+    disabled: disabled,
+    defaultValues: {},
+  });
 
   const watchAllFields = onChange ? watch() : null;
 
