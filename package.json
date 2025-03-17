@@ -9,7 +9,6 @@
     "build:client": "vite build",
     "build": "npm run build:server && npm run build:client",
     "format": "prettier --write .",
-    "vite:build": "vite build",
     "start": "ts-node src/server",
     "clean": "tsc --build --clean",
     "test": "echo \"Error: no test specified\" && exit 1",

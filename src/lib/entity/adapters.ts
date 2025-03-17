@@ -73,7 +73,7 @@ export class Adapters {
         adapters.instances.push(data);
       }
     } else {
-      throw `Adapter ${name} not registed`;
+      throw `Adapter ${data.type} not registed`;
     }
   };
 
