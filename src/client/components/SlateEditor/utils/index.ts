@@ -56,3 +56,15 @@ export const isBlockActive = (
 
   return !!match;
 };
+
+export const isMarkActive = (editor: BaseEditor, format: string) => {
+  const marks = Editor.marks(editor);
+  return marks ? marks[format] === true : false;
+};
+
+export const toggleMark = (editor: BaseEditor, format: string) => {
+  const isActive = isMarkActive(editor, format);
+  isActive
+    ? Editor.removeMark(editor, format)
+    : Editor.addMark(editor, format, true);
+};

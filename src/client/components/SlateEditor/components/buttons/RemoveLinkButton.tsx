@@ -10,6 +10,8 @@ export const RemoveLinkButton = () => {
 
   return (
     <Button
+      className="rounded border p-1 text-sm transition-all hover:bg-gray-200
+        bg-white text-black"
       active={isLinkActive(editor as CustomEditor)}
       onMouseDown={() => {
         if (isLinkActive(editor as CustomEditor)) {

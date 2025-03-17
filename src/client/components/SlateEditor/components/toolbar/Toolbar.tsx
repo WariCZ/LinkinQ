@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { useSlate } from "slate-react";
 import useTable from "../../hooks/useTable.js";
 import { BlockButton } from "../buttons/BlockButton.jsx";
@@ -16,8 +17,8 @@ const Toolbar = () => {
   const editor = useSlate();
   const isTable = useTable(editor);
 
-  return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex gap-1 shadow-md p-2 rounded-md h-10 items-center bg-white justify-center">
+  const toolbarElement = (
+    <div className="fixed top-0 left-0 right-0 z-[99] flex gap-1 p-2 h-10 items-center bg-white justify-center">
       {defaultToolbarGroups.map((group, index) => (
         <span key={index} className="flex gap-2 items-center">
           {group.map((element) => {
@@ -71,6 +72,8 @@ const Toolbar = () => {
       ))}
     </div>
   );
+
+  return createPortal(toolbarElement, document.getElementById("editor-toolbar") || document.body);
 };
 
 export default Toolbar;

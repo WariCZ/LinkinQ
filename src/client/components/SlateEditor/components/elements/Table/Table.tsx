@@ -54,34 +54,38 @@ const Table = ({ editor }: TableProps) => {
   };
 
   return (
-    <div ref={tableOptionsRef} className="relative">
-      <Button onClick={handleButtonClick}>
+    <div className="relative inline-block" ref={tableOptionsRef}>
+      <button onClick={handleButtonClick} className="rounded border p-1 text-sm transition-all hover:bg-gray-200
+    bg-white text-black">
         <Icon IconComponent={FaTable} />
-      </Button>
-      {showOptions && (
-        <div className="absolute mt-2 bg-white shadow-md p-2 rounded-md border border-gray-200 w-max">
-          {tableData.row >= 1 && (
-            <div className="text-sm text-gray-500 mb-1">
-              <i>{`${tableData.row} x ${tableData.column}`}</i>
-            </div>
-          )}
-          <div className="grid grid-cols-6 gap-1">
-            {tableInput.map((grp, row) =>
-              grp.map(({ column, bg }) => (
-                <div
-                  key={`${row}-${column}`}
-                  onClick={handleInsert}
-                  onMouseOver={() =>
-                    setTableData({ row: row + 1, column: column + 1 })
-                  }
-                  className="w-4 h-4 border"
-                  style={{ borderColor: bg }}
-                ></div>
-              ))
+      </button>
+      <div className="relative">
+
+        {showOptions && (
+          <div className="absolute mt-2 bg-white shadow-md p-2 rounded-md border border-gray-200 w-max">
+            {tableData.row >= 1 && (
+              <div className="text-sm text-gray-500 mb-1 cursor-pointer">
+                <i>{`${tableData.row} x ${tableData.column}`}</i>
+              </div>
             )}
+            <div className="grid grid-cols-6 gap-1 cursor-pointer">
+              {tableInput.map((grp, row) =>
+                grp.map(({ column, bg }) => (
+                  <div
+                    key={`${row}-${column}`}
+                    onClick={handleInsert}
+                    onMouseOver={() =>
+                      setTableData({ row: row + 1, column: column + 1 })
+                    }
+                    className="w-4 h-4 border"
+                    style={{ borderColor: bg }}
+                  ></div>
+                ))
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

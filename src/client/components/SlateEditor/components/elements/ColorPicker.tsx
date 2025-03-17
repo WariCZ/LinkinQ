@@ -64,30 +64,36 @@ export const ColorPicker = ({ format, editor }: ColorPickerProps) => {
   };
 
   return (
-    <div className="relative" ref={colorPickerRef}>
-      <Button onClick={toggleOption}>
+    <div ref={colorPickerRef} className="relative inline-block">
+      <button
+        onClick={toggleOption}
+        className={`rounded border p-1 text-sm transition-all hover:bg-gray-200 bg-white text-black 
+      ${showOptions ? "bg-gray-300" : ""}`}
+      >
         <Icon IconComponent={MdOutlineFormatColorText} />
-      </Button>
+      </button>
       {showOptions && (
-        <div className="absolute left-0 bg-white shadow-md p-3 rounded-md z-10">
+        <div className="absolute left-0 top-full mt-2 bg-white shadow-md p-3 rounded-md z-10">
           <div className="grid grid-cols-7 gap-1">
             {colors.map((color, index) => (
               <div
                 key={index}
                 data-value={color}
                 onClick={changeColor}
-                className="w-4 h-4 rounded cursor-pointer"
+                className="w-5 h-5 rounded cursor-pointer border border-gray-300 transition-transform"
                 style={{ background: color }}
               ></div>
             ))}
           </div>
+
           <p className="text-center text-gray-500 text-sm mt-2">OR</p>
+
           <form
             onSubmit={handleFormSubmit}
             className="flex items-center gap-2 mt-2"
           >
             <div
-              className="w-4 h-4 rounded"
+              className="w-6 h-6 rounded border border-gray-300"
               style={{ background: validHex ? hexValue : "#000000" }}
             ></div>
             <input
@@ -95,9 +101,10 @@ export const ColorPicker = ({ format, editor }: ColorPickerProps) => {
               placeholder="#000000"
               value={hexValue}
               onChange={handleHexChange}
-              className={`w-16 h-6 border rounded p-1 text-sm ${validHex === false ? "border-red-500" : "border-gray-300"}`}
+              className={`w-20 h-7 border rounded p-1 text-sm outline-none focus:border-blue-500
+            ${validHex === false ? "border-red-500" : "border-gray-300"}`}
             />
-            <button type="submit" className="text-green-500">
+            <button type="submit" className="text-green-500 hover:text-green-700 transition-colors">
               <MdCheck size={20} />
             </button>
           </form>

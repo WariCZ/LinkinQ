@@ -12,14 +12,17 @@ export const BlockButton = ({
   icon: IconType;
 }) => {
   const editor = useSlate();
+  const isActive = isBlockActive(
+    editor,
+    format,
+    TEXT_ALIGN_TYPES.includes(format) ? "align" : "type"
+  );
 
   return (
     <Button
-      active={isBlockActive(
-        editor,
-        format,
-        TEXT_ALIGN_TYPES.includes(format) ? "align" : "type"
-      )}
+      className={`rounded border p-1 text-sm transition-all 
+        ${isActive ? "bg-gray-200 text-black font-bold" : "bg-white text-gray-600"}
+        hover:bg-gray-200`}
       onMouseDown={(event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         toggleBlock(editor, format);

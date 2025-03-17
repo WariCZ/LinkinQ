@@ -16,6 +16,8 @@ import Toolbar from "./components/toolbar/Toolbar";
 import { withImages } from "./plugins/withImages";
 import { withInlines } from "./plugins/withInlines";
 import { withTables } from "./plugins/withTables";
+import { toggleMark } from "./utils";
+import isHotkey from "is-hotkey";
 
 type SlateEditorProps = {
   value: Descendant[] | string;
@@ -23,15 +25,21 @@ type SlateEditorProps = {
   placeholder: string;
 };
 
+const HOTKEYS: Record<string, any> = {
+  'mod+b': 'bold',
+  'mod+i': 'italic',
+  'mod+u': 'underline',
+}
+
 const getDefaultValue = (value) => {
   return Array.isArray(value) && value.length > 0
     ? value
     : [
-        {
-          type: "paragraph",
-          children: [{ text: typeof value === "string" ? value : "" }],
-        },
-      ];
+      {
+        type: "paragraph",
+        children: [{ text: typeof value === "string" ? value : "" }],
+      },
+    ];
 };
 
 const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
@@ -81,11 +89,11 @@ const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
     Array.isArray(value) && value.length > 0
       ? value
       : [
-          {
-            type: "paragraph",
-            children: [{ text: typeof value === "string" ? value : "" }],
-          },
-        ];
+        {
+          type: "paragraph",
+          children: [{ text: typeof value === "string" ? value : "" }],
+        },
+      ];
 
   return (
     <Slate
@@ -106,6 +114,15 @@ const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
         spellCheck
         onFocus={() => setIsFocused(true)}
         onBlur={handleBlur}
+        onKeyDown={(event) => {
+          for (const hotkey in HOTKEYS) {
+            if (isHotkey(hotkey, event as any)) {
+              event.preventDefault()
+              const mark = HOTKEYS[hotkey]
+              toggleMark(editor, mark)
+            }
+          }
+        }}
         className="w-full h-28 text-gray-800 placeholder-gray-400 bg-gray-50 border border-gray-300 rounded-lg shadow-sm 
              focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-y-auto resize-y overflow-x-hidden"
       />
