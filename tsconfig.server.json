@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist/server",
+    "rootDir": "src",
+    "target": "ES6",
+    "module": "CommonJS",
+    "lib": ["ES6"],
+    "types": ["node"]
+  },
+  "include": ["src/server", "src/configurations", "src/lib"],
+  "exclude": ["node_modules", "src/lib/bpmn-web/datastore"]
+}

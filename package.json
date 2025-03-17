@@ -5,9 +5,11 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
+    "build:server": "tsc --project tsconfig.server.json",
+    "build:client": "vite build",
+    "build": "npm run build:server && npm run build:client",
     "format": "prettier --write .",
     "vite:build": "vite build",
-    "build": "tsc --build",
     "start": "ts-node src/server",
     "clean": "tsc --build --clean",
     "test": "echo \"Error: no test specified\" && exit 1",
