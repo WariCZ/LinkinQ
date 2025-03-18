@@ -27,12 +27,19 @@ export const FormField = ({
           name={formField.field}
           control={control}
           rules={{ required: formField.required, validate: formField.validate }}
-          render={({ field }) => (
-            <CustomComponent
-              {...field}
-              readOnly={formField.readOnly}
-              unit={formField.unit}
-            />
+          render={({ field, fieldState }) => (
+            <>
+              <CustomComponent
+                {...field}
+                readOnly={formField.readOnly}
+                unit={formField.unit}
+              />
+              {fieldState.error && (
+                <p className="text-red-600 text-sm mt-1">
+                  {fieldState.error.message}
+                </p>
+              )}
+            </>
           )}
         />
       </div>
@@ -86,6 +93,9 @@ export const FormField = ({
       return (
         <div key={formField.field}>
           <Label htmlFor={formField.field}>{formField.label}</Label>
+          {formField.required ? (
+            <span className="text-red-600 px-1">*</span>
+          ) : null}
           <Controller
             name={formField.field}
             control={control}
@@ -128,7 +138,14 @@ export const FormField = ({
               required: formField.required,
               validate: formField.validate,
             }}
-            render={({ field }) => <Select {...field} {...formField} />}
+            render={({ field, fieldState }) => <>
+              <Select {...field} {...formField} />
+              {fieldState.error && (
+                <p className="text-red-600 text-sm mt-1">
+                  {fieldState.error.message}
+                </p>
+              )}
+            </>}
           />
         </div>
       );
@@ -184,16 +201,32 @@ export const FormField = ({
       return (
         <div key={formField.field} className="col-span-full my-2">
           <Label htmlFor={formField.field}>{formField.label}</Label>
+          {formField.required ? (
+            <span className="text-red-600 px-1">*</span>
+          ) : null}
           <Controller
             name={formField.field}
             control={control}
-            render={({ field }) => (
-              <SlateEditor
-                value={field.value}
-                onChange={field.onChange}
-                placeholder="Enter rich text..."
-              />
-            )}
+            rules={{
+              required: formField.required,
+              validate: formField.validate,
+            }}
+            render={({ field, fieldState }) => {
+              console.log(field)
+              return <>
+                <SlateEditor
+                  field={field}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Enter rich text..."
+                />
+                {fieldState.error && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </>
+            }}
           />
         </div>
       );
@@ -203,10 +236,17 @@ export const FormField = ({
           key={formField.field}
           className="my-2 flex items-center gap-2 bg-white p-2 rounded-md"
         >
+          {formField.required ? (
+            <span className="text-red-600 px-1">*</span>
+          ) : null}
           <Controller
             name={formField.field}
             control={control}
-            render={({ field }) => (
+            rules={{
+              required: formField.required,
+              validate: formField.validate,
+            }}
+            render={({ field, fieldState }) => (
               <>
                 <label className="flex items-center cursor-pointer">
                   <input
@@ -223,6 +263,12 @@ export const FormField = ({
                     ></div>
                   </div>
                 </label>
+
+                {fieldState.error && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {fieldState.error.message}
+                  </p>
+                )}
               </>
             )}
           />

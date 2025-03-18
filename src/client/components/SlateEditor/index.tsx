@@ -18,11 +18,13 @@ import { withInlines } from "./plugins/withInlines";
 import { withTables } from "./plugins/withTables";
 import { toggleMark } from "./utils";
 import isHotkey from "is-hotkey";
+import { useFormContext } from "react-hook-form";
 
 type SlateEditorProps = {
   value: Descendant[] | string;
   onChange: (value: Descendant[]) => void;
   placeholder: string;
+  field: any
 };
 
 const HOTKEYS: Record<string, any> = {
@@ -42,7 +44,7 @@ const getDefaultValue = (value) => {
     ];
 };
 
-const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
+const SlateEditor = ({ value, onChange, placeholder, field }: SlateEditorProps) => {
   const renderElement = useCallback(
     (props: any) => <SlateElement {...props} />,
     []
@@ -59,7 +61,7 @@ const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
   const [slateValue, setSlateValue] = useState(getDefaultValue(value));
   const [isFocused, setIsFocused] = useState(false);
   const [editorKey, setEditorKey] = useState(uuidv4());
-
+  const { trigger } = useFormContext();
   useEffect(() => {
     debugger;
     if (value) {
@@ -100,7 +102,10 @@ const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
       key={editorKey}
       editor={editor}
       initialValue={initialValue}
-      onChange={(value) => onChange(value)}
+      onChange={(value) => {
+        onChange(value)
+        trigger(field.name);
+      }}
     >
       {isFocused && (
         <div ref={toolbarRef} onMouseDown={handleToolbarMouseDown}>
