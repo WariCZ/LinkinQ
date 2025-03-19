@@ -9,6 +9,8 @@ import { useLocation } from "react-router-dom";
 import _ from "lodash";
 import { useTranslation } from "react-i18next";
 import { TaskDetail } from "./components/TaskDetail";
+import { ManualTask } from "../examples/components/ManualTask";
+import { FaDownload } from "react-icons/fa";
 
 export const Tasks = () => {
   const { t } = useTranslation();
@@ -30,20 +32,20 @@ export const Tasks = () => {
     ],
     ...(schema[entity]
       ? Object.keys(schema[entity].fields)
-          .filter((f) => {
-            return !schema[entity].fields[f].system;
-          })
-          .map((f) => {
-            if (schema[entity].fields[f].link) {
-              if (schema[entity].fields[f].link === "users") {
-                return f + ".fullname";
-              } else {
-                return f + ".caption";
-              }
+        .filter((f) => {
+          return !schema[entity].fields[f].system;
+        })
+        .map((f) => {
+          if (schema[entity].fields[f].link) {
+            if (schema[entity].fields[f].link === "users") {
+              return f + ".fullname";
             } else {
-              return f;
+              return f + ".caption";
             }
-          })
+          } else {
+            return f;
+          }
+        })
       : []),
     ...["status"],
   ];
@@ -70,6 +72,7 @@ export const Tasks = () => {
 
   return (
     <div className="mx-3">
+     
       <div className="flex items-center justify-between my-3">
         <div className="flex space-x-2">
           <Button
@@ -78,8 +81,7 @@ export const Tasks = () => {
                 title: t("Create task"),
                 size: "xl",
                 modalSingle: true,
-              })
-            }
+              })}
           >
             <FaPlus className="ml-0 m-1 h-3 w-3" />
             {t("add")}

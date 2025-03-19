@@ -35,6 +35,7 @@ i18n.use(initReactI18next).init({
             new: "New tasks",
             attn: "Tasks attn",
           },
+          examples: "Examples",
         },
         "modal.close": "Close",
         "modal.save": "Save",

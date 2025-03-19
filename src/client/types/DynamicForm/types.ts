@@ -1,4 +1,5 @@
 import { TextInputProps } from "flowbite-react";
+import { IconType } from "react-icons";
 
 type RuleType = "show" | "hide" | "required" | "optional";
 
@@ -18,9 +19,10 @@ type FormFieldDefault = {
     conditions: ConditionType[];
   }[];
   colSpan?: number;
-  customComponent?: React.ComponentType<any>;
+  customComponent?: string;
   unit?: string;
   validate?: (value: any) => string | boolean;
+  className?: string;
 };
 
 type FormFieldSelect = {
@@ -59,12 +61,33 @@ export type SectionType = {
 
 export type TabFormType = {
   name: string;
+  icon?: string;
   fields: (FormFieldType | SectionType)[];
 };
 
 export type TabsFromType = {
   type: "Tabs";
   tabs: TabFormType[];
+} & FormFieldDefault;
+
+type FormFieldComponent = {
+  type: "Сomponent";
+  component?: string;
+} & FormFieldDefault;
+
+type FormFieldProgress = {
+  type: "progress";
+} & FormFieldDefault;
+
+type FormFieldTextWithIcon = {
+  type: "textWithIcon";
+} & FormFieldDefault &
+  TextInputProps;
+
+type FormFieldCollapsibleSection = {
+  type: "СollapsibleSection";
+  icon?: IconType;
+  children: FormFieldType[];
 } & FormFieldDefault;
 
 export type FormFieldType =
@@ -74,4 +97,8 @@ export type FormFieldType =
   | FormFieldAttach
   | FormFieldRichText
   | TabsFromType
-  | FormSwitchRichText;
+  | FormSwitchRichText
+  | FormFieldComponent
+  | FormFieldProgress
+  | FormFieldTextWithIcon
+  | FormFieldCollapsibleSection;

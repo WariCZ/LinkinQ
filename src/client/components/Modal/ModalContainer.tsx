@@ -3,6 +3,7 @@ import { Button, Modal } from "flowbite-react";
 import { useModalStore } from "./modalStore";
 import Draggable from "react-draggable";
 import { useTranslation } from "react-i18next";
+import { IconType } from "react-icons";
 
 const ModalContainer = () => {
   const { modals, closeModal } = useModalStore();
@@ -43,13 +44,23 @@ const ModalContainer = () => {
                   <h3 className="text-sm font-semibold">{options.title}</h3>
                 )}
               </Modal.Header>
-              <Modal.Body className="max-h-[800px]">
+              <Modal.Body className="max-h-[75vh] min-h-[75vh] overflow-auto p-0">
                 {ComponentWithProps}
               </Modal.Body>
               <Modal.Footer>
                 <Button onClick={closeModal} color="light">
                   {t("modal.close")}
                 </Button>
+                {options.additionalButtons?.map(
+                  (btn: { label: string; onClick: () => void; color?: string; icon?: IconType }, btnIndex: number) => (
+                    <Button key={btnIndex} color={btn.color || "gray"} onClick={btn.onClick} className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
+                        {btn.icon && <btn.icon size={15} />}
+                        {btn.label}
+                      </div>
+                    </Button>
+                  )
+                )}
                 <Button
                   onClick={() => {
                     if (formRef.current) {

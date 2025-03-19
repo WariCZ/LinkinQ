@@ -63,7 +63,6 @@ const SlateEditor = ({ value, onChange, placeholder, field }: SlateEditorProps) 
   const [editorKey, setEditorKey] = useState(uuidv4());
   const { trigger } = useFormContext();
   useEffect(() => {
-    debugger;
     if (value) {
       if (!_.isEqual(value, slateValue)) {
         // Při změně dat z API aktualizujte klíč editoru
@@ -115,7 +114,7 @@ const SlateEditor = ({ value, onChange, placeholder, field }: SlateEditorProps) 
       <Editable
         renderElement={renderElement}
         renderLeaf={renderLeaf}
-        placeholder={placeholder}
+        // placeholder={placeholder}
         spellCheck
         onFocus={() => setIsFocused(true)}
         onBlur={handleBlur}
@@ -129,7 +128,7 @@ const SlateEditor = ({ value, onChange, placeholder, field }: SlateEditorProps) 
           }
         }}
         className="w-full h-28 text-gray-800 placeholder-gray-400 bg-gray-50 border border-gray-300 rounded-lg shadow-sm 
-             focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-y-auto resize-y overflow-x-hidden"
+             focus:outline-none focus:ring-1 focus:ring-cyan-500 overflow-y-auto resize-y overflow-x-hidden p-2"
       />
     </Slate>
   );

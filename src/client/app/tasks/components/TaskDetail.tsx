@@ -78,6 +78,7 @@ export const TaskDetail = (props: TaskDetailProps) => {
             type: "text",
             field: "caption",
             label: "Title",
+            className: "px-4 flex items-center w-full",
             validate: (value) =>
               value.length >= 3 || "Title must be at least 3 characters",
           },
@@ -85,6 +86,7 @@ export const TaskDetail = (props: TaskDetailProps) => {
             type: "Section",
             columns: 2,
             colSpan: 2,
+            className: "px-4 items-center mb-2",
             fields: [
               {
                 type: "text",
@@ -183,7 +185,7 @@ export const TaskDetail = (props: TaskDetailProps) => {
                         type: "number",
                         label: "Effort planned:",
                         readOnly: true,
-                        customComponent: EffortField,
+                        // customComponent: EffortField,
                         unit: "MD",
                       },
                       {
@@ -191,14 +193,14 @@ export const TaskDetail = (props: TaskDetailProps) => {
                         type: "number",
                         label: "Effort spent:",
                         readOnly: true,
-                        customComponent: EffortField,
+                        // customComponent: EffortField,
                         unit: "MD",
                       },
                       {
                         field: "effortsWorked",
                         type: "number",
                         label: "Efforts worked (MD):",
-                        customComponent: EffortField,
+                        // customComponent: EffortField,
                         unit: "MD",
                         validate: (value) =>
                           value === undefined || value === null || value === "" || value > 0 || "Value must be greater than 0",
@@ -207,7 +209,7 @@ export const TaskDetail = (props: TaskDetailProps) => {
                         field: "reportedEffort",
                         type: "number",
                         label: "Reported effort (MH):",
-                        customComponent: EffortField,
+                        // customComponent: EffortField,
                         unit: "MH",
                         validate: (value) =>
                           value === undefined || value === null || value === "" || value > 0 || "Value must be greater than 0",

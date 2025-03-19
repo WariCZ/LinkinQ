@@ -18,6 +18,7 @@ import { FaCircle } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { FaMailBulk } from "react-icons/fa";
 import { FaSitemap } from "react-icons/fa";
+import { FaRegFileAlt } from "react-icons/fa";
 
 type Label = {
   label: string;
@@ -137,7 +138,13 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
           to: "/tasks",
           filter: { attn: "$user" },
         },
+
       ],
+    },
+    {
+      label: t("sidebar.examples"),
+      to: "/examples",
+      icon: FaRegFileAlt,
     },
     {
       label: "testy tasks pageflow",
@@ -148,9 +155,8 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
 
   return (
     <Sidebar
-      className={`h-full border-r dark:border-r dark:border-gray-700 border-gray-200 absolute ${
-        sidebar ? "" : "hidden"
-      } z-10 lg:relative lg:block`}
+      className={`h-full border-r dark:border-r dark:border-gray-700 border-gray-200 absolute ${sidebar ? "" : "hidden"
+        } z-10 lg:relative lg:block`}
       onClick={() => {
         setSidebar(false);
       }}

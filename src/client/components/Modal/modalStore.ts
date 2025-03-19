@@ -4,9 +4,20 @@ interface ModalData {
   content: React.ReactNode | ((props: any) => React.ReactNode);
   options?: {
     title?: string;
-    size?: "sm" | "md" | "lg" | "xl";
+    size?:
+      | "sm"
+      | "md"
+      | "lg"
+      | "xl"
+      | "2xl"
+      | "3xl"
+      | "4xl"
+      | "5xl"
+      | "6xl"
+      | "7xl";
     modalSingle?: boolean;
     modalOnSuccess?: (data?: any) => void;
+    additionalButtons?: any;
   };
 }
 interface StoreState {

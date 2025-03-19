@@ -85,6 +85,7 @@ const Select = React.forwardRef(
           defaultOptions={
             props.required ? options : [{ value: null, label: " " }, ...options]
           }
+          className="w-full min-w-fit"
           classNamePrefix="flowbite-select"
           placeholder="Vyberte možnosti"
           menuPortalTarget={document.body} // Přesměrování dropdownu mimo modal
@@ -112,6 +113,7 @@ const Select = React.forwardRef(
           isDisabled={props.readOnly}
           // ref={ref}
           // menuIsOpen
+          className="w-full min-w-fit"
           classNamePrefix="flowbite-select"
           placeholder="Vyberte možnosti"
           menuPortalTarget={document.body} // Přesměrování dropdownu mimo modal

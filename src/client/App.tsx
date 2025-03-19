@@ -25,6 +25,7 @@ import { ServerScript } from "./app/admin/serverScript";
 import { QueryBuilder } from "./app/admin/queryBuilder";
 import { Notifications } from "./app/admin/notifications";
 import { Triggers } from "./app/admin/triggers";
+import { Examples } from "./app/examples";
 
 const PrivateLayout = (props: { admin?: boolean }) => {
   return (
@@ -70,6 +71,7 @@ const App: React.FC = () => {
             <Route path="profile" element={<Profile />} />
             <Route path="tasks" element={<Tasks />} />
             <Route path="entity/:entity" element={<Pageflow />} />
+            <Route path="examples" element={<Examples />} />
           </Route>
           {/* <Route path="/logout" element={<Logout />} /> */}
           <Route path="/admin/" element={<PrivateRoute admin={true} />}>
