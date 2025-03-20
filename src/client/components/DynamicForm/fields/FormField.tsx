@@ -32,6 +32,7 @@ export const FormField = ({
           key={formField.field}
           className={`my-2 ${formField.className || ""} ${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
         >
+          <></>
           <Label htmlFor={formField.field}>
             {formField.label}
             {formField.required ? (
@@ -47,7 +48,7 @@ export const FormField = ({
               validate: formField.validate,
             }}
             render={({ field, fieldState }) => (
-              <>
+              <div className="relative w-full">
                 <TextInput
                   {...field}
                   {...formField}
@@ -57,11 +58,11 @@ export const FormField = ({
                   required={formField.required}
                 />
                 {fieldState.error && (
-                  <p className="text-red-600 text-sm mt-1">
+                  <p className="text-red-600 text-sm mt-1 absolute right-0">
                     {fieldState.error.message}
                   </p>
                 )}
-              </>
+              </div>
             )}
           />
         </div>

@@ -9,7 +9,7 @@ interface HeaderProps {
 function Header({ control }: HeaderProps) {
     return (
         <div className="bg-gray-100 py-6 px-4 rounded-lg shadow">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr] gap-4 mb-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr] gap-4 mb-4 items-center">
                 <FormField
                     formField={{
                         type: "textWithIcon",

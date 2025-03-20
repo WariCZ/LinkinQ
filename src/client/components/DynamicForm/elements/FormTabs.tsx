@@ -29,9 +29,9 @@ export const FormTabs = ({
       </TabList>
 
       {tabs.tabs.map((tab) => (
-        <TabPanel key={tab.name} >
+        <TabPanel key={tab.name}>
           {tab.fields && (
-            <div className="cursor-pointer border-t-2 border-gray-300">
+            <div className="cursor-pointer border-t-2 border-gray-300 px-2">
               {tab.fields.map((field, index) => {
                 let formField: FormFieldType = translateFormField({
                   schema: schema,

@@ -43,7 +43,7 @@ export const TaskDetail = (props: TaskDetailProps) => {
 
   return (
     <>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between px-4 bg-gray-100">
         {data.guid && (
           <div className="flex items-center gap-1">
             <span>ID: </span> <TextInput value={data.guid} readOnly disabled />
@@ -75,18 +75,23 @@ export const TaskDetail = (props: TaskDetailProps) => {
         entity={entity}
         formFields={[
           {
-            type: "text",
-            field: "caption",
-            label: "Title",
-            className: "px-4 flex items-center w-full",
-            validate: (value) =>
-              value.length >= 3 || "Title must be at least 3 characters",
+            type: "Section",
+            className: "px-4 items-center bg-gray-100",
+            fields: [{
+              type: "text",
+              field: "caption",
+              label: "Title",
+              className: "flex items-center w-full bg-gray-100",
+              validate: (value) =>
+                value.length >= 3 || "Title must be at least 3 characters",
+            }]
           },
+
           {
             type: "Section",
             columns: 2,
             colSpan: 2,
-            className: "px-4 items-center mb-2",
+            className: "px-4 items-center bg-gray-100",
             fields: [
               {
                 type: "text",
@@ -125,11 +130,13 @@ export const TaskDetail = (props: TaskDetailProps) => {
                 label: "Assignee",
                 required: false,
                 readOnly: true,
+                className: "mb-2"
               },
               {
                 type: "select",
                 field: "priority",
                 label: "Priority",
+                className: "mb-2",
                 options: [
                   {
                     value: "none",

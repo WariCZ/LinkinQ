@@ -122,7 +122,6 @@ export const renderItem = ({
     return <Component key={key} formField={formField} control={control} />;
   }
 
-  console.log("formField.type === СollapsibleSection", formField.type === "СollapsibleSection")
   if (formField.type === "СollapsibleSection") {
     return (
       <CollapsibleSection key={key} title={formField.label} icon={formField.icon}>
