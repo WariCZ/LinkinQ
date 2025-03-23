@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import useStore from "../../store";
 import { Button } from "flowbite-react";
-import Table from "../../components/Table";
 import useDataTable from "../../hooks/useDataTable";
 import { useModalStore } from "../../components/Modal/modalStore";
 import { FaPlus } from "react-icons/fa";
@@ -9,8 +8,7 @@ import { useLocation } from "react-router-dom";
 import _ from "lodash";
 import { useTranslation } from "react-i18next";
 import { TaskDetail } from "./components/TaskDetail";
-import { ManualTask } from "../examples/components/ManualTask";
-import { FaDownload } from "react-icons/fa";
+import Table from "@/client/components/Table";
 
 export const Tasks = () => {
   const { t } = useTranslation();
@@ -72,7 +70,7 @@ export const Tasks = () => {
 
   return (
     <div className="mx-3">
-     
+
       <div className="flex items-center justify-between my-3">
         <div className="flex space-x-2">
           <Button
@@ -90,6 +88,7 @@ export const Tasks = () => {
         </div>
       </div>
       <Table
+        tableConfigKey="tasks"
         entity={entity}
         data={data}
         rowClick={(data) =>
