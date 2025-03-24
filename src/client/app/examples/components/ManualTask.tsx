@@ -3,13 +3,14 @@ import useStore from "@/client/store";
 import useDataDetail from "@/client/hooks/useDataDetail";
 import DynamicForm from "@/client/components/DynamicForm";
 import { DateTime } from "luxon";
-
+import { useTranslation } from "react-i18next";
 interface ManualTaskProps extends ModalPropsType {
     data?: any;
     entity: "tasks";
 }
 
 export const ManualTask = (props: ManualTaskProps) => {
+    const { t } = useTranslation();
     const entity = props.entity;
 
     const schema = useStore((state) => state.schema);
@@ -67,27 +68,27 @@ export const ManualTask = (props: ManualTaskProps) => {
                     type: "Tabs",
                     tabs: [
                         {
-                            name: "Informace",
+                            name: t("labels.information"),
                             icon: "FaInfoCircle",
                             fields: [{ type: "Сomponent", component: "GeneralTab" }]
                         },
                         {
-                            name: "Soubor",
+                            name: t("labels.file"),
                             icon: "FaPaperclip",
                             fields: [{ type: "Сomponent", component: "FilesManagment" }]
                         },
                         {
-                            name: "Historie",
+                            name: t("labels.history"),
                             icon: "FaBook",
                             fields: [{ type: "Сomponent", component: "FilesManagment" }]
                         },
                         {
-                            name: "Ceny",
+                            name: t("labels.prices"),
                             icon: "FaDollarSign",
                             fields: []
                         },
                         {
-                            name: "Indikace",
+                            name: t("labels.indication"),
                             icon: "FaChevronRight",
                             fields: []
                         }

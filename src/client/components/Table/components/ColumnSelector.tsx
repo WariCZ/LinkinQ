@@ -19,6 +19,7 @@ import { TableFieldType } from "../types";
 import { EntitySchema } from "@/lib/entity/types";
 import { getLabel } from "../utils";
 import { FiX } from "react-icons/fi";
+import { useTranslation } from "react-i18next";
 
 interface SortableItemProps {
     id: string;
@@ -65,7 +66,6 @@ function SortableItem({ id, label, onRemove }: SortableItemProps) {
         </div>
     );
 }
-
 interface ColumnSelectorProps {
     initialColumns: string[];
     columns: TableFieldType[];
@@ -74,6 +74,7 @@ interface ColumnSelectorProps {
 }
 
 export const ColumnSelector = forwardRef<{ getSelectedColumns: () => string[] }, ColumnSelectorProps>(({ initialColumns, columns, schema, entity }, ref) => {
+    const { t } = useTranslation();
     const [localColumns, setLocalColumns] = useState<string[]>(initialColumns);
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -105,11 +106,6 @@ export const ColumnSelector = forwardRef<{ getSelectedColumns: () => string[] },
     const handleSelectAll = () => setLocalColumns(allColumnKeys);
     const handleReset = () => setLocalColumns(initialColumns);
 
-    const filteredColumns = columns.filter((c: any) => {
-        const label = typeof c === "string" ? c : c.label || c.field;
-        return label.toLowerCase().includes(searchTerm.toLowerCase());
-    });
-
     const getColumnKeyAndLabel = (column: any) => {
         const key = typeof column === "string" ? column : column.field;
         const label =
@@ -119,6 +115,11 @@ export const ColumnSelector = forwardRef<{ getSelectedColumns: () => string[] },
 
         return { key, label };
     };
+
+    const filteredColumns = columns.filter((c: any) => {
+        const { label } = getColumnKeyAndLabel(c);
+        return label.toLowerCase().includes(searchTerm.toLowerCase());
+    });
 
     const handleRemoveColumn = (key: string) => {
         setLocalColumns((prev) => prev.filter((k) => k !== key));
@@ -134,8 +135,8 @@ export const ColumnSelector = forwardRef<{ getSelectedColumns: () => string[] },
                     className="flex-1"
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <Button onClick={handleSelectAll}>Select All</Button>
-                <Button onClick={handleReset} color="gray">Reset</Button>
+                <Button onClick={handleSelectAll}>{t("table.selectAll")}</Button>
+                <Button onClick={handleReset} color="gray">{t("table.reset")}</Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[60vh] overflow-y-auto">
                 <div className="space-y-3 mt-2">
@@ -154,7 +155,7 @@ export const ColumnSelector = forwardRef<{ getSelectedColumns: () => string[] },
                     })}
                 </div>
                 <div>
-                    <h4 className="font-semibold mb-3">Selected Columns</h4>
+                    <h4 className="font-semibold mb-3">{t("table.selectedColumns")}</h4>
                     <DndContext sensors={useSensors(useSensor(PointerSensor))} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                         <SortableContext items={localColumns} strategy={verticalListSortingStrategy}>
                             <div className="space-y-2">
