@@ -9,7 +9,7 @@ import {
 import useStore from "./store";
 import { DashboardHeader } from "./components/layout/Header";
 import DashboardSidebar from "./components/layout/Sidebar";
-import { Flowbite } from "flowbite-react";
+import { Flowbite, Spinner } from "flowbite-react";
 import { customTheme } from "./flowbite";
 import AppToast from "./components/Toast";
 import Pageflow from "./Pageflow";
@@ -44,9 +44,7 @@ const PrivateLayout = (props: { admin?: boolean }) => {
 
 const PrivateRoute = (props: { admin?: boolean }) => {
   const user = useStore((state) => state.user);
-  const checkAuth = useStore((state) => state.checkAuth);
   const loading = useStore((state) => state.loading);
-  const getSchema = useStore((state) => state.getSchema);
   const firstLoad = useStore((state) => state.firstLoad);
 
   useEffect(() => {
@@ -54,7 +52,7 @@ const PrivateRoute = (props: { admin?: boolean }) => {
   }, [firstLoad]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="flex items-center w-full h-full justify-center"><Spinner aria-label="Root loading" size="xl" /></div>;
   }
 
   return user ? <PrivateLayout {...props} /> : <Navigate to="/login" />;

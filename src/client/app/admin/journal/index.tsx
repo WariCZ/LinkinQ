@@ -66,6 +66,7 @@ export const Journal: React.FC = () => {
           reload
         </Button>
         <Table
+          tableConfigKey="journal"
           data={data}
           columns={columns}
           highlightedRow={highlightedRow}

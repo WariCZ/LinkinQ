@@ -16,8 +16,7 @@ export const FormSection = ({
 }) => {
   return (
     <div
-      className={`${section.className || ""
-        } grid lg:grid-cols-${section.columns || 1} gap-${gap || 4}`}
+      className={`grid lg:grid-cols-${section.columns || 1} gap-${gap || 4} ${section.className || ""} `}
     >
       {section.label && <h3 className="col-span-full">{section.label}</h3>}
       {section.fields.map((field, index) => {

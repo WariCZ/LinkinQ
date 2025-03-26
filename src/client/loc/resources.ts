@@ -37,6 +37,13 @@ const resources = {
         history: "History",
         prices: "Prices",
         indication: "Indication",
+        fullTextSearch: "Fulltext search",
+        reset: "Reset",
+        confirm: "Confirm",
+        cancel: "Cancel",
+        selectRange: "Select a range",
+        from: "From",
+        to: "To"
       },
     },
   },

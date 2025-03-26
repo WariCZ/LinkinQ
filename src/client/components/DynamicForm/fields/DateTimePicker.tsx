@@ -62,8 +62,9 @@ const DateTimePicker = (
 
   const handleConfirm = () => {
     if (date && time) {
-      debugger;
-      setInputValue(getDatetime(date, time)); // Zápis do inputu
+      const result = getDatetime(date, time);
+      setInputValue(result); 
+      props.onChange?.(result);
     }
     setIsOpen(false);
   };

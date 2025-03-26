@@ -61,22 +61,24 @@ const ModalContainer = () => {
                     </Button>
                   )
                 )}
-                <Button
-                  onClick={() => {
-                    if (formRef.current) {
-                      formRef.current.dispatchEvent(
-                        new Event("submit", {
-                          cancelable: true,
-                          bubbles: true,
-                        })
-                      );
-                    } else {
-                      options?.modalOnSuccess && options.modalOnSuccess();
-                    }
-                  }}
-                >
-                  {t("modal.save")}
-                </Button>
+                {!options.hideSuccessButton
+                  && <Button
+                    onClick={() => {
+                      if (formRef.current) {
+                        formRef.current.dispatchEvent(
+                          new Event("submit", {
+                            cancelable: true,
+                            bubbles: true,
+                          })
+                        );
+                      } else {
+                        options?.modalOnSuccess && options.modalOnSuccess();
+                      }
+                    }}
+                  >
+                    {t("modal.save")}
+                  </Button>}
+
               </Modal.Footer>
             </Modal>
           </Draggable>

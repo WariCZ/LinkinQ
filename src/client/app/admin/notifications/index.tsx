@@ -51,6 +51,7 @@ export const Notifications: React.FC = () => {
       </div>
       <div className="p-2">
         <Table
+          tableConfigKey="notifications"
           data={data}
           columns={columns}
           highlightedRow={highlightedRow}

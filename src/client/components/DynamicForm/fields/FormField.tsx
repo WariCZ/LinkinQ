@@ -10,6 +10,7 @@ import TextInputWithIcon from "./TextInputWithIcon";
 import { IconType } from "react-icons";
 import { CollapsibleSection } from "../../CollapsibleSection";
 import { FormSection } from "../elements/FormSection";
+import DateRangePicker from "../../globalComponents/DateRangePicker";
 
 export const FormField = ({
   formField,
@@ -56,6 +57,7 @@ export const FormField = ({
                   disabled={formField.disabled}
                   readOnly={formField.readOnly}
                   required={formField.required}
+                  className="w-full"
                 />
                 {fieldState.error && (
                   <p className="text-red-600 text-sm mt-1 absolute right-0">
@@ -139,9 +141,14 @@ export const FormField = ({
               required: formField.required ? "Required" : false,
               validate: formField.validate,
             }}
-            render={({ fieldState }) => (
+            render={({ field, fieldState }) => (
               <>
-                <DateTimePicker />
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                />
                 {fieldState.error && (
                   <p className="text-red-600 text-sm mt-1">
                     {fieldState.error.message}
@@ -301,7 +308,6 @@ export const FormField = ({
           />
         </div>
       );
-
     case "СollapsibleSection":
       return (
         <CollapsibleSection key={formField.label} title={formField.label} icon={formField.icon}>
@@ -315,6 +321,31 @@ export const FormField = ({
         </CollapsibleSection>
       );
     // Add other cases (datetime, Filepicker, etc.) as needed.
+    case "dateRangePicker":
+      return (
+        <div key={formField.field} className={formField?.className}>
+          <Label htmlFor={formField.field}>{formField.label}</Label>
+          <Controller
+            name={formField.field}
+            control={control}
+            defaultValue={{ from: "", to: "" }}
+            render={({ field, fieldState }) => (
+              <>
+                <DateRangePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  name={field.name}
+                />
+                {fieldState.error && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </>
+            )}
+          />
+        </div>
+      );
 
     default:
       return null;

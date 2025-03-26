@@ -1,4 +1,5 @@
-import { CellContext } from "@tanstack/react-table";
+import { FieldPrimitiveType, FieldType } from "@/lib/entity/types";
+import { CellContext, ColumnDef } from "@tanstack/react-table";
 
 export type TableFieldType =
   | {
@@ -16,3 +17,14 @@ export type TableOrdering = {
   desc?: boolean;
 };
 
+interface AppColumnMeta {
+  type: FieldPrimitiveType;
+}
+
+export type AppColumnDef<TData = any, TValue = any> = ColumnDef<
+  TData,
+  TValue
+> & {
+  accessorKey: string,
+  meta: AppColumnMeta;
+};

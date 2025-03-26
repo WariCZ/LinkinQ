@@ -90,6 +90,10 @@ type FormFieldCollapsibleSection = {
   children: FormFieldType[];
 } & FormFieldDefault;
 
+type FormFieldDateRange = {
+  type: "dateRangePicker";
+} & FormFieldDefault;
+
 export type FormFieldType =
   | FormFieldSelect
   | FormFieldText
@@ -101,4 +105,5 @@ export type FormFieldType =
   | FormFieldComponent
   | FormFieldProgress
   | FormFieldTextWithIcon
-  | FormFieldCollapsibleSection;
+  | FormFieldCollapsibleSection
+  | FormFieldDateRange;

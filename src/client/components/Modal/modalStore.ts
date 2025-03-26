@@ -18,6 +18,7 @@ interface ModalData {
     modalSingle?: boolean;
     modalOnSuccess?: (data?: any) => void;
     additionalButtons?: any;
+    hideSuccessButton?: boolean;
   };
 }
 interface StoreState {
