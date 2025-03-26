@@ -24,7 +24,8 @@ import {
 import logger from "../logger";
 import EventEmitter from "events";
 import { Sql } from "./sql";
-import { Triggers } from "./triggers";
+import { TriggerItemInternalType, Triggers } from "./triggers";
+import { dynamicImportFromFiles } from "./importFiles";
 
 export class Entity {
   db: Knex;
@@ -776,7 +777,12 @@ export class Entity {
     //   sqlAdmin,
     // });
 
-    await this.triggers.initTriggers(this.schema);
+    const path = process.cwd() + "/triggers/";
+    const triggersFS: TriggerItemInternalType[] = await dynamicImportFromFiles(
+      path
+    );
+
+    await this.triggers.initTriggers(this.schema, triggersFS);
 
     await this.createData({
       data: defaultData(),

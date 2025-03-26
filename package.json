@@ -2,8 +2,7 @@
   "name": "linkinq",
   "version": "1.0.2",
   "description": "",
-  "main": "dist/src/index.js",
-  "types": "dist/src/index.d.ts",
+  "main": "src/index.ts",
   "scripts": {
     "build:server": "tsc --project tsconfig.server.json",
     "build:client": "vite build",

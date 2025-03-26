@@ -7,6 +7,7 @@ import { EntitySchema } from "./types";
 import { dbType, Sql } from "./sql";
 import { MAIN_GUID, MAIN_ID } from "../knex";
 import { hashPassword } from "./utils";
+import { dynamicImportFromFiles } from "./importFiles";
 
 export type CodeType = {
   beforeData: Record<string, any>;
@@ -44,16 +45,11 @@ export class Triggers {
     db: Knex<any, unknown[]>;
     eventsOnEntities: EventEmitter;
   }) {
-    this.path = process.cwd() + "/triggers/";
     this.eventsOnEntities = eventsOnEntities;
     this.db = (table: string) => db(table).setUser({ id: 1 });
 
     this.registerTriggers(db);
     this.startWorkflow = undefined;
-  }
-
-  private getPath(filename: string) {
-    return this.path + filename;
   }
 
   get() {
@@ -158,7 +154,10 @@ export class Triggers {
     this.schema = schema;
   };
 
-  initTriggers = async (schema: EntitySchema) => {
+  initTriggers = async (
+    schema: EntitySchema,
+    initTriggers: TriggerItemInternalType[]
+  ) => {
     this.schema = schema;
 
     const dbTriggers: TriggerItemInternalType[] = await this.db("triggers")
@@ -180,29 +179,28 @@ export class Triggers {
     }
 
     // nactu vsechny triggery z FS
-    let triggersFS: TriggerItemInternalType[] = [];
+    // let triggersFS: TriggerItemInternalType[] = [];
 
-    for (const filename of fs.readdirSync(this.path)) {
-      const path = require("path");
-      if (path.extname(filename) == ".ts") {
-        let name = path.basename(filename);
+    // for (const filename of fs.readdirSync(this.path)) {
+    //   const path = require("path");
+    //   if (path.extname(filename) == ".ts") {
+    //     let name = path.basename(filename);
 
-        const stats = await fs.promises.stat(this.getPath(name));
-        const x = await import(this.getPath(name));
-        const { default: triggers } = await import(this.getPath(name));
+    //     const stats = await fs.promises.stat(this.getPath(name));
+    //     const { default: triggers } = await import(this.getPath(name));
 
-        const triggersTmp: TriggerItemInternalType[] = triggers.map(
-          (t: TriggerItemInternalType) => ({
-            ...t,
-            updatetime: DateTime.fromJSDate(stats.mtime),
-          })
-        );
+    //     const triggersTmp: TriggerItemInternalType[] = triggers.map(
+    //       (t: TriggerItemInternalType) => ({
+    //         ...t,
+    //         updatetime: DateTime.fromJSDate(stats.mtime),
+    //       })
+    //     );
 
-        triggersFS = triggersFS.concat(triggersTmp);
-      }
-    }
+    //     triggersFS = triggersFS.concat(triggersTmp);
+    //   }
+    // }
 
-    for (const trigger of triggersFS) {
+    for (const trigger of initTriggers) {
       this.prepareDefinition(trigger);
       const dbTrigger: any =
         this.definitions[trigger.type][trigger.method][trigger.entity][
