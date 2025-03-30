@@ -1,6 +1,6 @@
 import { ModalPropsType } from "@/client/types/common/ModalPropsType";
 import useStore from "@/client/store";
-import { httpRequest } from "@/client/hooks/useDataDetail";
+import { httpRequest } from "@/client/services/httpBase";
 import Form from "@/client/components/DynamicForm";
 
 export const DeleteEntity = (props: { entity: string } & ModalPropsType) => {
