@@ -729,7 +729,7 @@ export class Entity {
     return schema;
   }
 
-  async prepareSchema() {
+  async prepareSchema(triggers) {
     if (process.env.e2etest == "true") {
       await this.resetPublicSchema();
     }
@@ -777,12 +777,7 @@ export class Entity {
     //   sqlAdmin,
     // });
 
-    const path = process.cwd() + "/triggers/";
-    const triggersFS: TriggerItemInternalType[] = await dynamicImportFromFiles(
-      path
-    );
-
-    await this.triggers.initTriggers(this.schema, triggersFS);
+    await this.triggers.initTriggers(this.schema, triggers);
 
     await this.createData({
       data: defaultData(),

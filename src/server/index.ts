@@ -1,6 +1,7 @@
-import { WebApp } from "./webApp";
+import plugin from "tailwindcss";
+import { Linkinq } from "./app";
 
-const webApp = new WebApp();
-webApp.initApp();
+const linkinq = new Linkinq();
+linkinq.initApp();
 
-module.exports = webApp.app;
+module.exports = linkinq.app;

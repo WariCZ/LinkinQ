@@ -1,4 +1,4 @@
-import { TriggerItemType } from "@/lib/entity/triggers";
+import { TriggerItemType } from "../../lib/entity/triggers";
 
 const triggers: TriggerItemType[] = [
   {

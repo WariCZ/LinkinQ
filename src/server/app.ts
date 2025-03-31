@@ -21,6 +21,9 @@ import { Adapters } from "../lib/entity/adapters";
 import { mailAdapter } from "../lib/entity/adaptersDef/mail";
 import { BpmnRoutes } from "../lib/bpmn-web/routes";
 import pageflowRouter from "../lib/entity/pageflow";
+import { TriggerItemInternalType } from "../lib/entity/triggers";
+import { dynamicImportFromFiles } from "../lib/entity/importFiles";
+import path from "path";
 
 dotenv.config();
 
@@ -29,8 +32,8 @@ declare global {
     entityModel: EntitySchema;
   };
 }
-
-export class WebApp {
+type LinkinqConfig = {};
+export class Linkinq {
   app: Express;
   entity: EntityRoutes;
   bpmnRoutes: BpmnRoutes;
@@ -39,7 +42,7 @@ export class WebApp {
   viteRunning: boolean;
   ad: Adapters;
 
-  constructor() {
+  constructor(config?: LinkinqConfig) {
     this.viteRunning = false;
     const fs = require("fs");
 
@@ -66,7 +69,26 @@ export class WebApp {
   }
 
   async initApp() {
-    const { schema, sqlAdmin, db } = await this.entity.prepareSchema();
+    // const path = process.cwd() + "/src/configurations/triggers/";
+    // const path = __dirname + "../configurations/triggers/";
+    // path.join(__dirname, "data", "file.txt");
+    // console.log(__dirname + path);
+
+    const triggersPathLinkinq = path.join(
+      __dirname,
+      "../configurations/triggers/"
+    );
+    const triggersPathApp = path.join(
+      process.cwd(),
+      "/src/configurations/triggers/"
+    );
+    debugger;
+    const triggers: TriggerItemInternalType[] = await dynamicImportFromFiles([
+      triggersPathLinkinq,
+      triggersPathApp,
+    ]);
+
+    const { schema, sqlAdmin, db } = await this.entity.prepareSchema(triggers);
 
     this.ad.loadAdapters(schema);
     const wflogger = new Logger({ toConsole: true });

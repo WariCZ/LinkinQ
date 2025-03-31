@@ -4,9 +4,10 @@
     "outDir": "dist/server",
     "rootDir": "src",
     "target": "ES6",
-    "module": "CommonJS",
     "lib": ["ES6"],
-    "types": ["node"]
+    "types": ["node"],
+    "module": "Node16",
+    "moduleResolution": "node16"
   },
   "include": ["src/server", "src/configurations", "src/lib"],
   "exclude": ["node_modules", "src/lib/bpmn-web/datastore"]

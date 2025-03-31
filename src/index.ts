@@ -1,1 +1,1 @@
-export { WebApp } from "./server/webApp";
+export { Linkinq } from "./server/app";
