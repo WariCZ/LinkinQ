@@ -351,7 +351,7 @@ export class Triggers {
           if (!that.schema[table]) {
             return;
           }
-          if (table == "tasks") debugger;
+          // if (table == "tasks") debugger;
 
           if (table == "journal") return;
 

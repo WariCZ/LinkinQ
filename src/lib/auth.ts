@@ -86,7 +86,6 @@ const authRoutes = ({
         entity: "users",
         fields: ["password", "fullname", "email", "id", "guid", "roles.key"],
         where: {
-          password: password,
           email: username,
         },
       });

@@ -30,20 +30,20 @@ export const Tasks = () => {
     ],
     ...(schema[entity]
       ? Object.keys(schema[entity].fields)
-        .filter((f) => {
-          return !schema[entity].fields[f].system;
-        })
-        .map((f) => {
-          if (schema[entity].fields[f].link) {
-            if (schema[entity].fields[f].link === "users") {
-              return f + ".fullname";
+          .filter((f) => {
+            return !schema[entity].fields[f].system;
+          })
+          .map((f) => {
+            if (schema[entity].fields[f].link) {
+              if (schema[entity].fields[f].link === "users") {
+                return f + ".fullname";
+              } else {
+                return f + ".caption";
+              }
             } else {
-              return f + ".caption";
+              return f;
             }
-          } else {
-            return f;
-          }
-        })
+          })
       : []),
     ...["status"],
   ];
@@ -70,7 +70,6 @@ export const Tasks = () => {
 
   return (
     <div className="mx-3">
-
       <div className="flex items-center justify-between my-3">
         <div className="flex space-x-2">
           <Button
@@ -79,7 +78,8 @@ export const Tasks = () => {
                 title: t("Create task"),
                 size: "xl",
                 modalSingle: true,
-              })}
+              })
+            }
           >
             <FaPlus className="ml-0 m-1 h-3 w-3" />
             {t("add")}

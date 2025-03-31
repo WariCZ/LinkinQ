@@ -2,12 +2,16 @@ import { useEffect, useState } from "react";
 import { httpRequest, getSingleRecord } from "@/client/services/httpBase";
 import _ from "lodash";
 import { useDataCommon } from "./useDataCommon";
+import { off } from "process";
+
+const DEFAULT_LIMIT = 50;
 
 function useDataTable<T, U>(
   param: {
     entity: string;
     fields?: string[];
     filter?: Object;
+    limit?: number;
     ordering?: {
       id: string;
       desc: boolean;
@@ -54,11 +58,15 @@ function useDataTable<T, U>(
     fields,
     filter,
     ordering,
+    limit,
+    offset,
   }: {
     entity: string;
     fields?: string;
     filter?: Record<string, any>;
     ordering?: string;
+    limit?: number;
+    offset?: number;
   }) =>
     httpRequest({
       method: "GET",
@@ -66,6 +74,8 @@ function useDataTable<T, U>(
       params: {
         __fields: fields ?? "*",
         __orderby: ordering,
+        __limit: limit,
+        __offset: offset,
         ...filter,
       },
     });
@@ -75,10 +85,14 @@ function useDataTable<T, U>(
     fields,
     filter,
     ordering,
+    limit,
+    offset,
   }: {
     entity: string;
     fields?: string[];
     filter?: Object;
+    limit?: number;
+    offset?: number;
     ordering?: {
       id: string;
       desc: boolean;
@@ -91,6 +105,8 @@ function useDataTable<T, U>(
         fields: fields?.length ? fields.join(",") : "*",
         filter: filter || {},
         ordering: ordering?.map((o) => o.id + (o.desc ? "-" : "")).join(","),
+        limit: limit || DEFAULT_LIMIT,
+        offset: offset,
       });
       if (response) setData(response.data);
     } catch (err: any) {
@@ -105,6 +121,8 @@ function useDataTable<T, U>(
     fields?: string[];
     filter?: Object;
     entity?: string;
+    limit?: number;
+    offset?: number;
     ordering?: {
       id: string;
       desc: boolean;
@@ -121,6 +139,8 @@ function useDataTable<T, U>(
       fields: params?.fields || fieldsEntity,
       filter: params?.filter || filter,
       ordering: params?.ordering || ordering,
+      limit: params?.limit || param.limit,
+      offset: params?.offset,
     });
   };
 

@@ -15,6 +15,8 @@ type SelectEntityType = {
   onlyIds?: boolean;
   orderBy?: string[];
   user: User;
+  limit?: number;
+  offset?: number;
 };
 
 export const whereQueries = ({
@@ -491,6 +493,8 @@ export const getData = async ({
   nJoinDirection,
   orderBy,
   user,
+  limit,
+  offset,
 }: SelectEntityType & {
   db: dbType;
   schema: EntitySchema;
@@ -535,6 +539,13 @@ export const getData = async ({
           query.orderBy(o, "asc");
         }
       });
+    }
+
+    if (limit) {
+      query.limit(limit);
+    }
+    if (offset) {
+      query.offset(offset);
     }
     // Pridam WHERE
     await addWhere({
