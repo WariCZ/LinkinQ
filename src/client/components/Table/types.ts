@@ -1,4 +1,4 @@
-import { FieldPrimitiveType, FieldType } from "@/lib/entity/types";
+import { FieldPrimitiveType } from "@/lib/entity/types";
 import { CellContext, ColumnDef } from "@tanstack/react-table";
 
 export type TableFieldType =

@@ -1,5 +1,5 @@
 
-import { FaFilter } from "react-icons/fa";
+import { FaFilter, FaTools, FaTrashAlt } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { AppColumnDef } from "../types";
 import { useModalStore } from "../../Modal/modalStore";
@@ -8,6 +8,9 @@ import { FaFilterCircleXmark } from "react-icons/fa6";
 import { Button, TextInput } from "flowbite-react";
 import { useFilterFields } from "../hooks/useFilterFields";
 import { MdCancel } from "react-icons/md";
+import { IoCreateOutline } from "react-icons/io5";
+import { Dispatch, SetStateAction } from "react";
+import BatchEdit from "./BatchEdit";
 
 interface TableToolbarProps {
     filters: Record<string, any>;
@@ -16,9 +19,22 @@ interface TableToolbarProps {
     columns: AppColumnDef<any, any>[];
     applyFullTextSeacrh: (textSearch: string) => void
     fullTextSearch: string;
+    selectedRows?: string[];
+    setSelectedRows?: Dispatch<SetStateAction<string[]>>;
+    deleteSelected?: () => void;
 }
 
-export const TableToolbar = ({ filters, columns, applyFilters, clearFilters, applyFullTextSeacrh, fullTextSearch }: TableToolbarProps) => {
+export const TableToolbar = ({
+    filters,
+    columns,
+    applyFilters,
+    clearFilters,
+    applyFullTextSeacrh,
+    fullTextSearch,
+    selectedRows,
+    setSelectedRows,
+    deleteSelected
+}: TableToolbarProps) => {
     const { t } = useTranslation();
     const { openModal, closeModal } = useModalStore();
     const fields = useFilterFields(columns);
@@ -77,43 +93,84 @@ export const TableToolbar = ({ filters, columns, applyFilters, clearFilters, app
     }
 
     return (
-        <div className="flex justify-between mb-2 items-center">
-            <TextInput
-                id="base"
-                type="text"
-                className="w-full max-w-[300px]"
-                placeholder={t("labels.fullTextSearch")}
-                sizing="md" value={fullTextSearch}
-                onChange={(e) => {
-                    const value = e.target.value
-                    applyFullTextSeacrh(value)
-                }}
-            />
-
-            {hasActiveFilters ? (
-                <div className="flex rounded-md overflow-hidden shadow-sm border border-red-700 bg-red-700 text-white">
+        <>
+            <div className="flex justify-between mb-2">
+                <div className={`flex items-center gap-3 transition-opacity duration-200 ${selectedRows.length > 0 ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                    }`}>
+                    <Button
+                        onClick={deleteSelected}
+                        color="light"
+                    >
+                        <div className="flex gap-2 items-center">
+                            <FaTrashAlt className="text-sm" />
+                            <span>Odstranit vybrané</span>
+                        </div>
+                    </Button>
+                    <Button
+                        color="red"
+                        onClick={() => {
+                            openModal(
+                                <BatchEdit
+                                    selectedRows={selectedRows}
+                                    onConfirm={(fields) => {
+                                        console.log(fields);
+                                    }}
+                                />,
+                                {
+                                    title: "Hromadné změny",
+                                    size: "xl",
+                                    modalSingle: true,
+                                }
+                            );
+                        }}
+                    >
+                        <div className="flex gap-2 items-center">
+                            <FaTools className="text-sm" />
+                            <span>Hromadné změny...</span>
+                        </div>
+                    </Button>
+                </div>
+                {hasActiveFilters ? (
+                    <div className="flex rounded-md overflow-hidden shadow-sm border border-red-700 bg-red-700 text-white h-[30px]">
+                        <Button
+                            className="h-[30px] items-center"
+                            onClick={handleOpenFilter}
+                            color="red"
+                        >
+                            <FaFilter size={12} />
+                        </Button>
+                        <Button
+                            className="h-[30px] items-center"
+                            onClick={handleClearFilters}
+                            color="red"
+                        >
+                            <MdCancel size={12} />
+                        </Button>
+                    </div>
+                ) : (
                     <Button
                         onClick={handleOpenFilter}
-                        color="red"
+                        outline
+                        color="light"
+                        className="h-[30px] items-center"
                     >
                         <FaFilter size={12} />
                     </Button>
-                    <Button
-                        onClick={handleClearFilters}
-                        color="red"
-                    >
-                        <MdCancel />
-                    </Button>
-                </div>
-            ) : (
-                <Button
-                    onClick={handleOpenFilter}
-                    outline
-                    color="light"
-                >
-                    <FaFilter size={12} />
-                </Button>
-            )}
-        </div>
+                )}
+            </div>
+            <div className="flex justify-between py-3 items-center border-t">
+                <TextInput
+                    id="base"
+                    type="text"
+                    className="w-full max-w-[300px]"
+                    placeholder={t("labels.fullTextSearch")}
+                    sizing="md" value={fullTextSearch}
+                    onChange={(e) => {
+                        const value = e.target.value
+                        applyFullTextSeacrh(value)
+                    }}
+                />
+            </div>
+        </>
     );
 };

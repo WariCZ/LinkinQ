@@ -1,6 +1,5 @@
 import React, { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
 import {
-  flexRender,
   getCoreRowModel,
   getSortedRowModel,
   useReactTable
@@ -8,15 +7,13 @@ import {
 import _ from "lodash";
 import useStore from "@/client/store";
 import { TableFieldType, TableOrdering } from "./types";
-import { useModalStore } from "../Modal/modalStore";
-import { ColumnSelector } from "./components/ColumnSelector";
-import { IoSettingsOutline } from "react-icons/io5";
-import { FaSortUp, FaSortDown } from "react-icons/fa";
 import { useColumnStorage } from "./hooks/useColumnStorage";
-import ColumnResizeHandle from "./components/ColumnResizeHandle";
 import { useTranslatedColumns } from "./hooks/useTranslatedColumns";
 import { TableToolbar } from "./components/TableToolbar";
 import { DateTime } from "luxon";
+import { TableHeader } from "./components/TableHeader";
+import { TableBody } from "./components/TableBody";
+
 interface TableProps<T> {
   tableConfigKey: string,
   entity?: string;
@@ -27,6 +24,7 @@ interface TableProps<T> {
   highlightedRow?: string[];
   setOrdering?: Dispatch<SetStateAction<TableOrdering[]>>;
   ordering?: TableOrdering[];
+  deleteRecord?: (guid: string) => Promise<void>
 }
 
 const Table = <T, _>({
@@ -39,12 +37,14 @@ const Table = <T, _>({
   loading,
   rowClick,
   entity,
+  deleteRecord
 }: TableProps<T>) => {
   const schema = useStore((state) => state.schema);
   const columnSelectorRef = useRef<any>(null);
-  const { openModal, closeModal } = useModalStore();
+
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [fullTextSearch, setFullTextSearch] = useState("")
+  const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
   const {
     selectedColumns,
@@ -69,15 +69,16 @@ const Table = <T, _>({
   });
 
   const filteredData = useMemo(() => {
-    return data
-      .filter((item) => {
-        if (!fullTextSearch) return true;
+    if (!Array.isArray(data)) return [];
 
-        return Object.values(item).some((val) =>
-          val?.toString().toLowerCase().includes(fullTextSearch.toLowerCase())
-        );
-      })
-      .filter((item) => {
+    return data?.filter((item) => {
+      if (!fullTextSearch) return true;
+
+      return Object.values(item).some((val) =>
+        val?.toString().toLowerCase().includes(fullTextSearch.toLowerCase())
+      );
+    })
+      ?.filter((item) => {
         return Object.entries(filters).every(([key, value]) => {
           if (value === undefined || value === "") return true;
 
@@ -155,128 +156,48 @@ const Table = <T, _>({
 
   return (
     <>
-      <TableToolbar columns={translatedColumns} applyFilters={applyFilters} filters={filters} clearFilters={cleatFilters} applyFullTextSeacrh={applyFullTextSeacrh} fullTextSearch={fullTextSearch} />
+      <TableToolbar
+        columns={translatedColumns}
+        applyFilters={applyFilters}
+        filters={filters}
+        clearFilters={cleatFilters}
+        applyFullTextSeacrh={applyFullTextSeacrh}
+        fullTextSearch={fullTextSearch}
+        selectedRows={selectedRows}
+        setSelectedRows={setSelectedRows}
+        deleteSelected={async () => {
+          for (const guid of selectedRows) {
+            await deleteRecord?.(guid);
+          }
+          setSelectedRows([]);
+        }}
+      />
       <div className="overflow-x-auto rounded-md">
         <table className="table-auto w-full text-sm text-left text-gray-500 dark:text-gray-400">
-          <thead className="bg-[#2c3a54] text-xs text-gray-50 uppercase dark:bg-gray-700 dark:text-gray-400 ">
-            {getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <th
-                      key={header.id}
-                      style={{ minWidth: `${header.getSize()}px` }}
-                      className="relative group px-4 whitespace-nowrap border-r hover:bg-gray-700"
-                      colSpan={header.colSpan}
-                      onClick={header.column.getToggleSortingHandler()}
-                    >
-                      {!header.isPlaceholder && (
-                        <div
-                          className={
-                            header.column.getCanSort() ? "cursor-pointer select-none" : ""
-                          }
-                          title={
-                            header.column.getCanSort()
-                              ? header.column.getNextSortingOrder() === "asc"
-                                ? "Sort ascending"
-                                : header.column.getNextSortingOrder() === "desc"
-                                  ? "Sort descending"
-                                  : "Clear sort"
-                              : undefined
-                          }
-                        >
-                          <div className="flex gap-2 items-center">
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                            {header.column.getIsSorted() === "asc" && <FaSortUp />}
-                            {header.column.getIsSorted() === "desc" && <FaSortDown />}
-                          </div>
-                        </div>
-                      )}
-
-                      {header.column.getCanResize() && (
-                        <ColumnResizeHandle
-                          onMouseDown={header.getResizeHandler()}
-                          onTouchStart={header.getResizeHandler()}
-                        />
-                      )}
-                    </th>
-                  );
-                })}
-                <th key={headerGroup.id} className="w-14 hover:bg-gray-700">
-                  <button onClick={() => {
-                    openModal(
-                      <ColumnSelector
-                        ref={columnSelectorRef}
-                        initialColumns={selectedColumns}
-                        columns={columns}
-                        schema={schema}
-                        entity={entity}
-                      />,
-                      {
-                        title: "Change columns visible",
-                        size: "2xl",
-                        modalSingle: true,
-                        modalOnSuccess: () => {
-                          const selected = columnSelectorRef.current?.getSelectedColumns();
-                          if (selected) setSelectedColumns(selected);
-                          closeModal();
-                        },
-                      }
-                    );
-                  }}
-                    className="px-4 py-2">
-                    <IoSettingsOutline size={20} />
-                  </button>
-                </th>
-              </tr>
-            ))}
-          </thead>
-          {getRowModel().rows.length ? (<tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
-            {loading
-              ? getHeaderGroups().map((headerGroup) =>
-                ["", "", ""].map((_, i) => (
-                  <tr key={i} className="max-w-sm animate-pulse">
-                    {headerGroup.headers.map((_, a) => {
-                      return (
-                        <td key={a} className="px-4 py-2 whitespace-nowrap">
-                          <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full"></div>
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))
-              )
-              : getRowModel().rows.map((row, i) => {
-                return (
-                  <tr
-                    onClick={() => {
-                      rowClick && rowClick(row.original);
-                    }}
-                    key={row.id + "-" + i}
-                    className={`hover:bg-gray-100 dark:hover:bg-gray-600 ${highlightedRow &&
-                      highlightedRow.indexOf((row.original as any).guid) > -1
-                      ? "highlight"
-                      : ""
-                      }`}
-                  >
-                    {row.getVisibleCells().map((cell) => {
-                      return (
-                        <td
-                          key={cell.id}
-                          className="px-4 py-2 whitespace-nowrap text-ellipsis overflow-hidden max-w-80"
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </td>
-                      );
-                    })}
-                    <td></td>
-                  </tr>
-                );
-              })}
-          </tbody>) : <div className="flex items-center justify-center w-full">no data</div>}
+          <TableHeader
+            getHeaderGroups={getHeaderGroups}
+            getRowModel={getRowModel}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+            filteredData={filteredData}
+            columnSelectorRef={columnSelectorRef}
+            selectedColumns={selectedColumns}
+            columns={columns}
+            schema={schema}
+            entity={entity}
+            setSelectedColumns={setSelectedColumns}
+          />
+          <TableBody
+            rows={getRowModel().rows}
+            loading={loading}
+            getHeaderGroups={getHeaderGroups}
+            rowClick={rowClick}
+            selectedRows={selectedRows}
+            setSelectedRows={setSelectedRows}
+            highlightedRow={highlightedRow}
+            translatedColumns={translatedColumns}
+            deleteRecord={deleteRecord}
+          />
         </table>
       </div>
     </>

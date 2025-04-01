@@ -51,7 +51,7 @@ export const Tasks = () => {
   const [
     data,
     setData,
-    { loading, refresh, fields, filter, highlightedRow, setOrdering, ordering },
+    { loading, refresh, filter, highlightedRow, setOrdering, ordering, deleteRecord },
   ] = useDataTable(
     {
       entity: entity,
@@ -102,6 +102,7 @@ export const Tasks = () => {
         loading={loading}
         highlightedRow={highlightedRow}
         ordering={ordering}
+        deleteRecord={deleteRecord}
         setOrdering={setOrdering}
       />
     </div>
