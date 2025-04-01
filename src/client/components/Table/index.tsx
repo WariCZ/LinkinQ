@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useMemo, useRef, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
 import {
   getCoreRowModel,
   getSortedRowModel,
@@ -13,6 +13,8 @@ import { TableToolbar } from "./components/TableToolbar";
 import { DateTime } from "luxon";
 import { TableHeader } from "./components/TableHeader";
 import { TableBody } from "./components/TableBody";
+
+const PAGE_SIZE = 10;
 
 interface TableProps<T> {
   tableConfigKey: string,
@@ -46,6 +48,44 @@ const Table = <T, _>({
   const [fullTextSearch, setFullTextSearch] = useState("")
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
 
+  const [localData, setLocalData] = useState<T[]>(data.slice(0, PAGE_SIZE));
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const loaderRef = useRef<HTMLTableRowElement | null>(null);
+
+  useEffect(() => {
+    if (!loaderRef.current || !scrollContainerRef.current || !hasMore) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && hasMore) {
+        setTimeout(() => {
+          const clonedItems = data.slice(0, PAGE_SIZE).map((item, i) => ({
+            ...item,
+            guid: `${item.guid || i}-${Date.now()}-${Math.random()}`,
+          }));
+
+          setLocalData((prev) => [...prev, ...clonedItems]);
+          setPage((prev) => prev + 1);
+
+          if (page >= 10) setHasMore(false);
+        }, 500);
+      }
+    });
+
+    observer.observe(loaderRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [page, hasMore, data]);
+
+  useEffect(() => {
+    setLocalData(data.slice(0, PAGE_SIZE));
+    setPage(1);
+    setHasMore(data.length > PAGE_SIZE);
+  }, [data.length]);
+
   const {
     selectedColumns,
     columnSizing,
@@ -69,9 +109,9 @@ const Table = <T, _>({
   });
 
   const filteredData = useMemo(() => {
-    if (!Array.isArray(data)) return [];
+    if (!Array.isArray(localData)) return [];
 
-    return data?.filter((item) => {
+    return localData?.filter((item) => {
       if (!fullTextSearch) return true;
 
       return Object.values(item).some((val) =>
@@ -119,7 +159,7 @@ const Table = <T, _>({
           return true;
         });
       });
-  }, [data, filters, fullTextSearch]);
+  }, [localData, filters, fullTextSearch]);
 
   const { getRowModel, getHeaderGroups } = useReactTable({
     columns: translatedColumns,
@@ -172,8 +212,8 @@ const Table = <T, _>({
           setSelectedRows([]);
         }}
       />
-      <div className="overflow-x-auto rounded-md">
-        <table className="table-auto w-full text-sm text-left text-gray-500 dark:text-gray-400">
+      <div className="overflow-auto rounded-md" ref={scrollContainerRef}>
+        <table className="table-auto w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
           <TableHeader
             getHeaderGroups={getHeaderGroups}
             getRowModel={getRowModel}
@@ -197,6 +237,8 @@ const Table = <T, _>({
             highlightedRow={highlightedRow}
             translatedColumns={translatedColumns}
             deleteRecord={deleteRecord}
+            loaderRef={loaderRef}
+            hasMore={hasMore}
           />
         </table>
       </div>

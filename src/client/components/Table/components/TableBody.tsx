@@ -1,6 +1,6 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, RefObject } from "react";
 import { TableRow } from "./TableRow";
-import { Row, HeaderGroup } from '@tanstack/react-table';
+import { Row, HeaderGroup } from "@tanstack/react-table";
 
 interface TableBodyProps<T> {
     rows: Row<any>[];
@@ -12,6 +12,8 @@ interface TableBodyProps<T> {
     highlightedRow?: string[];
     translatedColumns: any[];
     deleteRecord: (guid: string) => Promise<void>;
+    loaderRef?: RefObject<HTMLTableRowElement>;
+    hasMore?: boolean;
 }
 
 export const TableBody = <T,>({
@@ -23,7 +25,9 @@ export const TableBody = <T,>({
     setSelectedRows,
     highlightedRow = [],
     translatedColumns,
-    deleteRecord
+    deleteRecord,
+    loaderRef,
+    hasMore
 }: TableBodyProps<T>) => {
     if (rows.length === 0 && !loading) {
         return (
@@ -56,7 +60,7 @@ export const TableBody = <T,>({
                 )
                 : rows.map((row: any, i: number) => (
                     <TableRow
-                        key={row.id + '-' + i}
+                        key={row.id + "-" + i}
                         row={row}
                         i={i}
                         rowClick={rowClick}
@@ -66,6 +70,12 @@ export const TableBody = <T,>({
                         deleteRecord={deleteRecord}
                     />
                 ))}
+
+            <tr ref={loaderRef}>
+                <td colSpan={translatedColumns.length + 2} className="text-center py-4 text-gray-400 italic">
+                    {hasMore ? "Loading more..." : "No more data"}
+                </td>
+            </tr>
         </tbody>
     );
 };
