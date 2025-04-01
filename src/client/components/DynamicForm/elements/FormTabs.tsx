@@ -19,12 +19,14 @@ export const FormTabs = ({
       <TabList className={"bg-gray-100 border-gray-200 pl-2"}>
         {tabs.tabs.map((tab) => {
           const IconComponent = Icons[tab.icon] || null;
-          return <Tab key={tab.name}>
-            <div className="flex gap-2 items-center">
-              {IconComponent && <IconComponent className="text-lg" />}
-              {tab.name}
-            </div>
-          </Tab>
+          return (
+            <Tab key={tab.name}>
+              <div className="flex gap-2 items-center">
+                {IconComponent && <IconComponent className="text-lg" />}
+                {tab.name}
+              </div>
+            </Tab>
+          );
         })}
       </TabList>
 

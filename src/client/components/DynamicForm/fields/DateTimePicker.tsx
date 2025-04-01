@@ -63,7 +63,7 @@ const DateTimePicker = (
   const handleConfirm = () => {
     if (date && time) {
       const result = getDatetime(date, time);
-      setInputValue(result); 
+      setInputValue(result);
       props.onChange?.(result);
     }
     setIsOpen(false);

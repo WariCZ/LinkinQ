@@ -104,7 +104,10 @@ export const ColorPicker = ({ format, editor }: ColorPickerProps) => {
               className={`w-20 h-7 border rounded p-1 text-sm outline-none focus:border-blue-500
             ${validHex === false ? "border-red-500" : "border-gray-300"}`}
             />
-            <button type="submit" className="text-green-500 hover:text-green-700 transition-colors">
+            <button
+              type="submit"
+              className="text-green-500 hover:text-green-700 transition-colors"
+            >
               <MdCheck size={20} />
             </button>
           </form>

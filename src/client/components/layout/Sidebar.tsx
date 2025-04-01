@@ -138,7 +138,6 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
           to: "/tasks",
           filter: { attn: "$user" },
         },
-
       ],
     },
     {
@@ -155,8 +154,9 @@ export default function DashboardSidebar(props: { admin?: boolean }) {
 
   return (
     <Sidebar
-      className={`h-full border-r dark:border-r dark:border-gray-700 border-gray-200 absolute ${sidebar ? "" : "hidden"
-        } z-10 lg:relative lg:block`}
+      className={`h-full border-r dark:border-r dark:border-gray-700 border-gray-200 absolute ${
+        sidebar ? "" : "hidden"
+      } z-10 lg:relative lg:block`}
       onClick={() => {
         setSidebar(false);
       }}

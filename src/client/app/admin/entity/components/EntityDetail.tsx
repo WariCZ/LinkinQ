@@ -7,7 +7,6 @@ import { DeleteEntity } from "./DeleteEntity";
 import { FaFileExport } from "react-icons/fa";
 import Table from "@/client/components/Table";
 
-
 export const EntityDetail = ({
   entity,
   definition,
@@ -18,9 +17,9 @@ export const EntityDetail = ({
   const { openModal } = useModalStore();
   const fieldsArray = definition?.fields
     ? Object.entries(definition?.fields).map(([key, value]) => ({
-      name: key,
-      ...value,
-    }))
+        name: key,
+        ...value,
+      }))
     : [];
 
   const exportEntity = () => {
@@ -78,8 +77,8 @@ export const EntityDetail = ({
             "description",
             "default",
           ]}
-        // loading={loading}
-        // ordering={[{ id: "name" }]}
+          // loading={loading}
+          // ordering={[{ id: "name" }]}
         />
       </div>
     </div>

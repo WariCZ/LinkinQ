@@ -105,7 +105,10 @@ export const FormField = ({
       );
     case "select":
       return (
-        <div key={formField.field} className={`test select ${formField.className}`}>
+        <div
+          key={formField.field}
+          className={`test select ${formField.className}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           {formField.required ? (
             <span className="text-red-600 px-1">*</span>
@@ -118,14 +121,16 @@ export const FormField = ({
               required: formField.required ? "Required" : false,
               validate: formField.validate,
             }}
-            render={({ field, fieldState }) => <>
-              <Select {...field} {...formField} />
-              {fieldState.error && (
-                <p className="text-red-600 text-sm mt-1">
-                  {fieldState.error.message}
-                </p>
-              )}
-            </>}
+            render={({ field, fieldState }) => (
+              <>
+                <Select {...field} {...formField} />
+                {fieldState.error && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </>
+            )}
           />
         </div>
       );
@@ -184,7 +189,10 @@ export const FormField = ({
       );
     case "richtext":
       return (
-        <div key={formField.field} className={`flex flex-col my-2 gap-2 ${formField.className}`}>
+        <div
+          key={formField.field}
+          className={`flex flex-col my-2 gap-2 ${formField.className}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           {formField.required ? (
             <span className="text-red-600 px-1">*</span>
@@ -261,7 +269,10 @@ export const FormField = ({
       );
     case "progress":
       return (
-        <div key={formField.field} className={`my-2 ${formField.className || ""}`}>
+        <div
+          key={formField.field}
+          className={`my-2 ${formField.className || ""}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
             name={formField.field}
@@ -271,14 +282,21 @@ export const FormField = ({
               validate: formField.validate,
             }}
             render={({ field }) => (
-              <TaskProgressInput value={field.value} onChange={field.onChange} disabled={formField.disabled} />
+              <TaskProgressInput
+                value={field.value}
+                onChange={field.onChange}
+                disabled={formField.disabled}
+              />
             )}
           />
         </div>
       );
     case "textWithIcon":
       return (
-        <div key={formField.field} className={`my-2 ${formField.className || ""}`}>
+        <div
+          key={formField.field}
+          className={`my-2 ${formField.className || ""}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
             name={formField.field}
@@ -310,14 +328,22 @@ export const FormField = ({
       );
     case "СollapsibleSection":
       return (
-        <CollapsibleSection key={formField.label} title={formField.label} icon={formField.icon}>
-          {formField.children?.map((childField, index) => (
+        <CollapsibleSection
+          key={formField.label}
+          title={formField.label}
+          icon={formField.icon}
+        >
+          {formField.children?.map((childField, index) =>
             childField.type === "Section" ? (
-              <FormSection key={index} section={childField as SectionType} control={control} />
+              <FormSection
+                key={index}
+                section={childField as SectionType}
+                control={control}
+              />
             ) : (
               <FormField key={index} formField={childField} control={control} />
             )
-          ))}
+          )}
         </CollapsibleSection>
       );
     // Add other cases (datetime, Filepicker, etc.) as needed.

@@ -24,27 +24,32 @@ type SlateEditorProps = {
   value: Descendant[] | string;
   onChange: (value: Descendant[]) => void;
   placeholder: string;
-  field: any
+  field: any;
 };
 
 const HOTKEYS: Record<string, any> = {
-  'mod+b': 'bold',
-  'mod+i': 'italic',
-  'mod+u': 'underline',
-}
+  "mod+b": "bold",
+  "mod+i": "italic",
+  "mod+u": "underline",
+};
 
 const getDefaultValue = (value) => {
   return Array.isArray(value) && value.length > 0
     ? value
     : [
-      {
-        type: "paragraph",
-        children: [{ text: typeof value === "string" ? value : "" }],
-      },
-    ];
+        {
+          type: "paragraph",
+          children: [{ text: typeof value === "string" ? value : "" }],
+        },
+      ];
 };
 
-const SlateEditor = ({ value, onChange, placeholder, field }: SlateEditorProps) => {
+const SlateEditor = ({
+  value,
+  onChange,
+  placeholder,
+  field,
+}: SlateEditorProps) => {
   const renderElement = useCallback(
     (props: any) => <SlateElement {...props} />,
     []
@@ -90,11 +95,11 @@ const SlateEditor = ({ value, onChange, placeholder, field }: SlateEditorProps) 
     Array.isArray(value) && value.length > 0
       ? value
       : [
-        {
-          type: "paragraph",
-          children: [{ text: typeof value === "string" ? value : "" }],
-        },
-      ];
+          {
+            type: "paragraph",
+            children: [{ text: typeof value === "string" ? value : "" }],
+          },
+        ];
 
   return (
     <Slate
@@ -102,7 +107,7 @@ const SlateEditor = ({ value, onChange, placeholder, field }: SlateEditorProps) 
       editor={editor}
       initialValue={initialValue}
       onChange={(value) => {
-        onChange(value)
+        onChange(value);
         trigger(field.name);
       }}
     >
@@ -121,9 +126,9 @@ const SlateEditor = ({ value, onChange, placeholder, field }: SlateEditorProps) 
         onKeyDown={(event) => {
           for (const hotkey in HOTKEYS) {
             if (isHotkey(hotkey, event as any)) {
-              event.preventDefault()
-              const mark = HOTKEYS[hotkey]
-              toggleMark(editor, mark)
+              event.preventDefault();
+              const mark = HOTKEYS[hotkey];
+              toggleMark(editor, mark);
             }
           }
         }}

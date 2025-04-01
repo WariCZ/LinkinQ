@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { httpRequest, getSingleRecord } from "@/client/services/httpBase";
 import _ from "lodash";
 import { useDataCommon } from "./useDataCommon";
-import { off } from "process";
 
 const DEFAULT_LIMIT = 50;
 
@@ -35,6 +34,8 @@ function useDataTable<T, U>(
   const [ordering, setOrdering] = useState(param.ordering || []);
   const [highlightedRow, setHighlightedRow] = useState<string[]>([]);
   const [entity, setEntity] = useState(param.entity);
+  const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
     const eventSource = new EventSource("/api/events");
@@ -97,7 +98,7 @@ function useDataTable<T, U>(
       id: string;
       desc: boolean;
     }[];
-  }) => {
+  }): Promise<{ data: any[]; hasMore: boolean }> => {
     setError(null);
     try {
       const response = await getTableRecords({
@@ -108,13 +109,26 @@ function useDataTable<T, U>(
         limit: limit || DEFAULT_LIMIT,
         offset: offset,
       });
-      if (response) setData(response.data);
+
+      if (response) {
+        if (offset && offset > 0) {
+          setData((prev: any[]) => [...prev, ...response.data]);
+        } else {
+          setData(response.data);
+        }
+        return {
+          data: response.data,
+          hasMore: response.data.length >= (limit || DEFAULT_LIMIT),
+        };
+      }
     } catch (err: any) {
       setError(err.message);
       console.error(err.message);
     } finally {
       setLoading(false);
     }
+
+    return { data: [], hasMore: false };
   };
 
   const refresh = async (params?: {
@@ -134,7 +148,7 @@ function useDataTable<T, U>(
     if (params?.ordering) setOrdering(params.ordering);
     if (params?.entity) setEntity(params.entity);
 
-    await fetchData({
+    return await fetchData({
       entity: param.entity,
       fields: params?.fields || fieldsEntity,
       filter: params?.filter || filter,
@@ -142,6 +156,28 @@ function useDataTable<T, U>(
       limit: params?.limit || param.limit,
       offset: params?.offset,
     });
+  };
+
+  const fetchNextPage = async () => {
+    if (!hasMore || isFetchingNextPage) return;
+
+    setIsFetchingNextPage(true);
+
+    const offset = (data as any[]).length;
+    const result = await fetchData({
+      entity,
+      fields: fieldsEntity,
+      filter,
+      ordering,
+      limit: param.limit || DEFAULT_LIMIT,
+      offset,
+    });
+
+    if (result && result.data.length < (param.limit || DEFAULT_LIMIT)) {
+      setHasMore(false);
+    }
+
+    setIsFetchingNextPage(false);
   };
 
   const setRecord = (data: U) => baseSetRecord(param.entity, data);
@@ -201,6 +237,8 @@ function useDataTable<T, U>(
       refresh,
       setRecord,
       deleteRecord,
+      fetchNextPage,
+      hasMore,
       setOrdering: (o: any) => refresh({ ordering: o }),
     },
   ] as const;

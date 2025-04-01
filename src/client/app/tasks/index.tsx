@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import useStore from "../../store";
 import { Button } from "flowbite-react";
 import useDataTable from "../../hooks/useDataTable";
@@ -16,7 +16,6 @@ export const Tasks = () => {
   const { openModal } = useModalStore();
   const filters = location?.state?.filter;
   const header = location?.state?.header;
-
   const schema = useStore((state) => state.schema);
 
   const entity = "tasks";
@@ -51,7 +50,17 @@ export const Tasks = () => {
   const [
     data,
     setData,
-    { loading, refresh, filter, highlightedRow, setOrdering, ordering, deleteRecord },
+    {
+      loading,
+      refresh,
+      filter,
+      highlightedRow,
+      setOrdering,
+      ordering,
+      deleteRecord,
+      hasMore,
+      fetchNextPage,
+    },
   ] = useDataTable(
     {
       entity: entity,
@@ -104,6 +113,8 @@ export const Tasks = () => {
         ordering={ordering}
         deleteRecord={deleteRecord}
         setOrdering={setOrdering}
+        fetchNextPage={fetchNextPage}
+        hasMore={hasMore}
       />
     </div>
   );

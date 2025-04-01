@@ -43,7 +43,7 @@ const resources = {
         cancel: "Cancel",
         selectRange: "Select a range",
         from: "From",
-        to: "To"
+        to: "To",
       },
     },
   },

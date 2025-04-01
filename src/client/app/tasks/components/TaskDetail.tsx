@@ -77,14 +77,16 @@ export const TaskDetail = (props: TaskDetailProps) => {
           {
             type: "Section",
             className: "px-4 items-center bg-gray-100",
-            fields: [{
-              type: "text",
-              field: "caption",
-              label: "Title",
-              className: "flex items-center w-full bg-gray-100",
-              validate: (value) =>
-                value.length >= 3 || "Title must be at least 3 characters",
-            }]
+            fields: [
+              {
+                type: "text",
+                field: "caption",
+                label: "Title",
+                className: "flex items-center w-full bg-gray-100",
+                validate: (value) =>
+                  value.length >= 3 || "Title must be at least 3 characters",
+              },
+            ],
           },
 
           {
@@ -130,7 +132,7 @@ export const TaskDetail = (props: TaskDetailProps) => {
                 label: "Assignee",
                 required: false,
                 readOnly: true,
-                className: "mb-2"
+                className: "mb-2",
               },
               {
                 type: "select",
@@ -210,7 +212,11 @@ export const TaskDetail = (props: TaskDetailProps) => {
                         // customComponent: EffortField,
                         unit: "MD",
                         validate: (value) =>
-                          value === undefined || value === null || value === "" || value > 0 || "Value must be greater than 0",
+                          value === undefined ||
+                          value === null ||
+                          value === "" ||
+                          value > 0 ||
+                          "Value must be greater than 0",
                       },
                       {
                         field: "reportedEffort",
@@ -219,7 +225,11 @@ export const TaskDetail = (props: TaskDetailProps) => {
                         // customComponent: EffortField,
                         unit: "MH",
                         validate: (value) =>
-                          value === undefined || value === null || value === "" || value > 0 || "Value must be greater than 0",
+                          value === undefined ||
+                          value === null ||
+                          value === "" ||
+                          value > 0 ||
+                          "Value must be greater than 0",
                       },
                     ],
                   },

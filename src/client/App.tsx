@@ -52,7 +52,11 @@ const PrivateRoute = (props: { admin?: boolean }) => {
   }, [firstLoad]);
 
   if (loading) {
-    return <div className="flex items-center w-full h-full justify-center"><Spinner aria-label="Root loading" size="xl" /></div>;
+    return (
+      <div className="flex items-center w-full h-full justify-center">
+        <Spinner aria-label="Root loading" size="xl" />
+      </div>
+    );
   }
 
   return user ? <PrivateLayout {...props} /> : <Navigate to="/login" />;

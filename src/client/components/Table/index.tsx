@@ -1,8 +1,14 @@
-import React, { Dispatch, SetStateAction, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   getCoreRowModel,
   getSortedRowModel,
-  useReactTable
+  useReactTable,
 } from "@tanstack/react-table";
 import _ from "lodash";
 import useStore from "@/client/store";
@@ -14,10 +20,8 @@ import { DateTime } from "luxon";
 import { TableHeader } from "./components/TableHeader";
 import { TableBody } from "./components/TableBody";
 
-const PAGE_SIZE = 10;
-
 interface TableProps<T> {
-  tableConfigKey: string,
+  tableConfigKey: string;
   entity?: string;
   loading?: boolean;
   columns: TableFieldType[];
@@ -26,7 +30,9 @@ interface TableProps<T> {
   highlightedRow?: string[];
   setOrdering?: Dispatch<SetStateAction<TableOrdering[]>>;
   ordering?: TableOrdering[];
-  deleteRecord?: (guid: string) => Promise<void>
+  deleteRecord?: (guid: string) => Promise<void>;
+  fetchNextPage: () => Promise<void>;
+  hasMore?: boolean;
 }
 
 const Table = <T, _>({
@@ -39,59 +45,27 @@ const Table = <T, _>({
   loading,
   rowClick,
   entity,
-  deleteRecord
+  deleteRecord,
+  fetchNextPage,
+  hasMore,
 }: TableProps<T>) => {
   const schema = useStore((state) => state.schema);
   const columnSelectorRef = useRef<any>(null);
+  const tableContainerRef = useRef<HTMLDivElement | null>(null);
 
   const [filters, setFilters] = useState<Record<string, any>>({});
-  const [fullTextSearch, setFullTextSearch] = useState("")
+  const [fullTextSearch, setFullTextSearch] = useState("");
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-
-  const [localData, setLocalData] = useState<T[]>(data.slice(0, PAGE_SIZE));
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const loaderRef = useRef<HTMLTableRowElement | null>(null);
-
-  useEffect(() => {
-    if (!loaderRef.current || !scrollContainerRef.current || !hasMore) return;
-
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && hasMore) {
-        setTimeout(() => {
-          const clonedItems = data.slice(0, PAGE_SIZE).map((item, i) => ({
-            ...item,
-            guid: `${item.guid || i}-${Date.now()}-${Math.random()}`,
-          }));
-
-          setLocalData((prev) => [...prev, ...clonedItems]);
-          setPage((prev) => prev + 1);
-
-          if (page >= 10) setHasMore(false);
-        }, 500);
-      }
-    });
-
-    observer.observe(loaderRef.current);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [page, hasMore, data]);
-
-  useEffect(() => {
-    setLocalData(data.slice(0, PAGE_SIZE));
-    setPage(1);
-    setHasMore(data.length > PAGE_SIZE);
-  }, [data.length]);
 
   const {
     selectedColumns,
     columnSizing,
     setSelectedColumns,
-    handleColumnSizingChange
-  } = useColumnStorage(tableConfigKey, columns.map((c) => typeof c === "string" ? c : c.field));
+    handleColumnSizingChange,
+  } = useColumnStorage(
+    tableConfigKey,
+    columns.map((c) => (typeof c === "string" ? c : c.field))
+  );
 
   const filteredColumns = selectedColumns
     .map((field) =>
@@ -109,15 +83,16 @@ const Table = <T, _>({
   });
 
   const filteredData = useMemo(() => {
-    if (!Array.isArray(localData)) return [];
+    if (!Array.isArray(data)) return [];
 
-    return localData?.filter((item) => {
-      if (!fullTextSearch) return true;
+    return data
+      ?.filter((item) => {
+        if (!fullTextSearch) return true;
 
-      return Object.values(item).some((val) =>
-        val?.toString().toLowerCase().includes(fullTextSearch.toLowerCase())
-      );
-    })
+        return Object.values(item).some((val) =>
+          val?.toString().toLowerCase().includes(fullTextSearch.toLowerCase())
+        );
+      })
       ?.filter((item) => {
         return Object.entries(filters).every(([key, value]) => {
           if (value === undefined || value === "") return true;
@@ -132,7 +107,9 @@ const Table = <T, _>({
             if (!itemDate.isValid) return false;
 
             if (from) {
-              const fromDate = DateTime.fromFormat(from, "yyyy-MM-dd").startOf("day");
+              const fromDate = DateTime.fromFormat(from, "yyyy-MM-dd").startOf(
+                "day"
+              );
               if (!fromDate.isValid || itemDate < fromDate) return false;
             }
 
@@ -149,7 +126,10 @@ const Table = <T, _>({
           }
 
           if (typeof value === "string") {
-            return itemValue?.toString().toLowerCase().includes(value.toLowerCase());
+            return itemValue
+              ?.toString()
+              .toLowerCase()
+              .includes(value.toLowerCase());
           }
 
           if (typeof value === "number") {
@@ -159,7 +139,7 @@ const Table = <T, _>({
           return true;
         });
       });
-  }, [localData, filters, fullTextSearch]);
+  }, [data, filters, fullTextSearch]);
 
   const { getRowModel, getHeaderGroups } = useReactTable({
     columns: translatedColumns,
@@ -170,29 +150,42 @@ const Table = <T, _>({
       setOrdering && setOrdering(o());
     },
     manualSorting: true,
-    columnResizeMode: 'onChange',
+    columnResizeMode: "onChange",
     enableColumnResizing: true,
     state: {
       sorting: ordering?.map((o) => ({ ...o, desc: o.desc || false })),
       columnSizing: columnSizing,
     },
-    columnResizeDirection: 'rtl',
+    columnResizeDirection: "rtl",
     onColumnSizingChange: handleColumnSizingChange,
   });
 
-
   const applyFilters = (dataFilter: Record<string, any>) => {
-    setFilters(dataFilter)
-  }
+    setFilters(dataFilter);
+  };
 
   const cleatFilters = () => {
-    setFilters({})
-    setFullTextSearch("")
-  }
+    setFilters({});
+    setFullTextSearch("");
+  };
 
   const applyFullTextSeacrh = (textSearch: string) => {
-    setFullTextSearch(textSearch)
-  }
+    setFullTextSearch(textSearch);
+  };
+
+  const fetchMore = React.useCallback(
+    (containerRefElement?: HTMLDivElement | null) => {
+      if (containerRefElement && hasMore && !loading) {
+        const { scrollHeight, scrollTop, clientHeight } = containerRefElement;
+        const bottomReached = scrollHeight - scrollTop - clientHeight < 500;
+
+        if (bottomReached) {
+          fetchNextPage();
+        }
+      }
+    },
+    [fetchNextPage, hasMore, loading, data.length]
+  );
 
   return (
     <>
@@ -212,7 +205,16 @@ const Table = <T, _>({
           setSelectedRows([]);
         }}
       />
-      <div className="overflow-auto rounded-md" ref={scrollContainerRef}>
+      <div
+        className="overflow-auto rounded-md"
+        onScroll={(e) => fetchMore(e.currentTarget)}
+        ref={tableContainerRef}
+        style={{
+          overflow: "auto",
+          position: "relative",
+          height: "72vh",
+        }}
+      >
         <table className="table-auto w-full text-sm text-left text-gray-500 dark:text-gray-400 ">
           <TableHeader
             getHeaderGroups={getHeaderGroups}
@@ -237,7 +239,6 @@ const Table = <T, _>({
             highlightedRow={highlightedRow}
             translatedColumns={translatedColumns}
             deleteRecord={deleteRecord}
-            loaderRef={loaderRef}
             hasMore={hasMore}
           />
         </table>

@@ -52,8 +52,21 @@ const ModalContainer = () => {
                   {t("modal.close")}
                 </Button>
                 {options.additionalButtons?.map(
-                  (btn: { label: string; onClick: () => void; color?: string; icon?: IconType }, btnIndex: number) => (
-                    <Button key={btnIndex} color={btn.color || "gray"} onClick={btn.onClick} className="flex items-center gap-2">
+                  (
+                    btn: {
+                      label: string;
+                      onClick: () => void;
+                      color?: string;
+                      icon?: IconType;
+                    },
+                    btnIndex: number
+                  ) => (
+                    <Button
+                      key={btnIndex}
+                      color={btn.color || "gray"}
+                      onClick={btn.onClick}
+                      className="flex items-center gap-2"
+                    >
                       <div className="flex items-center gap-2">
                         {btn.icon && <btn.icon size={15} />}
                         {btn.label}
@@ -61,8 +74,8 @@ const ModalContainer = () => {
                     </Button>
                   )
                 )}
-                {!options.hideSuccessButton
-                  && <Button
+                {!options.hideSuccessButton && (
+                  <Button
                     onClick={() => {
                       if (formRef.current) {
                         formRef.current.dispatchEvent(
@@ -77,8 +90,8 @@ const ModalContainer = () => {
                     }}
                   >
                     {t("modal.save")}
-                  </Button>}
-
+                  </Button>
+                )}
               </Modal.Footer>
             </Modal>
           </Draggable>

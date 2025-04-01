@@ -73,7 +73,10 @@ const Toolbar = () => {
     </div>
   );
 
-  return createPortal(toolbarElement, document.getElementById("editor-toolbar") || document.body);
+  return createPortal(
+    toolbarElement,
+    document.getElementById("editor-toolbar") || document.body
+  );
 };
 
 export default Toolbar;

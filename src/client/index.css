@@ -47,10 +47,9 @@ div:has(> span > span.errorHighlight) {
   background-color: lightcoral; /* nebo jakákoliv barva, kterou chcete */
 }
 
-
 ::-webkit-scrollbar {
   width: 5px;
-  height: 5px; 
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: #f1f1f1;

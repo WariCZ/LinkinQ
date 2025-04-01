@@ -19,8 +19,13 @@ export const Examples = () => {
             size: "7xl",
             modalSingle: true,
             additionalButtons: [
-              { label: t("labels.apply"), onClick: () => console.log("Click"), color: "cyan", icon: FaDownload, }
-            ]
+              {
+                label: t("labels.apply"),
+                onClick: () => console.log("Click"),
+                color: "cyan",
+                icon: FaDownload,
+              },
+            ],
           })
         }
       >

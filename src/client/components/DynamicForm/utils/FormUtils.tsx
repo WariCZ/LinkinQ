@@ -45,7 +45,12 @@ export const translateFormField = ({
       };
     }
   } else {
-    if (field.type == "Section" || field.type == "Tabs" || field.type == "Сomponent" || field.type == "СollapsibleSection") {
+    if (
+      field.type == "Section" ||
+      field.type == "Tabs" ||
+      field.type == "Сomponent" ||
+      field.type == "СollapsibleSection"
+    ) {
       return field;
     }
     const s = schema?.fields[field.field];
@@ -113,7 +118,9 @@ export const renderItem = ({
   }
 
   if (formField.type === "Сomponent" && formField.component) {
-    const Component = typeof formField.component === "string" && globalComponents[formField.component]
+    const Component =
+      typeof formField.component === "string" &&
+      globalComponents[formField.component];
 
     if (!Component) {
       return null;
@@ -124,14 +131,23 @@ export const renderItem = ({
 
   if (formField.type === "СollapsibleSection") {
     return (
-      <CollapsibleSection key={key} title={formField.label} icon={formField.icon}>
-        {formField.children?.map((childField, index) => (
+      <CollapsibleSection
+        key={key}
+        title={formField.label}
+        icon={formField.icon}
+      >
+        {formField.children?.map((childField, index) =>
           childField.type === "Section" ? (
-            <FormSection key={index} section={childField as SectionType} control={control} schema={schema} />
+            <FormSection
+              key={index}
+              section={childField as SectionType}
+              control={control}
+              schema={schema}
+            />
           ) : (
             <FormField key={index} formField={childField} control={control} />
           )
-        ))}
+        )}
       </CollapsibleSection>
     );
   }

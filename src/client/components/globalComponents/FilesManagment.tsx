@@ -1,11 +1,7 @@
 import { FormField } from "@/client/components/DynamicForm/fields/FormField";
 
 function FilesManagment(props) {
-    console.log("props", props)
-    return (
-        <div className="flex flex-col gap-2 p-4">
-            FilesManagment
-        </div>
-    );
+  console.log("props", props);
+  return <div className="flex flex-col gap-2 p-4">FilesManagment</div>;
 }
-export default FilesManagment
+export default FilesManagment;

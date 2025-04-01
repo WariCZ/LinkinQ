@@ -103,7 +103,7 @@ const DynamicForm = ({
   const form = useForm({
     disabled: disabled,
     defaultValues: {},
-  })
+  });
 
   const { control, handleSubmit, reset, setError, watch } = form;
   const watchAllFields = onChange ? watch() : null;
