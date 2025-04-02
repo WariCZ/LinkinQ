@@ -7,9 +7,8 @@ import { FaFilterCircleXmark } from "react-icons/fa6";
 import { Button, TextInput } from "flowbite-react";
 import { useFilterFields } from "../hooks/useFilterFields";
 import { MdCancel } from "react-icons/md";
-import { IoCreateOutline } from "react-icons/io5";
 import { Dispatch, SetStateAction } from "react";
-import BatchEdit from "./BatchEdit";
+import { useEditableTextFields } from "../hooks/useEditableTextFields";
 
 interface TableToolbarProps {
   filters: Record<string, any>;
@@ -21,6 +20,7 @@ interface TableToolbarProps {
   selectedRows?: string[];
   setSelectedRows?: Dispatch<SetStateAction<string[]>>;
   deleteSelected?: () => void;
+  multiUpdate?: (guids: string[], data: Partial<any>) => Promise<void>;
 }
 
 export const TableToolbar = ({
@@ -31,12 +31,13 @@ export const TableToolbar = ({
   applyFullTextSeacrh,
   fullTextSearch,
   selectedRows,
-  setSelectedRows,
   deleteSelected,
+  multiUpdate,
 }: TableToolbarProps) => {
   const { t } = useTranslation();
   const { openModal, closeModal } = useModalStore();
   const fields = useFilterFields(columns);
+  const fieldsBatchEditor = useEditableTextFields(columns);
 
   const handleOpenFilter = () => {
     openModal(
@@ -87,6 +88,53 @@ export const TableToolbar = ({
     );
   };
 
+  const handleOpenBatchEditor = () => {
+    openModal(
+      <DynamicForm
+        formFields={[
+          {
+            type: "Section",
+            fields: fieldsBatchEditor,
+            className: "flex flex-col p-4",
+          },
+        ]}
+        onSubmit={({ data }) => {
+          const filteredData = Object.fromEntries(
+            Object.entries(data).filter(
+              ([_, value]) =>
+                value !== "" && value !== null && value !== undefined
+            )
+          );
+          if (Object.keys(filteredData).length > 0) {
+            multiUpdate(selectedRows, filteredData);
+          }
+          closeModal();
+        }}
+      />,
+      {
+        title: "Hromadne zmeny",
+        size: "md",
+        modalSingle: true,
+        hideSuccessButton: true,
+        additionalButtons: [
+          {
+            label: t("labels.apply"),
+            onClick: () => {
+              const form = document.querySelector("form");
+              if (form) {
+                form.dispatchEvent(
+                  new Event("submit", { cancelable: true, bubbles: true })
+                );
+              }
+            },
+            color: hasActiveFilters ? "red" : "cyan",
+            icon: FaFilter,
+          },
+        ],
+      }
+    );
+  };
+
   const hasActiveFilters =
     fullTextSearch.length > 0 ||
     Object.values(filters).some(
@@ -113,24 +161,7 @@ export const TableToolbar = ({
               <span>Odstranit vybrané</span>
             </div>
           </Button>
-          <Button
-            color="red"
-            onClick={() => {
-              openModal(
-                <BatchEdit
-                  selectedRows={selectedRows}
-                  onConfirm={(fields) => {
-                    console.log(fields);
-                  }}
-                />,
-                {
-                  title: "Hromadné změny",
-                  size: "xl",
-                  modalSingle: true,
-                }
-              );
-            }}
-          >
+          <Button color="red" onClick={handleOpenBatchEditor}>
             <div className="flex gap-2 items-center">
               <FaTools className="text-sm" />
               <span>Hromadné změny...</span>

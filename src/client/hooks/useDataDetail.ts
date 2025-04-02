@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getSingleRecord } from "../services/httpBase";
+import { getSingleRecord, httpRequest } from "../services/httpBase";
 import { useDataCommon } from "./useDataCommon";
 import useStore from "../store";
 
@@ -58,6 +58,23 @@ function useDataDetail<T, U>(
 
   const saveRecord = (d: U) => setRecord(param.entity, d);
 
+  const multiUpdate = async (guids: string[], data: Partial<U>) => {
+    try {
+      await httpRequest({
+        method: "PUT",
+        entity: param.entity,
+        data: {
+          data,
+          where: { guid: guids },
+        },
+      });
+      setToast({ type: "info", msg: "Records updated successfully" });
+      refresh();
+    } catch (err: any) {
+      setToast({ type: "error", msg: err.response?.statusText || err.message });
+    }
+  };
+
   return [
     data,
     setData,
@@ -68,6 +85,7 @@ function useDataDetail<T, U>(
       refresh,
       setRecord: saveRecord,
       deleteRecord,
+      multiUpdate,
     },
   ];
 }

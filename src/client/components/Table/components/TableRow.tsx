@@ -20,6 +20,7 @@ interface TableRowProps<T> {
   setSelectedRows: Dispatch<SetStateAction<string[]>>;
   highlightedRow?: string[];
   deleteRecord?: (guid: string) => Promise<void>;
+  selectable?: boolean;
 }
 
 export const TableRow = <T,>({
@@ -30,6 +31,7 @@ export const TableRow = <T,>({
   setSelectedRows,
   highlightedRow = [],
   deleteRecord,
+  selectable,
 }: TableRowProps<T>) => {
   const guid = row.original.guid;
   const isSelected = selectedRows.includes(guid);
@@ -41,22 +43,26 @@ export const TableRow = <T,>({
       key={row.id + "-" + i}
       className={`hover:bg-gray-100 dark:hover:bg-gray-600 ${isHighlighted ? "highlight" : ""}`}
     >
-      <td className="px-4">
-        <Checkbox
-          checked={isSelected}
-          onClick={(e) => e.stopPropagation()}
-          onChange={(e) => {
-            if (e.target.checked) {
-              setSelectedRows((prev: string[]) => [...prev, guid]);
-            } else {
-              setSelectedRows((prev: string[]) =>
-                prev.filter((id) => id !== guid)
-              );
-            }
-          }}
-          className="block cursor-pointer"
-        />
-      </td>
+      {selectable ? (
+        <td className="px-4">
+          <Checkbox
+            checked={isSelected}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setSelectedRows((prev: string[]) => [...prev, guid]);
+              } else {
+                setSelectedRows((prev: string[]) =>
+                  prev.filter((id) => id !== guid)
+                );
+              }
+            }}
+            className="block cursor-pointer"
+          />
+        </td>
+      ) : (
+        <></>
+      )}
 
       {row.getVisibleCells().map((cell: any) => (
         <td

@@ -9,6 +9,9 @@ import _ from "lodash";
 import { useTranslation } from "react-i18next";
 import { TaskDetail } from "./components/TaskDetail";
 import Table from "@/client/components/Table";
+import useDataDetail from "@/client/hooks/useDataDetail";
+
+const entity = "tasks";
 
 export const Tasks = () => {
   const { t } = useTranslation();
@@ -16,9 +19,9 @@ export const Tasks = () => {
   const { openModal } = useModalStore();
   const filters = location?.state?.filter;
   const header = location?.state?.header;
+  const [guidDetail, setGuidDetail] = useState(null);
   const schema = useStore((state) => state.schema);
 
-  const entity = "tasks";
   const columns = [
     ...[
       /*"guid",*/ "caption",
@@ -46,6 +49,36 @@ export const Tasks = () => {
       : []),
     ...["status"],
   ];
+
+  const fields = Object.keys(schema[entity].fields).filter((f) => {
+    return (
+      !schema[entity].fields[f].system || f === "caption" || f === "description"
+    );
+  });
+
+  const [
+    dataDetail,
+    setDataDataDetail,
+    { setRecord, refreshDetail, multiUpdate },
+  ] = useDataDetail(
+    {
+      entity: entity,
+      guid: guidDetail,
+      fields: [
+        ...fields,
+        "workflowInstance.name",
+        "workflowInstance.source",
+        "workflowInstance.items",
+        "status",
+        "createtime",
+        "createdby",
+        "updatetime",
+        "updatedby",
+        "attachments.caption",
+      ],
+    },
+    {} as any
+  );
 
   const [
     data,
@@ -77,17 +110,42 @@ export const Tasks = () => {
     }
   }, [filters]);
 
+  useEffect(() => {
+    if (guidDetail && dataDetail?.guid) {
+      openModal(
+        <TaskDetail
+          data={dataDetail}
+          entity={entity}
+          refresh={refreshDetail}
+          setRecord={setRecord}
+        />,
+        {
+          title: t("Detail task"),
+          size: "xl",
+          modalSingle: true,
+        }
+      );
+    }
+  }, [dataDetail, guidDetail]);
+
   return (
     <div className="mx-3">
       <div className="flex items-center justify-between my-3">
         <div className="flex space-x-2">
           <Button
             onClick={() =>
-              openModal(<TaskDetail entity={entity} />, {
-                title: t("Create task"),
-                size: "xl",
-                modalSingle: true,
-              })
+              openModal(
+                <TaskDetail
+                  entity={entity}
+                  refresh={refreshDetail}
+                  setRecord={setRecord}
+                />,
+                {
+                  title: t("Create task"),
+                  size: "xl",
+                  modalSingle: true,
+                }
+              )
             }
           >
             <FaPlus className="ml-0 m-1 h-3 w-3" />
@@ -97,16 +155,13 @@ export const Tasks = () => {
         </div>
       </div>
       <Table
+        selectable
         tableConfigKey="tasks"
         entity={entity}
         data={data}
-        rowClick={(data) =>
-          openModal(<TaskDetail data={data} entity={entity} />, {
-            title: t("Detail task"),
-            size: "xl",
-            modalSingle: true,
-          })
-        }
+        rowClick={(data: any) => {
+          setGuidDetail(data?.guid as string);
+        }}
         columns={columns}
         loading={loading}
         highlightedRow={highlightedRow}
@@ -115,6 +170,7 @@ export const Tasks = () => {
         setOrdering={setOrdering}
         fetchNextPage={fetchNextPage}
         hasMore={hasMore}
+        multiUpdate={multiUpdate}
       />
     </div>
   );

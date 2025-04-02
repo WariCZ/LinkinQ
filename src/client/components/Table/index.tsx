@@ -22,6 +22,7 @@ import { TableBody } from "./components/TableBody";
 
 interface TableProps<T> {
   tableConfigKey: string;
+  selectable?: boolean;
   entity?: string;
   loading?: boolean;
   columns: TableFieldType[];
@@ -33,6 +34,7 @@ interface TableProps<T> {
   deleteRecord?: (guid: string) => Promise<void>;
   fetchNextPage: () => Promise<void>;
   hasMore?: boolean;
+  multiUpdate?: (guids: string[], data: Partial<any>) => Promise<void>;
 }
 
 const Table = <T, _>({
@@ -48,6 +50,8 @@ const Table = <T, _>({
   deleteRecord,
   fetchNextPage,
   hasMore,
+  multiUpdate,
+  selectable,
 }: TableProps<T>) => {
   const schema = useStore((state) => state.schema);
   const columnSelectorRef = useRef<any>(null);
@@ -204,6 +208,7 @@ const Table = <T, _>({
           }
           setSelectedRows([]);
         }}
+        multiUpdate={multiUpdate}
       />
       <div
         className="overflow-auto rounded-md"
@@ -227,6 +232,7 @@ const Table = <T, _>({
             columns={columns}
             schema={schema}
             entity={entity}
+            selectable={selectable}
             setSelectedColumns={setSelectedColumns}
           />
           <TableBody
@@ -240,6 +246,7 @@ const Table = <T, _>({
             translatedColumns={translatedColumns}
             deleteRecord={deleteRecord}
             hasMore={hasMore}
+            selectable={selectable}
           />
         </table>
       </div>

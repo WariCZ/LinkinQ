@@ -10,9 +10,10 @@ interface TableBodyProps<T> {
   selectedRows: string[];
   setSelectedRows: Dispatch<SetStateAction<string[]>>;
   highlightedRow?: string[];
-  translatedColumns: any[];
-  deleteRecord: (guid: string) => Promise<void>;
-  hasMore: boolean;
+  translatedColumns?: any[];
+  deleteRecord?: (guid: string) => Promise<void>;
+  hasMore?: boolean;
+  selectable?: boolean,
 }
 
 export const TableBody = <T,>({
@@ -26,6 +27,7 @@ export const TableBody = <T,>({
   translatedColumns,
   deleteRecord,
   hasMore,
+  selectable
 }: TableBodyProps<T>) => {
   if (rows.length === 0 && !loading) {
     return (
@@ -35,7 +37,7 @@ export const TableBody = <T,>({
             colSpan={translatedColumns.length + 2}
             className="text-center py-6 text-gray-400 italic"
           >
-            No data found
+            No data to display
           </td>
         </tr>
       </tbody>
@@ -66,17 +68,20 @@ export const TableBody = <T,>({
               setSelectedRows={setSelectedRows}
               highlightedRow={highlightedRow}
               deleteRecord={deleteRecord}
+              selectable={selectable}
             />
           ))}
 
-      <tr>
-        <td
-          colSpan={translatedColumns.length + 2}
-          className="text-center py-4 text-gray-400 italic"
-        >
-          {hasMore ? "Loading more..." : "No more data"}
-        </td>
-      </tr>
+      {translatedColumns.length > 50 && (
+        <tr>
+          <td
+            colSpan={translatedColumns.length + 2}
+            className="text-center py-4 text-gray-400 italic"
+          >
+            {hasMore ? "Loading more..." : "No more data"}
+          </td>
+        </tr>
+      )}
     </tbody>
   );
 };

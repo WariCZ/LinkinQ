@@ -10,46 +10,48 @@ import { DateTime } from "luxon";
 interface TaskDetailProps extends ModalPropsType {
   data?: any;
   entity: "tasks";
+  refresh: (params?: { fields?: string[] }) => Promise<void>;
+  setRecord: (d: any) => Promise<void>;
 }
 
 export const TaskDetail = (props: TaskDetailProps) => {
-  const entity = props.entity;
-  const schema = useStore((state) => state.schema);
-  const fields = Object.keys(schema[entity].fields).filter((f) => {
-    return (
-      !schema[entity].fields[f].system || f === "caption" || f === "description"
-    );
-  });
+  const { data, entity, refresh, setRecord } = props;
+  // const schema = useStore((state) => state.schema);
+  // const fields = Object.keys(schema[entity].fields).filter((f) => {
+  //   return (
+  //     !schema[entity].fields[f].system || f === "caption" || f === "description"
+  //   );
+  // });
 
-  const [data, setData, { setRecord, loading, refresh }] = useDataDetail(
-    {
-      entity: entity,
-      guid: props?.data?.guid,
-      fields: [
-        ...fields,
-        "workflowInstance.name",
-        "workflowInstance.source",
-        "workflowInstance.items",
-        "status",
-        "createtime",
-        "createdby",
-        "updatetime",
-        "updatedby",
-        "attachments.caption",
-      ],
-    },
-    {} as any
-  );
+  // const [data, setData, { setRecord, loading, refresh }] = useDataDetail(
+  //   {
+  //     entity: entity,
+  //     guid: props?.data?.guid,
+  //     fields: [
+  //       ...fields,
+  //       "workflowInstance.name",
+  //       "workflowInstance.source",
+  //       "workflowInstance.items",
+  //       "status",
+  //       "createtime",
+  //       "createdby",
+  //       "updatetime",
+  //       "updatedby",
+  //       "attachments.caption",
+  //     ],
+  //   },
+  //   {} as any
+  // );
 
   return (
     <>
       <div className="flex items-center justify-between px-4 bg-gray-100">
-        {data.guid && (
+        {data?.guid && (
           <div className="flex items-center gap-1">
             <span>ID: </span> <TextInput value={data.guid} readOnly disabled />
           </div>
         )}
-        {data.workflowInstance && (
+        {data?.workflowInstance && (
           <ButtonExecuteBpmn
             status={data.status}
             wf={data.workflowInstance}
@@ -65,11 +67,11 @@ export const TaskDetail = (props: TaskDetailProps) => {
         {...props}
         data={{
           ...data,
-          createtime: data.createtime
-            ? DateTime.fromISO(data.createtime).toFormat("dd.MM.yyyy HH:mm:ss")
+          createtime: data?.createtime
+            ? DateTime.fromISO(data?.createtime).toFormat("dd.MM.yyyy HH:mm:ss")
             : "",
-          updatetime: data.updatetime
-            ? DateTime.fromISO(data.updatetime).toFormat("dd.MM.yyyy HH:mm:ss")
+          updatetime: data?.updatetime
+            ? DateTime.fromISO(data?.updatetime).toFormat("dd.MM.yyyy HH:mm:ss")
             : "",
         }}
         entity={entity}

@@ -20,6 +20,7 @@ interface TableHeaderProps<T> {
   columns: TableFieldType[];
   schema: Record<string, any>;
   entity?: string;
+  selectable?: boolean;
 }
 
 export const TableHeader = <T,>({
@@ -34,13 +35,14 @@ export const TableHeader = <T,>({
   columns,
   schema,
   entity,
+  selectable,
 }: TableHeaderProps<T>) => {
   const { openModal, closeModal } = useModalStore();
   return (
     <thead className="bg-[#2c3a54] text-xs text-gray-50 uppercase dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
       {getHeaderGroups().map((headerGroup) => (
         <tr key={headerGroup.id}>
-          {getRowModel().rows.length ? (
+          {getRowModel().rows.length && selectable ? (
             <th className="px-4">
               <Checkbox
                 checked={
