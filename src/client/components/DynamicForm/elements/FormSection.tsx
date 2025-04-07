@@ -8,11 +8,13 @@ export const FormSection = ({
   control,
   gap,
   schema,
+  readOnly,
 }: {
   section: SectionType;
   control: Control<FieldValues, any>;
   gap?: number;
   schema?: EntityType;
+  readOnly?: boolean;
 }) => {
   return (
     <div
@@ -25,7 +27,13 @@ export const FormSection = ({
           field: field,
         });
 
-        return renderItem({ formField, key: index, control: control, schema });
+        return renderItem({
+          formField,
+          key: index,
+          control: control,
+          schema,
+          readOnly,
+        });
       })}
     </div>
   );

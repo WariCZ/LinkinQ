@@ -4,9 +4,10 @@ import { FaUser } from "react-icons/fa";
 
 interface HeaderProps {
   control: Control<FieldValues, any>;
+  readOnly?: boolean;
 }
 
-function Header({ control }: HeaderProps) {
+function Header({ control, readOnly }: HeaderProps) {
   return (
     <div className="bg-gray-100 py-6 px-4 rounded-lg shadow">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[2fr_1fr] gap-4 mb-4 items-center">
@@ -20,6 +21,7 @@ function Header({ control }: HeaderProps) {
             icon: FaUser,
           }}
           control={control}
+          readOnly={readOnly}
         />
         <div className="flex items-center justify-end">
           <FormField
@@ -30,6 +32,7 @@ function Header({ control }: HeaderProps) {
               className: "w-full max-w-sm flex items-center justify-end gap-2",
             }}
             control={control}
+            readOnly={readOnly}
           />
         </div>
       </div>
@@ -43,6 +46,7 @@ function Header({ control }: HeaderProps) {
             entity: "users",
           }}
           control={control}
+          readOnly={readOnly}
         />
         <FormField
           formField={{
@@ -52,6 +56,7 @@ function Header({ control }: HeaderProps) {
             className: "w-full",
           }}
           control={control}
+          readOnly={readOnly}
         />
         <FormField
           formField={{
@@ -69,6 +74,7 @@ function Header({ control }: HeaderProps) {
             ],
           }}
           control={control}
+          readOnly={readOnly}
         />
       </div>
     </div>

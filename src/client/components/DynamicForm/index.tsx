@@ -26,6 +26,7 @@ interface DynamicFormProps {
   columns?: number;
   gap?: number;
   children?: React.ReactElement;
+  readOnly?: boolean
 }
 
 const getFieldsForForm = (
@@ -97,6 +98,7 @@ const DynamicForm = ({
   columns,
   gap,
   children,
+  readOnly
 }: DynamicFormProps) => {
   const schema: any = useStore((state) => state.schema);
 
@@ -105,6 +107,7 @@ const DynamicForm = ({
     defaultValues: {},
   });
 
+  console.log("readOnly test", readOnly)
   const { control, handleSubmit, reset, setError, watch } = form;
   const watchAllFields = onChange ? watch() : null;
 
@@ -187,7 +190,7 @@ const DynamicForm = ({
   };
 
   return (
-    <FormProvider {...form}>
+    <FormProvider {...form} >
       <form
         ref={formRef}
         onSubmit={handleSubmit(formSubmit)}
@@ -215,6 +218,7 @@ const DynamicForm = ({
             control: c,
             gap,
             schema: schema[entity],
+            readOnly
           });
         })}
         {children}

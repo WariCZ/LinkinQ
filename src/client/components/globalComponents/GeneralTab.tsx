@@ -13,6 +13,7 @@ function GeneralTab(props) {
           field: "description",
           className: "mb-4",
         }}
+        readOnly={props.readOnly}
         control={props.control}
       />
       <CollapsibleSection
@@ -30,6 +31,7 @@ function GeneralTab(props) {
       </CollapsibleSection>
 
       <FormField
+        readOnly={props.readOnly}
         formField={{
           type: "СollapsibleSection",
           field: "parentSR",

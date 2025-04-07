@@ -1,9 +1,6 @@
 import ButtonExecuteBpmn from "@/client/components/ButtonExecuteBpmn";
 import Form from "@/client/components/DynamicForm";
-import EffortField from "@/client/components/DynamicForm/fields/EffortField";
 import { ModalPropsType } from "@/client/types/common/ModalPropsType";
-import useDataDetail from "@/client/hooks/useDataDetail";
-import useStore from "@/client/store";
 import { TextInput } from "flowbite-react";
 import { DateTime } from "luxon";
 
@@ -16,32 +13,6 @@ interface TaskDetailProps extends ModalPropsType {
 
 export const TaskDetail = (props: TaskDetailProps) => {
   const { data, entity, refresh, setRecord } = props;
-  // const schema = useStore((state) => state.schema);
-  // const fields = Object.keys(schema[entity].fields).filter((f) => {
-  //   return (
-  //     !schema[entity].fields[f].system || f === "caption" || f === "description"
-  //   );
-  // });
-
-  // const [data, setData, { setRecord, loading, refresh }] = useDataDetail(
-  //   {
-  //     entity: entity,
-  //     guid: props?.data?.guid,
-  //     fields: [
-  //       ...fields,
-  //       "workflowInstance.name",
-  //       "workflowInstance.source",
-  //       "workflowInstance.items",
-  //       "status",
-  //       "createtime",
-  //       "createdby",
-  //       "updatetime",
-  //       "updatedby",
-  //       "attachments.caption",
-  //     ],
-  //   },
-  //   {} as any
-  // );
 
   return (
     <>
