@@ -134,14 +134,26 @@ export class EntityRoutes extends Entity {
                 ? req.query.__orderby.split(",")
                 : undefined;
 
+            const limit = req.query.__limit
+              ? parseInt(req.query.__limit as string)
+              : undefined;
+
+            const offset = req.query.__offset
+              ? parseInt(req.query.__offset as string)
+              : undefined;
+
             const ret = await sql.select({
               entity: req.params.entity,
               fields,
               orderBy,
+              limit,
+              offset,
               where: _.omit(req.query as any, [
                 "entity",
                 "__fields",
                 "__orderby",
+                "__limit",
+                "__offset",
               ]),
             });
 

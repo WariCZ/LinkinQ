@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import useStore from "../../../store";
 import { Button, TextInput } from "flowbite-react";
-import Table from "../../../components/Table";
+import Table from "@/client/components/Table";
 import useDataTable from "../../../hooks/useDataTable";
 import { useModalStore } from "../../../components/Modal/modalStore";
 import { FaPlus } from "react-icons/fa";
@@ -111,6 +111,7 @@ export const QueryBuilder = () => {
       </div>
       <div className="p-2 pt-0">
         <Table
+          tableConfigKey="queryBuilder"
           entity={entity}
           data={data}
           rowClick={(data) =>

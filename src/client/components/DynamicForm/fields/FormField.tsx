@@ -1,10 +1,16 @@
 import { Control, Controller, FieldValues } from "react-hook-form";
-import { FormFieldType } from "../../../types/DynamicForm/types";
+import { FormFieldType, SectionType } from "../../../types/DynamicForm/types";
 import { Checkbox, Label, TextInput } from "flowbite-react";
 import DateTimePicker from "./DateTimePicker";
 import Select from "./Select";
 import FileUpload from "./FileUpload";
 import SlateEditor from "../../SlateEditor";
+import TaskProgressInput from "./ProgressInput";
+import TextInputWithIcon from "./TextInputWithIcon";
+import { IconType } from "react-icons";
+import { CollapsibleSection } from "../../CollapsibleSection";
+import { FormSection } from "../elements/FormSection";
+import DateRangePicker from "../../globalComponents/DateRangePicker";
 
 export const FormField = ({
   formField,
@@ -18,27 +24,6 @@ export const FormField = ({
     formField.type = "text";
   }
 
-  if (formField.customComponent) {
-    const CustomComponent = formField.customComponent;
-    return (
-      <div key={formField.field} className="my-2">
-        <Label htmlFor={formField.field}>{formField.label}</Label>
-        <Controller
-          name={formField.field}
-          control={control}
-          rules={{ required: formField.required, validate: formField.validate }}
-          render={({ field }) => (
-            <CustomComponent
-              {...field}
-              readOnly={formField.readOnly}
-              unit={formField.unit}
-            />
-          )}
-        />
-      </div>
-    );
-  }
-
   switch (formField.type) {
     case "text":
     case "number":
@@ -46,8 +31,9 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={formField.colSpan && `col-span-${formField.colSpan}`}
+          className={`my-2 ${formField.className || ""} ${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
         >
+          <></>
           <Label htmlFor={formField.field}>
             {formField.label}
             {formField.required ? (
@@ -59,11 +45,11 @@ export const FormField = ({
             control={control}
             defaultValue={formField.default || ""}
             rules={{
-              required: formField.required,
+              required: formField.required ? "Required" : false,
               validate: formField.validate,
             }}
             render={({ field, fieldState }) => (
-              <>
+              <div className="relative w-full">
                 <TextInput
                   {...field}
                   {...formField}
@@ -71,27 +57,31 @@ export const FormField = ({
                   disabled={formField.disabled}
                   readOnly={formField.readOnly}
                   required={formField.required}
+                  className="w-full"
                 />
                 {fieldState.error && (
-                  <p className="text-red-600 text-sm mt-1">
+                  <p className="text-red-600 text-sm mt-1 absolute right-0">
                     {fieldState.error.message}
                   </p>
                 )}
-              </>
+              </div>
             )}
           />
         </div>
       );
     case "checkbox":
       return (
-        <div key={formField.field}>
+        <div key={formField.field} className={formField?.className}>
           <Label htmlFor={formField.field}>{formField.label}</Label>
+          {formField.required ? (
+            <span className="text-red-600 px-1">*</span>
+          ) : null}
           <Controller
             name={formField.field}
             control={control}
             defaultValue={false}
             rules={{
-              required: formField.required,
+              required: formField.required ? "Required" : false,
               validate: formField.validate,
             }}
             render={({ field, fieldState }) => (
@@ -115,7 +105,10 @@ export const FormField = ({
       );
     case "select":
       return (
-        <div key={formField.field} className="test select">
+        <div
+          key={formField.field}
+          className={`test select ${formField.className}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           {formField.required ? (
             <span className="text-red-600 px-1">*</span>
@@ -125,28 +118,42 @@ export const FormField = ({
             control={control}
             // defaultValue={formField.default || 1}
             rules={{
-              required: formField.required,
+              required: formField.required ? "Required" : false,
               validate: formField.validate,
             }}
-            render={({ field }) => <Select {...field} {...formField} />}
+            render={({ field, fieldState }) => (
+              <>
+                <Select {...field} {...formField} />
+                {fieldState.error && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </>
+            )}
           />
         </div>
       );
     case "datetime":
       return (
-        <div key={formField.field}>
+        <div key={formField.field} className={formField?.className}>
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
             name={formField.field}
             control={control}
             defaultValue={false}
             rules={{
-              required: formField.required,
+              required: formField.required ? "Required" : false,
               validate: formField.validate,
             }}
-            render={({ fieldState }) => (
+            render={({ field, fieldState }) => (
               <>
-                <DateTimePicker />
+                <DateTimePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  onBlur={field.onBlur}
+                  name={field.name}
+                />
                 {fieldState.error && (
                   <p className="text-red-600 text-sm mt-1">
                     {fieldState.error.message}
@@ -159,13 +166,13 @@ export const FormField = ({
       );
     case "attachment":
       return (
-        <div key={formField.field}>
+        <div key={formField.field} className={formField?.className}>
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
             name={formField.field}
             control={control}
             rules={{
-              required: formField.required,
+              required: formField.required ? "Required" : false,
               validate: formField.validate,
             }}
             render={({ field }) => (
@@ -182,17 +189,35 @@ export const FormField = ({
       );
     case "richtext":
       return (
-        <div key={formField.field} className="col-span-full my-2">
+        <div
+          key={formField.field}
+          className={`flex flex-col my-2 gap-2 ${formField.className}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
+          {formField.required ? (
+            <span className="text-red-600 px-1">*</span>
+          ) : null}
           <Controller
             name={formField.field}
             control={control}
-            render={({ field }) => (
-              <SlateEditor
-                value={field.value}
-                onChange={field.onChange}
-                placeholder="Enter rich text..."
-              />
+            rules={{
+              required: formField.required ? "Required" : false,
+              validate: formField.validate,
+            }}
+            render={({ field, fieldState }) => (
+              <>
+                <SlateEditor
+                  field={field}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Enter text..."
+                />
+                {fieldState.error && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </>
             )}
           />
         </div>
@@ -203,10 +228,17 @@ export const FormField = ({
           key={formField.field}
           className="my-2 flex items-center gap-2 bg-white p-2 rounded-md"
         >
+          {formField.required ? (
+            <span className="text-red-600 px-1">*</span>
+          ) : null}
           <Controller
             name={formField.field}
             control={control}
-            render={({ field }) => (
+            rules={{
+              required: formField.required ? "Required" : false,
+              validate: formField.validate,
+            }}
+            render={({ field, fieldState }) => (
               <>
                 <label className="flex items-center cursor-pointer">
                   <input
@@ -223,14 +255,123 @@ export const FormField = ({
                     ></div>
                   </div>
                 </label>
+
+                {fieldState.error && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {fieldState.error.message}
+                  </p>
+                )}
               </>
             )}
           />
           <Label htmlFor={formField.field}>{formField.label}</Label>
         </div>
       );
-
+    case "progress":
+      return (
+        <div
+          key={formField.field}
+          className={`my-2 ${formField.className || ""}`}
+        >
+          <Label htmlFor={formField.field}>{formField.label}</Label>
+          <Controller
+            name={formField.field}
+            control={control}
+            rules={{
+              required: formField.required ? "Required" : false,
+              validate: formField.validate,
+            }}
+            render={({ field }) => (
+              <TaskProgressInput
+                value={field.value}
+                onChange={field.onChange}
+                disabled={formField.disabled}
+              />
+            )}
+          />
+        </div>
+      );
+    case "textWithIcon":
+      return (
+        <div
+          key={formField.field}
+          className={`my-2 ${formField.className || ""}`}
+        >
+          <Label htmlFor={formField.field}>{formField.label}</Label>
+          <Controller
+            name={formField.field}
+            control={control}
+            rules={{
+              required: formField.required ? "Required" : false,
+              validate: formField.validate,
+            }}
+            render={({ field, fieldState }) => {
+              return (
+                <>
+                  <TextInputWithIcon
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder={formField.placeholder}
+                    disabled={formField.disabled}
+                    icon={formField.icon as IconType}
+                  />
+                  {fieldState.error && (
+                    <p className="text-red-600 text-sm mt-1">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </>
+              );
+            }}
+          />
+        </div>
+      );
+    case "СollapsibleSection":
+      return (
+        <CollapsibleSection
+          key={formField.label}
+          title={formField.label}
+          icon={formField.icon}
+        >
+          {formField.children?.map((childField, index) =>
+            childField.type === "Section" ? (
+              <FormSection
+                key={index}
+                section={childField as SectionType}
+                control={control}
+              />
+            ) : (
+              <FormField key={index} formField={childField} control={control} />
+            )
+          )}
+        </CollapsibleSection>
+      );
     // Add other cases (datetime, Filepicker, etc.) as needed.
+    case "dateRangePicker":
+      return (
+        <div key={formField.field} className={formField?.className}>
+          <Label htmlFor={formField.field}>{formField.label}</Label>
+          <Controller
+            name={formField.field}
+            control={control}
+            defaultValue={{ from: "", to: "" }}
+            render={({ field, fieldState }) => (
+              <>
+                <DateRangePicker
+                  value={field.value}
+                  onChange={field.onChange}
+                  name={field.name}
+                />
+                {fieldState.error && (
+                  <p className="text-red-600 text-sm mt-1">
+                    {fieldState.error.message}
+                  </p>
+                )}
+              </>
+            )}
+          />
+        </div>
+      );
 
     default:
       return null;

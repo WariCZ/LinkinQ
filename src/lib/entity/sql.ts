@@ -34,6 +34,7 @@ export class Sql {
     orderBy,
     groupBy,
     limit,
+    offset,
   }: {
     entity: string;
     fields?: string[];
@@ -41,6 +42,7 @@ export class Sql {
     orderBy?: string[];
     groupBy?: string[];
     limit?: number;
+    offset?: number;
   }) => {
     if (entity) {
       if (this.#schema[entity]) {
@@ -57,6 +59,8 @@ export class Sql {
           ...queries,
           schema: this.#schema,
           orderBy: orderBy,
+          limit: limit,
+          offset: offset,
           // groupBy: groupBy
         });
 

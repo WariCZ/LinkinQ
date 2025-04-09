@@ -1,9 +1,11 @@
 import { Control, FieldValues } from "react-hook-form";
-import { FormFieldType } from "../../../types/DynamicForm/types";
+import { FormFieldType, SectionType } from "../../../types/DynamicForm/types";
 import { EntityType } from "@/lib/entity/types";
 import { FormSection } from "../elements/FormSection";
 import { FormTabs } from "../elements/FormTabs";
 import { FormField } from "../fields/FormField";
+import globalComponents from "../../globalComponents";
+import { CollapsibleSection } from "../../CollapsibleSection";
 
 export const translateFormField = ({
   field,
@@ -43,7 +45,12 @@ export const translateFormField = ({
       };
     }
   } else {
-    if (field.type == "Section" || field.type == "Tabs") {
+    if (
+      field.type == "Section" ||
+      field.type == "Tabs" ||
+      field.type == "Сomponent" ||
+      field.type == "СollapsibleSection"
+    ) {
       return field;
     }
     const s = schema?.fields[field.field];
@@ -107,6 +114,41 @@ export const renderItem = ({
   if (formField.type === "Tabs") {
     return (
       <FormTabs key={key} tabs={formField} control={control} schema={schema} />
+    );
+  }
+
+  if (formField.type === "Сomponent" && formField.component) {
+    const Component =
+      typeof formField.component === "string" &&
+      globalComponents[formField.component];
+
+    if (!Component) {
+      return null;
+    }
+
+    return <Component key={key} formField={formField} control={control} />;
+  }
+
+  if (formField.type === "СollapsibleSection") {
+    return (
+      <CollapsibleSection
+        key={key}
+        title={formField.label}
+        icon={formField.icon}
+      >
+        {formField.children?.map((childField, index) =>
+          childField.type === "Section" ? (
+            <FormSection
+              key={index}
+              section={childField as SectionType}
+              control={control}
+              schema={schema}
+            />
+          ) : (
+            <FormField key={index} formField={childField} control={control} />
+          )
+        )}
+      </CollapsibleSection>
     );
   }
 

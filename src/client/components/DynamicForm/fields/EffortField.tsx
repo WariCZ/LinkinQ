@@ -16,7 +16,7 @@ const EffortField = ({
   disabled,
   readOnly,
   label,
-  placeholder = "0",
+  placeholder,
   unit = "MD",
 }: EffortFieldProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,7 +34,7 @@ const EffortField = ({
       ) : (
         <TextInput
           type="number"
-          value={value?.toString() || ""}
+          value={value}
           onChange={handleChange}
           disabled={disabled}
           placeholder={placeholder}

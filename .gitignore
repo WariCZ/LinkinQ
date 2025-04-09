@@ -22,3 +22,5 @@ node_modules
 *.sln
 *.sw?
 .env
+
+package-lock.json

@@ -9,7 +9,7 @@ import {
 import useStore from "./store";
 import { DashboardHeader } from "./components/layout/Header";
 import DashboardSidebar from "./components/layout/Sidebar";
-import { Flowbite } from "flowbite-react";
+import { Flowbite, Spinner } from "flowbite-react";
 import { customTheme } from "./flowbite";
 import AppToast from "./components/Toast";
 import Pageflow from "./Pageflow";
@@ -25,6 +25,7 @@ import { ServerScript } from "./app/admin/serverScript";
 import { QueryBuilder } from "./app/admin/queryBuilder";
 import { Notifications } from "./app/admin/notifications";
 import { Triggers } from "./app/admin/triggers";
+import { Examples } from "./app/examples";
 
 const PrivateLayout = (props: { admin?: boolean }) => {
   return (
@@ -43,9 +44,7 @@ const PrivateLayout = (props: { admin?: boolean }) => {
 
 const PrivateRoute = (props: { admin?: boolean }) => {
   const user = useStore((state) => state.user);
-  const checkAuth = useStore((state) => state.checkAuth);
   const loading = useStore((state) => state.loading);
-  const getSchema = useStore((state) => state.getSchema);
   const firstLoad = useStore((state) => state.firstLoad);
 
   useEffect(() => {
@@ -53,7 +52,11 @@ const PrivateRoute = (props: { admin?: boolean }) => {
   }, [firstLoad]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center w-full h-full justify-center">
+        <Spinner aria-label="Root loading" size="xl" />
+      </div>
+    );
   }
 
   return user ? <PrivateLayout {...props} /> : <Navigate to="/login" />;
@@ -70,6 +73,7 @@ const App: React.FC = () => {
             <Route path="profile" element={<Profile />} />
             <Route path="tasks" element={<Tasks />} />
             <Route path="entity/:entity" element={<Pageflow />} />
+            <Route path="examples" element={<Examples />} />
           </Route>
           {/* <Route path="/logout" element={<Logout />} /> */}
           <Route path="/admin/" element={<PrivateRoute admin={true} />}>

@@ -19,20 +19,22 @@ export type EntityType<T = FieldType> = {
     };
   };
 };
+export type FieldPrimitiveType =
+  | "uuid"
+  | "richtext"
+  | "jsonb"
+  | "boolean"
+  | "password"
+  | "blob"
+  | "text"
+  | "bigint"
+  | "integer"
+  | "datetime"
+  | `link(${string})`
+  | `nlink(${string})`;
+
 export type FieldType = {
-  type:
-    | "uuid"
-    | "richtext"
-    | "jsonb"
-    | "boolean"
-    | "password"
-    | "blob"
-    | "text"
-    | "bigint"
-    | "integer"
-    | "datetime"
-    | `link(${string})`
-    | `nlink(${string})`;
+  type: FieldPrimitiveType;
   label?: string;
   name?: string;
   description?: string;

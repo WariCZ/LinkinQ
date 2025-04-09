@@ -1,7 +1,7 @@
 import useStore from "@/client/store";
 import React from "react";
 import Form from "@/client/components/DynamicForm";
-import { httpRequest } from "@/client/hooks/useDataDetail";
+import { httpRequest } from "@/client/services/httpBase";
 import { ModalPropsType } from "@/client/types/common/ModalPropsType";
 
 export const FieldDetail = (

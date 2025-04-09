@@ -18,31 +18,38 @@ import { withInlines } from "./plugins/withInlines";
 import { withTables } from "./plugins/withTables";
 import { toggleMark } from "./utils";
 import isHotkey from "is-hotkey";
+import { useFormContext } from "react-hook-form";
 
 type SlateEditorProps = {
   value: Descendant[] | string;
   onChange: (value: Descendant[]) => void;
   placeholder: string;
+  field: any;
 };
 
 const HOTKEYS: Record<string, any> = {
-  'mod+b': 'bold',
-  'mod+i': 'italic',
-  'mod+u': 'underline',
-}
+  "mod+b": "bold",
+  "mod+i": "italic",
+  "mod+u": "underline",
+};
 
 const getDefaultValue = (value) => {
   return Array.isArray(value) && value.length > 0
     ? value
     : [
-      {
-        type: "paragraph",
-        children: [{ text: typeof value === "string" ? value : "" }],
-      },
-    ];
+        {
+          type: "paragraph",
+          children: [{ text: typeof value === "string" ? value : "" }],
+        },
+      ];
 };
 
-const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
+const SlateEditor = ({
+  value,
+  onChange,
+  placeholder,
+  field,
+}: SlateEditorProps) => {
   const renderElement = useCallback(
     (props: any) => <SlateElement {...props} />,
     []
@@ -59,9 +66,8 @@ const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
   const [slateValue, setSlateValue] = useState(getDefaultValue(value));
   const [isFocused, setIsFocused] = useState(false);
   const [editorKey, setEditorKey] = useState(uuidv4());
-
+  const { trigger } = useFormContext();
   useEffect(() => {
-    debugger;
     if (value) {
       if (!_.isEqual(value, slateValue)) {
         // Při změně dat z API aktualizujte klíč editoru
@@ -89,18 +95,21 @@ const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
     Array.isArray(value) && value.length > 0
       ? value
       : [
-        {
-          type: "paragraph",
-          children: [{ text: typeof value === "string" ? value : "" }],
-        },
-      ];
+          {
+            type: "paragraph",
+            children: [{ text: typeof value === "string" ? value : "" }],
+          },
+        ];
 
   return (
     <Slate
       key={editorKey}
       editor={editor}
       initialValue={initialValue}
-      onChange={(value) => onChange(value)}
+      onChange={(value) => {
+        onChange(value);
+        trigger(field.name);
+      }}
     >
       {isFocused && (
         <div ref={toolbarRef} onMouseDown={handleToolbarMouseDown}>
@@ -110,21 +119,21 @@ const SlateEditor = ({ value, onChange, placeholder }: SlateEditorProps) => {
       <Editable
         renderElement={renderElement}
         renderLeaf={renderLeaf}
-        placeholder={placeholder}
+        // placeholder={placeholder}
         spellCheck
         onFocus={() => setIsFocused(true)}
         onBlur={handleBlur}
         onKeyDown={(event) => {
           for (const hotkey in HOTKEYS) {
             if (isHotkey(hotkey, event as any)) {
-              event.preventDefault()
-              const mark = HOTKEYS[hotkey]
-              toggleMark(editor, mark)
+              event.preventDefault();
+              const mark = HOTKEYS[hotkey];
+              toggleMark(editor, mark);
             }
           }
         }}
         className="w-full h-28 text-gray-800 placeholder-gray-400 bg-gray-50 border border-gray-300 rounded-lg shadow-sm 
-             focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-y-auto resize-y overflow-x-hidden"
+             focus:outline-none focus:ring-1 focus:ring-cyan-500 overflow-y-auto resize-y overflow-x-hidden p-2"
       />
     </Slate>
   );

@@ -36,7 +36,6 @@ const useStore = create<StoreState>((set, get) => ({
   logout: async () => {
     await axios.post("/logout");
     set({ user: null });
-    window.location.reload();
   },
   setSidebar: (sidebar) => {
     set({ sidebar });
@@ -68,8 +67,6 @@ const useStore = create<StoreState>((set, get) => ({
       }
     } catch (error) {
       set({ user: null });
-    } finally {
-      // set({ loading: false });
     }
   },
   getSchema: async () => {

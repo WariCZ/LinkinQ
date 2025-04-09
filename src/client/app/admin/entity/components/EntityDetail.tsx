@@ -65,6 +65,7 @@ export const EntityDetail = ({
       </div>
       <div className="pt-1">
         <Table
+          tableConfigKey="entity"
           data={fieldsArray}
           rowClick={(data) =>
             openModal(<FieldDetail data={data} entity={entity} />)

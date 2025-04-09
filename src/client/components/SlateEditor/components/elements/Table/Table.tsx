@@ -55,12 +55,14 @@ const Table = ({ editor }: TableProps) => {
 
   return (
     <div className="relative inline-block" ref={tableOptionsRef}>
-      <button onClick={handleButtonClick} className="rounded border p-1 text-sm transition-all hover:bg-gray-200
-    bg-white text-black">
+      <button
+        onClick={handleButtonClick}
+        className="rounded border p-1 text-sm transition-all hover:bg-gray-200
+    bg-white text-black"
+      >
         <Icon IconComponent={FaTable} />
       </button>
       <div className="relative">
-
         {showOptions && (
           <div className="absolute mt-2 bg-white shadow-md p-2 rounded-md border border-gray-200 w-max">
             {tableData.row >= 1 && (

@@ -1,6 +1,6 @@
 /* @vite-ignore */
 import useDataTable from "../hooks/useDataTable";
-import Table from "../components/Table";
+import Table from "@/client/components/Table";
 
 const TestPage = () => {
   const entity = "tasks";

@@ -4,6 +4,7 @@ import {
   UseFormSetError,
   Control,
   FieldValues,
+  FormProvider,
 } from "react-hook-form";
 import useStore from "../../store";
 import { EntityType } from "@/lib/entity/types";
@@ -99,11 +100,12 @@ const DynamicForm = ({
 }: DynamicFormProps) => {
   const schema: any = useStore((state) => state.schema);
 
-  const { control, handleSubmit, reset, setError, watch } = useForm({
+  const form = useForm({
     disabled: disabled,
     defaultValues: {},
   });
 
+  const { control, handleSubmit, reset, setError, watch } = form;
   const watchAllFields = onChange ? watch() : null;
 
   useEffect(() => {
@@ -185,37 +187,39 @@ const DynamicForm = ({
   };
 
   return (
-    <form
-      ref={formRef}
-      onSubmit={handleSubmit(formSubmit)}
-      className={columns && `grid lg:grid-cols-${columns} gap-${gap || 2}`}
-    >
-      {formFields.map((item, index) => {
-        let formField: FormFieldType = translateFormField({
-          schema: schema[entity],
-          field: item,
-        });
+    <FormProvider {...form}>
+      <form
+        ref={formRef}
+        onSubmit={handleSubmit(formSubmit)}
+        className={columns && `grid lg:grid-cols-${columns} gap-${gap || 2}`}
+      >
+        {formFields.map((item, index) => {
+          let formField: FormFieldType = translateFormField({
+            schema: schema[entity],
+            field: item,
+          });
 
-        if (formField.rules) {
-          formField = {
-            ...formField,
-            ...evaluateRules(formField.rules, watchAllFields),
-          };
-        }
+          if (formField.rules) {
+            formField = {
+              ...formField,
+              ...evaluateRules(formField.rules, watchAllFields),
+            };
+          }
 
-        if (formField.visible === false) return null;
+          if (formField.visible === false) return null;
 
-        const c: Control<FieldValues, any> = control as any;
-        return renderItem({
-          formField,
-          key: index,
-          control: c,
-          gap,
-          schema: schema[entity],
-        });
-      })}
-      {children}
-    </form>
+          const c: Control<FieldValues, any> = control as any;
+          return renderItem({
+            formField,
+            key: index,
+            control: c,
+            gap,
+            schema: schema[entity],
+          });
+        })}
+        {children}
+      </form>
+    </FormProvider>
   );
 };
 
