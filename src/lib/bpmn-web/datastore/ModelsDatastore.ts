@@ -4,8 +4,11 @@ import { Definition, BPMNServer, IModelsDatastore } from "..";
 import { ModelsDatastoreDB } from "./ModelsDatastoreDB";
 
 class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
-  constructor(server: BPMNServer) {
+  modelDefinitions: any;
+
+  constructor(server: BPMNServer, definitions: any) {
     super(server);
+    this.modelDefinitions = definitions;
   }
   get definitionsPath() {
     return this.server.configuration.definitionsPath;
@@ -16,6 +19,7 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
   }
 
   async getList(query = null): Promise<string[]> {
+    console.log(this.modelDefinitions);
     let files = [];
     const fs = require("fs");
     fs.readdirSync(this.definitionsPath).forEach((file) => {
@@ -23,10 +27,11 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
       if (path.extname(file) == ".bpmn") {
         let name = path.basename(file);
         name = name?.substring(0, name.length - 5);
+
         files.push({ name, saved: null });
       }
     });
-
+    debugger;
     return files;
   }
 
@@ -35,6 +40,7 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
    *
    */
   async load(name, owner = null): Promise<Definition> {
+    debugger;
     const source = await this.getSource(name);
     //const rules = this.getFile(name, 'rules');
 
@@ -47,6 +53,15 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
     return this.definitionsPath + name + "." + type;
   }
 
+  private getFileFromPath(path, owner = null) {
+    const fs = require("fs");
+    let file = fs.readFileSync(path, {
+      encoding: "utf8",
+      flag: "r",
+    });
+    return file;
+  }
+
   private getFile(name, type, owner = null) {
     const fs = require("fs");
     let file = fs.readFileSync(this.getPath(name, type), {
@@ -55,6 +70,7 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
     });
     return file;
   }
+
   private saveFile(name, type, data, owner = null) {
     let fullpath = this.getPath(name, type);
     const fs = require("fs");
@@ -63,6 +79,7 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
     });
   }
   async getSource(name, owner = null): Promise<string> {
+    debugger;
     return this.getFile(name, "bpmn");
   }
   async getSVG(name, owner = null): Promise<string> {
@@ -117,24 +134,23 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
   async rebuild(model = null) {
     try {
       if (model) return this.rebuildModel(model);
-      let filesList = await this.getList();
-      const models = new Map();
+      // let filesList = await this.getList();
+      let filesList = this.modelDefinitions;
 
+      const models = {};
+
+      // Tady dotahnout vse
       filesList.forEach((f) => {
-        const path = this.definitionsPath + f["name"] + ".bpmn";
-        const fs = require("fs");
-        var stats = fs.statSync(path);
-        var mtime = stats.mtime;
-        models.set(f["name"], mtime);
+        models[f.name] = { entry: f.time, name: f.name, path: f.path };
       });
       const dbList = await super.get();
       dbList.forEach((model) => {
         const name = model["name"];
         const saved = new Date(model["saved"]);
-        const entry = models.get(name);
+        const entry = models[name].entry;
         if (entry) {
           if (saved.getTime() > entry.getTime()) {
-            models.delete(name);
+            delete models[name];
           }
         } else {
           super.deleteModel(name);
@@ -142,24 +158,30 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
       });
       let i;
 
-      for (const entry of models.entries()) {
-        const name = entry[0];
-        await this.rebuildModel(name);
+      for (const name in models) {
+        const model = models[name];
+        await this.rebuildModel(name, model.path);
       }
     } catch (exc) {
       console.log("rebuild error");
       throw exc;
     }
   }
-  private async rebuildModel(name) {
+  private async rebuildModel(name, path) {
     console.log("rebuilding " + name);
-    let source = await this.getSource(name);
-    let svg;
-    try {
-      svg = await this.getSVG(name);
-    } catch (exc) {
-      //console.log(exc);
+    let source;
+    if (path) {
+      source = await this.getFileFromPath(path);
+    } else {
+      source = await this.getSource(name);
     }
+    // idealne nepotrebovat SVG proto je to zakomentovane
+    let svg;
+    // try {
+    //   svg = await this.getSVG(name);
+    // } catch (exc) {
+    //   //console.log(exc);
+    // }
     await super.save(name, source, svg);
   }
 }

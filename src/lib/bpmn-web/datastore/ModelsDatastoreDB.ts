@@ -61,6 +61,7 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
   }
 
   async getSource(name: string, owner = null): Promise<string> {
+    debugger;
     const model = await this.loadModel(name);
     return model.source;
   }

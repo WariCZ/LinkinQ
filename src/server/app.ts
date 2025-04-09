@@ -15,15 +15,20 @@ import logger from "../lib/logger";
 import { EntityRoutes } from "../lib/entity/routes";
 import authRoutes, { authenticate } from "../lib/auth";
 import { EntitySchema } from "../lib/entity/types";
-import { BPMNServer, configuration, BPMNAPI, Logger } from "../lib/bpmn-web";
+import {
+  BPMNServer,
+  getBPMNConfigurations,
+  BPMNAPI,
+  Logger,
+} from "../lib/bpmn-web";
 import { Sql } from "../lib/entity/sql";
 import { Adapters } from "../lib/entity/adapters";
 import { mailAdapter } from "../lib/entity/adaptersDef/mail";
 import { BpmnRoutes } from "../lib/bpmn-web/routes";
 import pageflowRouter from "../lib/entity/pageflow";
 import { TriggerItemInternalType } from "../lib/entity/triggers";
-import { dynamicImportFromFiles } from "../lib/entity/importFiles";
 import path from "path";
+import { loadConfigurations } from "../configurations";
 
 dotenv.config();
 
@@ -32,7 +37,11 @@ declare global {
     entityModel: EntitySchema;
   };
 }
-type LinkinqConfig = {};
+
+type LinkinqPlugin = { triggers: any[]; processes: any[] };
+
+type LinkinqConfig = { plugins: LinkinqPlugin[] };
+
 export class Linkinq {
   app: Express;
   entity: EntityRoutes;
@@ -41,6 +50,7 @@ export class Linkinq {
   packageJson;
   viteRunning: boolean;
   ad: Adapters;
+  test: "aaaa";
 
   constructor(config?: LinkinqConfig) {
     this.viteRunning = false;
@@ -69,30 +79,16 @@ export class Linkinq {
   }
 
   async initApp() {
-    // const path = process.cwd() + "/src/configurations/triggers/";
-    // const path = __dirname + "../configurations/triggers/";
-    // path.join(__dirname, "data", "file.txt");
-    // console.log(__dirname + path);
+    const configurations = await loadConfigurations();
 
-    const triggersPathLinkinq = path.join(
-      __dirname,
-      "../configurations/triggers/"
+    const { schema, sqlAdmin, db } = await this.entity.prepareSchema(
+      configurations.triggers
     );
-    const triggersPathApp = path.join(
-      process.cwd(),
-      "/src/configurations/triggers/"
-    );
-    debugger;
-    const triggers: TriggerItemInternalType[] = await dynamicImportFromFiles([
-      triggersPathLinkinq,
-      triggersPathApp,
-    ]);
-
-    const { schema, sqlAdmin, db } = await this.entity.prepareSchema(triggers);
 
     this.ad.loadAdapters(schema);
     const wflogger = new Logger({ toConsole: true });
-    this.bpmnServer = new BPMNServer(configuration, wflogger);
+    const BPMNConfiguration = getBPMNConfigurations(configurations.processes);
+    this.bpmnServer = new BPMNServer(BPMNConfiguration, wflogger);
 
     const bpmnAPI = new BPMNAPI(this.bpmnServer);
 

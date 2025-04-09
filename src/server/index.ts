@@ -1,7 +1,6 @@
-import plugin from "tailwindcss";
 import { Linkinq } from "./app";
 
-const linkinq = new Linkinq();
+const linkinq = new Linkinq({ plugins: [] });
 linkinq.initApp();
 
-module.exports = linkinq.app;
+export default linkinq.app;
