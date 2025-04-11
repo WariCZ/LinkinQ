@@ -2,8 +2,24 @@
   "name": "linkinq",
   "version": "1.0.2",
   "description": "",
-  "main": "dist/server/index.js",
-  "types": "dist/server/index.d.ts",
+  "type": "module",
+  "main": "./dist/server/index.js",
+  "browser": "./dist/client/index.js",
+  "types": "./dist/server/index.d.ts",
+  "exports": {
+    "./module1": "./dist/server/index.js",
+    "./module2": "./dist/client/index.js"
+  },
+  "typesVersions": {
+    "*": {
+      "module1": [
+        "./dist/server/index.js"
+      ],
+      "module2": [
+        "./dist/client/index.js"
+      ]
+    }
+  },
   "scripts": {
     "build:server": "tsc",
     "build:client": "vite build",

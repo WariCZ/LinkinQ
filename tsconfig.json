@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "lib": ["es2019"],
+    "module": "ES2020",
+    "target": "ES2015",
+
     "esModuleInterop": true,
-    "target": "es2017",
     "alwaysStrict": true,
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
