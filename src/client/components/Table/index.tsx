@@ -32,7 +32,7 @@ interface TableProps<T> {
   setOrdering?: Dispatch<SetStateAction<TableOrdering[]>>;
   ordering?: TableOrdering[];
   deleteRecord?: (guid: string) => Promise<void>;
-  fetchNextPage: () => Promise<void>;
+  fetchNextPage?: () => Promise<void>;
   hasMore?: boolean;
   multiUpdate?: (guids: string[], data: Partial<any>) => Promise<void>;
 }
@@ -184,7 +184,7 @@ const Table = <T, _>({
         const bottomReached = scrollHeight - scrollTop - clientHeight < 500;
 
         if (bottomReached) {
-          fetchNextPage();
+          fetchNextPage && fetchNextPage();
         }
       }
     },

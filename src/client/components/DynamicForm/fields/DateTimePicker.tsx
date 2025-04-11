@@ -12,6 +12,7 @@ const DateTimePicker = (
     value?: string;
     format?: string;
     onlydate?: boolean;
+    onChange?: (value: React.ChangeEvent<HTMLInputElement> | string) => void;
   }
 ) => {
   const popoverRef = useRef(null);

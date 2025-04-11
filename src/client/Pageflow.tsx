@@ -33,7 +33,7 @@ const Pageflow = () => {
           const file = config.data[entity].list.file;
           console.log("AAAA");
 
-          const components = (import.meta as any).glob("./pageflow/**/*.tsx");
+          const components = []; //(import.meta as any).glob("./pageflow/**/*.tsx");
 
           const DynamicComponent = React.lazy(async () => {
             const x = await components[`./pageflow/${file}.tsx`]();

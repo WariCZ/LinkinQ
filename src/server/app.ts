@@ -26,9 +26,7 @@ import { Adapters } from "../lib/entity/adapters";
 import { mailAdapter } from "../lib/entity/adaptersDef/mail";
 import { BpmnRoutes } from "../lib/bpmn-web/routes";
 import pageflowRouter from "../lib/entity/pageflow";
-import { TriggerItemInternalType } from "../lib/entity/triggers";
-import path from "path";
-import { loadConfigurations } from "../configurations";
+import { loadConfigurations } from "../lib/configurations";
 
 dotenv.config();
 
@@ -50,7 +48,6 @@ export class Linkinq {
   packageJson;
   viteRunning: boolean;
   ad: Adapters;
-  test: "aaaa";
 
   constructor(config?: LinkinqConfig) {
     this.viteRunning = false;
@@ -80,13 +77,14 @@ export class Linkinq {
 
   async initApp() {
     const configurations = await loadConfigurations();
-
+    debugger;
     const { schema, sqlAdmin, db } = await this.entity.prepareSchema(
       configurations.triggers
     );
 
     this.ad.loadAdapters(schema);
     const wflogger = new Logger({ toConsole: true });
+
     const BPMNConfiguration = getBPMNConfigurations(configurations.processes);
     this.bpmnServer = new BPMNServer(BPMNConfiguration, wflogger);
 

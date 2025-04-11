@@ -23,6 +23,7 @@ const TestPage = () => {
     <div>
       TestPage s
       <Table
+        tableConfigKey="dd"
         entity={entity}
         data={data}
         // rowClick={(data) =>

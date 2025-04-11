@@ -1,5 +1,5 @@
 import { Transforms, BaseElement } from "slate";
-import imageExtensions from "image-extensions";
+// import imageExtensions from "image-extensions";
 import isUrl from "is-url";
 import { CustomEditor } from "../../../types/SlateEditor/types";
 
@@ -28,7 +28,7 @@ export const isImageUrl = (url: string) => {
   if (!url) return false;
   if (!isUrl(url)) return false;
   const ext = new URL(url).pathname.split(".").pop();
-  return imageExtensions.includes(ext);
+  // return imageExtensions.includes(ext);
 };
 
 export const withImages = (editor: CustomEditor) => {

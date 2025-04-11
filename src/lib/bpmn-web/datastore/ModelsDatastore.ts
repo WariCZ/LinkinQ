@@ -19,7 +19,6 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
   }
 
   async getList(query = null): Promise<string[]> {
-    console.log(this.modelDefinitions);
     let files = [];
     const fs = require("fs");
     fs.readdirSync(this.definitionsPath).forEach((file) => {
@@ -31,7 +30,6 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
         files.push({ name, saved: null });
       }
     });
-    debugger;
     return files;
   }
 
@@ -147,13 +145,14 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
       dbList.forEach((model) => {
         const name = model["name"];
         const saved = new Date(model["saved"]);
-        const entry = models[name].entry;
+        const entry = models[name] && models[name].entry;
         if (entry) {
           if (saved.getTime() > entry.getTime()) {
             delete models[name];
           }
         } else {
-          super.deleteModel(name);
+          // Nechci to mazat z DB pokud neni na filesystemu
+          // super.deleteModel(name);
         }
       });
       let i;
