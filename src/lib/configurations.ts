@@ -2,6 +2,10 @@ import { TriggerItemInternalType } from "../lib/entity/triggers";
 import fs from "fs";
 import { DateTime } from "luxon";
 import path from "path";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const DEFAULT_CONFIGURATION_PATH = "/src/configurations/";
 const getPath = (basePath, filename) => path.join(basePath, filename);

@@ -3,26 +3,27 @@
   "version": "1.0.2",
   "description": "",
   "type": "module",
-  "main": "./dist/server/index.js",
-  "browser": "./dist/client/index.js",
-  "types": "./dist/server/index.d.ts",
   "exports": {
-    "./module1": "./dist/server/index.js",
-    "./module2": "./dist/client/index.js"
+    "./server": {
+      "development": "./src/server/index.ts",
+      "default": "./dist/server/index.js"
+    },
+    "./client": {
+      "development": "./src/client/index.ts",
+      "default": "./dist/client/index.js"
+    }
   },
   "typesVersions": {
     "*": {
-      "module1": [
-        "./dist/server/index.js"
+      "server": [
+        "./src/server/index.ts"
       ],
-      "module2": [
-        "./dist/client/index.js"
+      "client": [
+        "./src/client/index.ts"
       ]
     }
   },
   "scripts": {
-    "build:watch2": "tsx watch src/server/index.ts",
-    "build:watch": "tsc --watch & tsc-esm-fix dist --watch",
     "build:server": "tsc && tsc-esm-fix dist",
     "build:client": "vite build",
     "build": "npm run build:server && npm run build:client",
@@ -33,7 +34,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "client:dev": "vite",
     "server:start": "ts-node src/server/index",
-    "server:dev": "ts-node-dev --respawn src/server/index",
+    "server:dev": "tsx watch src/server/runner.ts",
     "server:e2etest": "ts-node-dev --respawn src/server/index e2etest=true"
   },
   "author": "",

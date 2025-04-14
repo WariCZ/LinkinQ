@@ -15,19 +15,25 @@ import logger from "../lib/logger";
 import { EntityRoutes } from "../lib/entity/routes";
 import authRoutes, { authenticate } from "../lib/auth";
 import { EntitySchema } from "../lib/entity/types";
+
+import { Sql } from "../lib/entity/sql";
+import { Adapters } from "../lib/entity/adapters";
+import { mailAdapter } from "../lib/entity/adaptersDef/mail";
+import { BpmnRoutes } from "../lib/bpmn-web/routes";
 import {
   BPMNServer,
   getBPMNConfigurations,
   BPMNAPI,
   Logger,
 } from "../lib/bpmn-web";
-import { Sql } from "../lib/entity/sql";
-import { Adapters } from "../lib/entity/adapters";
-import { mailAdapter } from "../lib/entity/adaptersDef/mail";
-import { BpmnRoutes } from "../lib/bpmn-web/routes";
+
 import pageflowRouter from "../lib/entity/pageflow";
 import { loadConfigurations } from "../lib/configurations";
 import fs from "fs";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 dotenv.config();
 
@@ -44,15 +50,15 @@ type LinkinqConfig = { plugins: LinkinqPlugin[] };
 export class Linkinq {
   app: Express;
   entity: EntityRoutes;
-  bpmnRoutes: BpmnRoutes;
-  bpmnServer: BPMNServer;
+  bpmnRoutes: any;
+  bpmnServer: any;
   packageJson;
   viteRunning: boolean;
   ad: Adapters;
 
   constructor(config?: LinkinqConfig) {
     this.viteRunning = false;
-    debugger;
+
     const configPath = __dirname + "/../package.json";
     if (fs.existsSync(configPath)) {
       this.packageJson = JSON.parse(fs.readFileSync(configPath, "utf8"));
@@ -76,54 +82,58 @@ export class Linkinq {
   }
 
   async initApp() {
-    debugger;
     const configurations = await loadConfigurations();
-    debugger;
+
     const { schema, sqlAdmin, db } = await this.entity.prepareSchema(
       configurations.triggers
     );
 
-    this.ad.loadAdapters(schema);
-    const wflogger = new Logger({ toConsole: true });
+    try {
+      this.ad.loadAdapters(schema);
+      const wflogger = new Logger({ toConsole: true });
 
-    const BPMNConfiguration = getBPMNConfigurations(configurations.processes);
-    this.bpmnServer = new BPMNServer(BPMNConfiguration, wflogger);
+      const BPMNConfiguration = getBPMNConfigurations(configurations.processes);
+      this.bpmnServer = new BPMNServer(BPMNConfiguration, wflogger);
 
-    const bpmnAPI = new BPMNAPI(this.bpmnServer);
+      const bpmnAPI = new BPMNAPI(this.bpmnServer);
+      this.entity.triggers.startWorkflow = async ({ table, data }) => {
+        var caseId = Math.floor(Math.random() * 10000);
+        let context = await bpmnAPI.engine.start(
+          "Tasks schema",
+          { caseId: caseId++ },
+          { userName: "admin" } as any
+        );
 
-    this.entity.triggers.startWorkflow = async ({ table, data }) => {
-      var caseId = Math.floor(Math.random() * 10000);
-      let context = await bpmnAPI.engine.start(
-        "Tasks schema",
-        { caseId: caseId++ },
-        { userName: "admin" } as any
-      );
-
-      const entityData = {};
-      Object.keys(context.item.element.def.$attrs).forEach((attr) => {
-        if (attr.indexOf("linkinq:") > -1) {
-          entityData[attr.replace("linkinq:", "")] =
-            context.item.element.def.$attrs[attr];
-        }
-      });
-      return {
-        id: (context.instance as any).dbId,
-        data: entityData,
+        const entityData = {};
+        Object.keys(context.item.element.def.$attrs).forEach((attr) => {
+          if (attr.indexOf("linkinq:") > -1) {
+            entityData[attr.replace("linkinq:", "")] =
+              context.item.element.def.$attrs[attr];
+          }
+        });
+        return {
+          id: (context.instance as any).dbId,
+          data: entityData,
+        };
       };
-    };
 
-    this.bpmnRoutes = new BpmnRoutes({
-      bpmnAPI,
-      sqlAdmin,
-      bpmnServer: this.bpmnServer,
-      schema,
-      db,
-    });
+      this.bpmnRoutes = new BpmnRoutes({
+        bpmnAPI,
+        sqlAdmin,
+        bpmnServer: this.bpmnServer,
+        schema,
+        db,
+      });
 
-    this.setupExpress({
-      schema,
-      sqlAdmin,
-    });
+      this.setupExpress({
+        schema,
+        sqlAdmin,
+      });
+    } catch (err) {
+      debugger;
+      console.error(err?.message || err);
+      throw err?.message || err;
+    }
   }
 
   initExpress(): Express {

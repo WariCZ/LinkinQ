@@ -17,6 +17,10 @@ import { MyAppDelegate } from "./appDelegate";
 // import { db } from "../db/knex";
 // import { up } from "../db/migration";
 import dotenv from "dotenv";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 dotenv.config();
 const templatesPath = __dirname + "/emailTemplates/";

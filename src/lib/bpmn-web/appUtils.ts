@@ -1,10 +1,3 @@
-import {
-  BPMNAPI,
-  BPMNServer,
-  DefaultAppDelegate,
-  Logger,
-  SecureUser,
-} from "./";
 /**
 	is called by a script 
 	
