@@ -2,6 +2,8 @@
 import { Definition, BPMNServer, IModelsDatastore } from "..";
 
 import { ModelsDatastoreDB } from "./ModelsDatastoreDB";
+import fs from "fs";
+import path from "path";
 
 class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
   modelDefinitions: any;
@@ -20,9 +22,7 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
 
   async getList(query = null): Promise<string[]> {
     let files = [];
-    const fs = require("fs");
     fs.readdirSync(this.definitionsPath).forEach((file) => {
-      const path = require("path");
       if (path.extname(file) == ".bpmn") {
         let name = path.basename(file);
         name = name?.substring(0, name.length - 5);
@@ -52,7 +52,6 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
   }
 
   private getFileFromPath(path, owner = null) {
-    const fs = require("fs");
     let file = fs.readFileSync(path, {
       encoding: "utf8",
       flag: "r",
@@ -61,7 +60,6 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
   }
 
   private getFile(name, type, owner = null) {
-    const fs = require("fs");
     let file = fs.readFileSync(this.getPath(name, type), {
       encoding: "utf8",
       flag: "r",
@@ -71,7 +69,6 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
 
   private saveFile(name, type, data, owner = null) {
     let fullpath = this.getPath(name, type);
-    const fs = require("fs");
     fs.writeFile(fullpath, data, function (err) {
       if (err) throw err;
     });
@@ -94,7 +91,6 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
   }
 
   async deleteModel(name: any, owner = null): Promise<void> {
-    const fs = require("fs");
     await super.deleteModel(name);
     await fs.unlink(this.definitionsPath + name + ".bpmn", function (err) {
       if (err) console.log("ERROR: " + err);
@@ -104,7 +100,6 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
     });
   }
   async renameModel(name: any, newName: any, owner = null): Promise<boolean> {
-    const fs = require("fs");
     await super.renameModel(name, newName);
     await fs.rename(
       this.definitionsPath + name + ".bpmn",

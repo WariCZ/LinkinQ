@@ -1,11 +1,10 @@
-const {
+import {
   BPMNAPI,
   BPMNServer,
   DefaultAppDelegate,
   Logger,
   SecureUser,
-} = require("./");
-
+} from "./";
 /**
 	is called by a script 
 	

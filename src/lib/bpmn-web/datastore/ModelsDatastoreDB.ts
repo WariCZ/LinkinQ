@@ -11,6 +11,7 @@ import {
 
 import { db, prepareConditions } from "../../knex";
 import { BpmnModelData } from "./ModelsData";
+import fs from "fs";
 
 // import { Definition } from "../elements";
 // import { BPMNServer } from "../server";
@@ -234,7 +235,6 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
   }
 
   async export(name: string, folderPath: string, owner = null) {
-    const fs = require("fs");
     const model = await this.loadModel(name, owner);
 
     fs.writeFile(`${folderPath}/${name}.bpmn`, model.source, (err: any) => {

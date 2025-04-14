@@ -5,7 +5,7 @@ import { AppUtils } from "./appUtils";
 
 // const Mailer = require("../userAccess/config/mail");
 
-const fs = require("fs");
+import fs from "fs";
 
 var seq = 1;
 

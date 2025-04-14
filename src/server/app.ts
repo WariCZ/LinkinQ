@@ -27,6 +27,7 @@ import { mailAdapter } from "../lib/entity/adaptersDef/mail";
 import { BpmnRoutes } from "../lib/bpmn-web/routes";
 import pageflowRouter from "../lib/entity/pageflow";
 import { loadConfigurations } from "../lib/configurations";
+import fs from "fs";
 
 dotenv.config();
 
@@ -51,8 +52,7 @@ export class Linkinq {
 
   constructor(config?: LinkinqConfig) {
     this.viteRunning = false;
-    const fs = require("fs");
-
+    debugger;
     const configPath = __dirname + "/../package.json";
     if (fs.existsSync(configPath)) {
       this.packageJson = JSON.parse(fs.readFileSync(configPath, "utf8"));
@@ -76,6 +76,7 @@ export class Linkinq {
   }
 
   async initApp() {
+    debugger;
     const configurations = await loadConfigurations();
     debugger;
     const { schema, sqlAdmin, db } = await this.entity.prepareSchema(
