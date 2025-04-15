@@ -2,15 +2,14 @@
   "name": "linkinq",
   "version": "1.0.2",
   "description": "",
-  "type": "module",
   "exports": {
     "./server": {
       "development": "./src/server/index.ts",
       "default": "./dist/server/index.js"
     },
     "./client": {
-      "development": "./src/client/index.ts",
-      "default": "./dist/client/index.js"
+      "development": "./src/client/index.tsx",
+      "default": "./dist/client/index.jsx"
     }
   },
   "typesVersions": {
@@ -19,7 +18,7 @@
         "./src/server/index.ts"
       ],
       "client": [
-        "./src/client/index.ts"
+        "./src/client/index.tsx"
       ]
     }
   },
