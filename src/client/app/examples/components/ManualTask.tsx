@@ -1,7 +1,7 @@
-import { ModalPropsType } from "@/client/types/common/ModalPropsType";
-import useStore from "@/client/store";
-import useDataDetail from "@/client/hooks/useDataDetail";
-import DynamicForm from "@/client/components/DynamicForm";
+import { ModalPropsType } from "../../../../client/types/common/ModalPropsType";
+import useStore from "../../../../client/store";
+import useDataDetail from "../../../../client/hooks/useDataDetail";
+import DynamicForm from "../../../../client/components/DynamicForm";
 import { DateTime } from "luxon";
 import { useTranslation } from "react-i18next";
 interface ManualTaskProps extends ModalPropsType {

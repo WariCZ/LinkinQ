@@ -1,8 +1,8 @@
 import React from "react";
 import { Button } from "flowbite-react";
-import Table from "@/client/components/Table";
+import Table from "../../../../client/components/Table";
 import useDataTable from "../../../hooks/useDataTable";
-import { TableFieldType } from "@/client/components/Table/types";
+import { TableFieldType } from "../../../../client/components/Table/types";
 
 export const Journal: React.FC = () => {
   console.log("call ProtectedPage");

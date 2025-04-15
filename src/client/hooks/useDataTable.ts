@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { httpRequest, getSingleRecord } from "@/client/services/httpBase";
+import { httpRequest, getSingleRecord } from "../../client/services/httpBase";
 import _ from "lodash";
 import { useDataCommon } from "./useDataCommon";
 

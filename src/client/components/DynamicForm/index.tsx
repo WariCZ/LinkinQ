@@ -7,7 +7,7 @@ import {
   FormProvider,
 } from "react-hook-form";
 import useStore from "../../store";
-import { EntityType } from "@/lib/entity/types";
+import { EntityType } from "../../../lib/entity/types";
 import _ from "lodash";
 import { ConditionType, FormFieldType } from "../../types/DynamicForm/types";
 import { renderItem, translateFormField } from "./utils/FormUtils";

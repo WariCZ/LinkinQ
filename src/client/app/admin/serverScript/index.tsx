@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import * as monaco from "monaco-editor";
 import axios from "axios";
 import { Button } from "flowbite-react";
-import { ServerSideOutputType } from "@/lib/entity/routes";
+import { ServerSideOutputType } from "../../../../lib/entity/routes";
 
 export const ServerScript = () => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);

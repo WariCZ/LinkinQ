@@ -1,11 +1,11 @@
-import { useModalStore } from "@/client/components/Modal/modalStore";
-import { exportJsonFile } from "@/client/utils";
-import { EntityType } from "@/lib/entity/types";
+import { useModalStore } from "../../../../../client/components/Modal/modalStore";
+import { exportJsonFile } from "../../../../../client/utils";
+import { EntityType } from "../../../../../lib/entity/types";
 import { Button } from "flowbite-react";
 import { FieldDetail } from "./FieldDetail";
 import { DeleteEntity } from "./DeleteEntity";
 import { FaFileExport } from "react-icons/fa";
-import Table from "@/client/components/Table";
+import Table from "../../../../../client/components/Table";
 
 export const EntityDetail = ({
   entity,

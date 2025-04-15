@@ -1,6 +1,6 @@
 import { Control, FieldValues } from "react-hook-form";
 import { FormFieldType, TabsFromType } from "../../../types/DynamicForm/types";
-import { EntityType } from "@/lib/entity/types";
+import { EntityType } from "../../../../lib/entity/types";
 import { Tab, TabList, TabPanel, Tabs } from "react-tabs";
 import { renderItem, translateFormField } from "../utils/FormUtils";
 import * as Icons from "react-icons/fa";

@@ -1,6 +1,6 @@
 import { Control, FieldValues } from "react-hook-form";
 import { FormFieldType, SectionType } from "../../../types/DynamicForm/types";
-import { EntityType } from "@/lib/entity/types";
+import { EntityType } from "../../../../lib/entity/types";
 import { renderItem, translateFormField } from "../utils/FormUtils";
 
 export const FormSection = ({
@@ -16,7 +16,9 @@ export const FormSection = ({
 }) => {
   return (
     <div
-      className={`grid lg:grid-cols-${section.columns || 1} gap-${gap || 4} ${section.className || ""} `}
+      className={`grid lg:grid-cols-${section.columns || 1} gap-${gap || 4} ${
+        section.className || ""
+      } `}
     >
       {section.label && <h3 className="col-span-full">{section.label}</h3>}
       {section.fields.map((field, index) => {

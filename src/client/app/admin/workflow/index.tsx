@@ -1,8 +1,8 @@
-import Form from "@/client/components/DynamicForm";
-import { ModalPropsType } from "@/client/types/common/ModalPropsType";
-import { useModalStore } from "@/client/components/Modal/modalStore";
-import useDataDetail from "@/client/hooks/useDataDetail";
-import useDataTable from "@/client/hooks/useDataTable";
+import Form from "../../../../client/components/DynamicForm";
+import { ModalPropsType } from "../../../../client/types/common/ModalPropsType";
+import { useModalStore } from "../../../../client/components/Modal/modalStore";
+import useDataDetail from "../../../../client/hooks/useDataDetail";
+import useDataTable from "../../../../client/hooks/useDataTable";
 import { BpmnJsReact, useBpmnJsReact } from "bpmn-js-react";
 import { Button, TextInput } from "flowbite-react";
 import { useMemo, useState } from "react";

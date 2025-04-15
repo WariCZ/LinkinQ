@@ -1,4 +1,4 @@
-import { FormFieldType } from "@/client/types/DynamicForm/types";
+import { FormFieldType } from "../../../../../client/types/DynamicForm/types";
 
 export const fieldFormTriggers = (schema: {}): (string | FormFieldType)[] => [
   {

@@ -1,8 +1,8 @@
-import Form from "@/client/components/DynamicForm";
-import { FormFieldType } from "@/client/types/DynamicForm/types";
-import { ModalPropsType } from "@/client/types/common/ModalPropsType";
-import useDataDetail from "@/client/hooks/useDataDetail";
-import useStore from "@/client/store";
+import Form from "../../../../../client/components/DynamicForm";
+import { FormFieldType } from "../../../../../client/types/DynamicForm/types";
+import { ModalPropsType } from "../../../../../client/types/common/ModalPropsType";
+import useDataDetail from "../../../../../client/hooks/useDataDetail";
+import useStore from "../../../../../client/store";
 
 export const QueryBuilderDetail = (
   props: { entity: string; data?: any; refresh: any } & ModalPropsType

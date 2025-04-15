@@ -7,6 +7,8 @@ import ModalContainer from "./components/Modal/ModalContainer";
 import "react-tabs/style/react-tabs.css";
 
 const createLinkinqClient = () => {
+  console.log("XXXX");
+  debugger;
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <>
       <App />
@@ -15,4 +17,4 @@ const createLinkinqClient = () => {
   );
 };
 
-export { createLinkinqClient };
+export { createLinkinqClient, App, ModalContainer };

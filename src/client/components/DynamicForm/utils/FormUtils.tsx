@@ -1,6 +1,6 @@
 import { Control, FieldValues } from "react-hook-form";
 import { FormFieldType, SectionType } from "../../../types/DynamicForm/types";
-import { EntityType } from "@/lib/entity/types";
+import { EntityType } from "../../../../lib/entity/types";
 import { FormSection } from "../elements/FormSection";
 import { FormTabs } from "../elements/FormTabs";
 import { FormField } from "../fields/FormField";

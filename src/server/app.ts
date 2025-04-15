@@ -58,7 +58,6 @@ export class Linkinq {
 
   constructor(config?: LinkinqConfig) {
     this.viteRunning = false;
-
     const configPath = __dirname + "/../package.json";
     if (fs.existsSync(configPath)) {
       this.packageJson = JSON.parse(fs.readFileSync(configPath, "utf8"));

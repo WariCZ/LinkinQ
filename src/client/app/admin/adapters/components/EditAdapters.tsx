@@ -1,6 +1,6 @@
-import Form from "@/client/components/DynamicForm";
-import { ModalPropsType } from "@/client/types/common/ModalPropsType";
-import useDataDetail from "@/client/hooks/useDataDetail";
+import Form from "../../../../../client/components/DynamicForm";
+import { ModalPropsType } from "../../../../../client/types/common/ModalPropsType";
+import useDataDetail from "../../../../../client/hooks/useDataDetail";
 import axios from "axios";
 import { Button } from "flowbite-react";
 

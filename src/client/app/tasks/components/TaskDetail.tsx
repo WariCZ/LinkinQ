@@ -1,9 +1,9 @@
-import ButtonExecuteBpmn from "@/client/components/ButtonExecuteBpmn";
-import Form from "@/client/components/DynamicForm";
-import EffortField from "@/client/components/DynamicForm/fields/EffortField";
-import { ModalPropsType } from "@/client/types/common/ModalPropsType";
-import useDataDetail from "@/client/hooks/useDataDetail";
-import useStore from "@/client/store";
+import ButtonExecuteBpmn from "../../../../client/components/ButtonExecuteBpmn";
+import Form from "../../../../client/components/DynamicForm";
+import EffortField from "../../../../client/components/DynamicForm/fields/EffortField";
+import { ModalPropsType } from "../../../../client/types/common/ModalPropsType";
+import useDataDetail from "../../../../client/hooks/useDataDetail";
+import useStore from "../../../../client/store";
 import { TextInput } from "flowbite-react";
 import { DateTime } from "luxon";
 

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import useStore from "../../../store";
 import { FaPlus } from "react-icons/fa";
 import { Button, TextInput } from "flowbite-react";
-import { useModalStore } from "@/client/components/Modal/modalStore";
+import { useModalStore } from "../../../../client/components/Modal/modalStore";
 import { EntityDetail } from "./components/EntityDetail";
 import { AddEntity } from "./components/AddEntity";
 

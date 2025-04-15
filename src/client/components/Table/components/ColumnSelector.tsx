@@ -16,7 +16,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { RxDragHandleDots2 } from "react-icons/rx";
 import { Button, Checkbox, TextInput } from "flowbite-react";
 import { TableFieldType } from "../types";
-import { EntitySchema } from "@/lib/entity/types";
+import { EntitySchema } from "../../../../lib/entity/types";
 import { getLabel } from "../utils";
 import { FiX } from "react-icons/fi";
 import { useTranslation } from "react-i18next";

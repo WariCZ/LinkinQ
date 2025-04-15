@@ -1,6 +1,6 @@
-import Form from "@/client/components/DynamicForm";
-import DateTimePicker from "@/client/components/DynamicForm/fields/DateTimePicker";
-import FileUpload from "@/client/components/DynamicForm/fields/FileUpload";
+import Form from "../../../client/components/DynamicForm";
+import DateTimePicker from "../../../client/components/DynamicForm/fields/DateTimePicker";
+import FileUpload from "../../../client/components/DynamicForm/fields/FileUpload";
 import React from "react";
 
 export const Dashboard = () => {

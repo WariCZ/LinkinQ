@@ -8,8 +8,8 @@ import { useLocation } from "react-router-dom";
 import _ from "lodash";
 import { useTranslation } from "react-i18next";
 import { TaskDetail } from "./components/TaskDetail";
-import Table from "@/client/components/Table";
-import useDataDetail from "@/client/hooks/useDataDetail";
+import Table from "../../../client/components/Table";
+import useDataDetail from "../../../client/hooks/useDataDetail";
 
 const entity = "tasks";
 

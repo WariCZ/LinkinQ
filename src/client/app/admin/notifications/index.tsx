@@ -1,9 +1,9 @@
 import React from "react";
-import Table from "@/client/components/Table";
+import Table from "../../../../client/components/Table";
 import useDataTable from "../../../hooks/useDataTable";
-import { useModalStore } from "@/client/components/Modal/modalStore";
+import { useModalStore } from "../../../../client/components/Modal/modalStore";
 import { NotificationDetail } from "./components/NotificationDetail";
-import { TableFieldType } from "@/client/components/Table/types";
+import { TableFieldType } from "../../../../client/components/Table/types";
 
 export const Notifications: React.FC = () => {
   const { openModal } = useModalStore();

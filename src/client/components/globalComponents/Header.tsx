@@ -1,4 +1,4 @@
-import { FormField } from "@/client/components/DynamicForm/fields/FormField";
+import { FormField } from "../../../client/components/DynamicForm/fields/FormField";
 import { Control, FieldValues } from "react-hook-form";
 import { FaUser } from "react-icons/fa";
 

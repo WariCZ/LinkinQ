@@ -12,7 +12,7 @@ import { FaDatabase } from "react-icons/fa";
 import { FaTasks } from "react-icons/fa";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { FaHubspot } from "react-icons/fa";
-import useStore from "@/client/store";
+import useStore from "../../../client/store";
 import logo from "../../static/logo.png";
 import { FaCircle } from "react-icons/fa";
 import { useTranslation } from "react-i18next";

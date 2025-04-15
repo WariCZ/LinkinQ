@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import useStore from "../../../store";
 import { Button, TextInput } from "flowbite-react";
-import Table from "@/client/components/Table";
+import Table from "../../../../client/components/Table";
 import useDataTable from "../../../hooks/useDataTable";
 import { useModalStore } from "../../../components/Modal/modalStore";
 import { FaPlus } from "react-icons/fa";

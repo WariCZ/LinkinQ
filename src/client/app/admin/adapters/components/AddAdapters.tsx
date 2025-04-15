@@ -1,5 +1,5 @@
-import Form from "@/client/components/DynamicForm";
-import { ModalPropsType } from "@/client/types/common/ModalPropsType";
+import Form from "../../../../../client/components/DynamicForm";
+import { ModalPropsType } from "../../../../../client/types/common/ModalPropsType";
 import axios from "axios";
 import _ from "lodash";
 import { useEffect, useState } from "react";

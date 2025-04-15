@@ -1,7 +1,7 @@
-import Form from "@/client/components/DynamicForm";
-import { ModalPropsType } from "@/client/types/common/ModalPropsType";
-import useStore from "@/client/store";
-import { httpRequest } from "@/client/services/httpBase";
+import Form from "../../../../../client/components/DynamicForm";
+import { ModalPropsType } from "../../../../../client/types/common/ModalPropsType";
+import useStore from "../../../../../client/store";
+import { httpRequest } from "../../../../../client/services/httpBase";
 
 export const AddEntity = (props: ModalPropsType) => {
   const getSchema = useStore((state) => state.getSchema);

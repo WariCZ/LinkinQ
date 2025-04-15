@@ -1,6 +1,6 @@
-import Form from "@/client/components/DynamicForm";
-import { ModalPropsType } from "@/client/types/common/ModalPropsType";
-import useStore from "@/client/store";
+import Form from "../../../../../client/components/DynamicForm";
+import { ModalPropsType } from "../../../../../client/types/common/ModalPropsType";
+import useStore from "../../../../../client/store";
 import axios from "axios";
 import { fieldFormTriggers } from "../utils/fieldFormTriggers";
 

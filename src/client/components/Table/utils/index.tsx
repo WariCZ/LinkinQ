@@ -1,4 +1,4 @@
-import { EntitySchema } from "@/lib/entity/types";
+import { EntitySchema } from "../../../../lib/entity/types";
 import _ from "lodash";
 
 interface GetLabelArgs {

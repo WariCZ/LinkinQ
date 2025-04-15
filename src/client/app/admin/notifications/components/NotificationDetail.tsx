@@ -1,5 +1,5 @@
-import Form from "@/client/components/DynamicForm";
-import useDataDetail from "@/client/hooks/useDataDetail";
+import Form from "../../../../../client/components/DynamicForm";
+import useDataDetail from "../../../../../client/hooks/useDataDetail";
 
 export const NotificationDetail = (props: any) => {
   const entity = "notifications";
