@@ -5,6 +5,8 @@ import { ModelsDatastoreDB } from "./ModelsDatastoreDB";
 import fs from "fs";
 import path from "path";
 
+const Definition_collection = "wf_models";
+
 class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
   modelDefinitions: any;
 
@@ -38,7 +40,6 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
    *
    */
   async load(name, owner = null): Promise<Definition> {
-    debugger;
     const source = await this.getSource(name);
     //const rules = this.getFile(name, 'rules');
 
@@ -74,11 +75,24 @@ class ModelsDatastore extends ModelsDatastoreDB implements IModelsDatastore {
     });
   }
   async getSource(name, owner = null): Promise<string> {
-    debugger;
-    return this.getFile(name, "bpmn");
+    // debugger;
+    const sourceData = await this.server.dataStore
+      .db(Definition_collection)
+      .setUser({ id: 1 })
+      .where({ name: name })
+      .select("source");
+
+    return sourceData[0].source;
+    // return this.getFile(name, "bpmn");
   }
   async getSVG(name, owner = null): Promise<string> {
-    return this.getFile(name, "svg");
+    const sourceData = await this.server.dataStore
+      .db(Definition_collection)
+      .setUser({ id: 1 })
+      .where({ name: name })
+      .select("svg");
+    return sourceData[0].svg;
+    // return this.getFile(name, "svg");
   }
 
   async save(name, bpmn, svg?, owner = null): Promise<boolean> {

@@ -1,20 +1,5 @@
 import { FieldType, EntitySchema } from "../types";
 
-import users from "./users";
-import userroles from "./userroles";
-import wf_events from "./wf_events";
-import wf_instances from "./wf_instances";
-import wf_locks from "./wf_locks";
-import wf_model from "./wf_models";
-import lov from "./lov";
-import journal from "./journal";
-import triggers from "./triggers";
-import tasks from "./tasks";
-import adapters from "./adapters";
-import notifications from "./notifications";
-import attachments from "./attachments";
-import attachments_history from "./attachments_history";
-
 export const defaultExecute = () => {
   return ['CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'];
 };
@@ -117,32 +102,3 @@ export const workflowFields = (): Record<string, FieldType> => ({
     system: true,
   },
 });
-
-export const defaultEntities = (): EntitySchema => {
-  return {
-    ...users.entityFields,
-    ...userroles.entityFields,
-    ...lov.entityFields,
-    ...wf_events,
-    ...wf_instances,
-    ...wf_locks,
-    ...wf_model,
-    ...journal,
-    ...attachments_history.entityFields,
-    ...attachments.entityFields,
-    ...triggers.entityFields,
-    ...adapters.entityFields,
-    ...notifications.entityFields,
-    ...tasks.entityFields,
-  };
-};
-
-export const defaultData = () => {
-  return {
-    // ...lov.defaultData,
-    // ...users.defaultData,
-    ...users.defaultData({ password: process.env.DEFAULT_PASSWORD }),
-    ...userroles.defaultData,
-    ...notifications.defaultData,
-  };
-};

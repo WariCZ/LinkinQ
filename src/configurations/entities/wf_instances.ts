@@ -1,4 +1,5 @@
-import { EntitySchema } from "../types";
+import { EntitySchema } from "../../lib/entity/types";
+
 const entityFields: EntitySchema = {
   wf_instances: {
     system: true,

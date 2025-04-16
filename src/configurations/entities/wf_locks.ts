@@ -1,4 +1,4 @@
-import { EntitySchema } from "../types";
+import { EntitySchema } from "../../lib/entity/types";
 const entityFields: EntitySchema = {
   wf_locks: {
     system: true,

@@ -7,7 +7,6 @@ import { EntitySchema } from "./types";
 import { dbType, Sql } from "./sql";
 import { MAIN_GUID, MAIN_ID } from "../knex";
 import { hashPassword } from "./utils";
-import { dynamicImportFromFiles } from "./importFiles";
 
 export type CodeType = {
   beforeData: Record<string, any>;

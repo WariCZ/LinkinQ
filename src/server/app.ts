@@ -18,7 +18,7 @@ import { EntitySchema } from "../lib/entity/types";
 
 import { Sql } from "../lib/entity/sql";
 import { Adapters } from "../lib/entity/adapters";
-import { mailAdapter } from "../lib/entity/adaptersDef/mail";
+import { mailAdapter } from "../configurations/adapters/mail";
 import { BpmnRoutes } from "../lib/bpmn-web/routes";
 import {
   BPMNServer,
@@ -81,13 +81,13 @@ export class Linkinq {
   }
 
   async initApp() {
-    const configurations = await loadConfigurations();
-
-    const { schema, sqlAdmin, db } = await this.entity.prepareSchema(
-      configurations.triggers
-    );
-
     try {
+      const configurations = await loadConfigurations();
+
+      const { schema, sqlAdmin, db } = await this.entity.prepareSchema(
+        configurations
+      );
+
       this.ad.loadAdapters(schema);
       const wflogger = new Logger({ toConsole: true });
 

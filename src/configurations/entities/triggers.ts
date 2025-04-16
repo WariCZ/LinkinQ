@@ -1,4 +1,4 @@
-import { EntitySchema } from "../types";
+import { EntitySchema } from "../../lib/entity/types";
 const entityFields: EntitySchema = {
   triggers: {
     system: true,
@@ -36,8 +36,4 @@ const entityFields: EntitySchema = {
   },
 };
 
-const defaultData = {
-  triggers: [],
-};
-
-export default { entityFields, defaultData };
+export default entityFields;

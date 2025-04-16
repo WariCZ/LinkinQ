@@ -15,17 +15,11 @@ import {
   translateDataTypesDBtoSchema,
   wait,
 } from "./utils";
-import {
-  defaultData,
-  defaultEntities,
-  defaultExecute,
-  defaultFields,
-} from "./defaultEntities";
+
 import logger from "../logger";
 import EventEmitter from "events";
 import { Sql } from "./sql";
 import { TriggerItemInternalType, Triggers } from "./triggers";
-import { dynamicImportFromFiles } from "./importFiles";
 
 export class Entity {
   db: Knex;
@@ -43,6 +37,10 @@ export class Entity {
       eventsOnEntities: this.eventsOnEntities,
     });
   }
+
+  defaultExecute = () => {
+    return ['CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'];
+  };
 
   async resetPublicSchema() {
     try {
@@ -619,53 +617,89 @@ export class Entity {
     return { fieldsAdd: fieldsAdd };
   }
 
+  processDataObjects(input) {
+    const orderEntities = [
+      "users",
+      "userroles",
+      "lov",
+      "wf_events",
+      "wf_instances",
+      "wf_locks",
+      "wf_model",
+      "journal",
+      "attachments_history",
+      "attachments",
+      "triggers",
+      "adapters",
+      "notifications",
+    ];
+
+    const result = [];
+
+    // Nejprve hodnoty podle poradi
+    for (const key of orderEntities) {
+      if (key in input) {
+        result.push({ entity: key, data: input[key] });
+      }
+    }
+
+    // Pak zbytek, který v poradi není
+    for (const key in input) {
+      if (!orderEntities.includes(key)) {
+        result.push({ entity: key, data: input[key] });
+      }
+    }
+    return result;
+  }
+
   async createData({
     data,
-    // updateData,
+    updateData,
     sqlAdmin,
   }: {
     data: Object;
     sqlAdmin: Sql;
-    // updateData?: Object;
+    updateData: Object;
   }) {
-    //
-    for (const [name, dataArray] of Object.entries(data)) {
-      for (const d of dataArray) {
+    const sortedEnt = this.processDataObjects(data);
+
+    for (const entData of sortedEnt) {
+      for (const d of entData.data) {
         var rows = await sqlAdmin.select({
-          entity: name,
+          entity: entData.entity,
           fields: [this.MAIN_ID],
           where: { guid: d.guid },
         });
         if (rows.length === 0) {
           await sqlAdmin.insert({
-            entity: name,
+            entity: entData.entity,
             data: d,
           });
         }
       }
     }
 
-    // if (updateData) {
-    //   for (const [name, dataArray] of Object.entries(updateData)) {
-    //     for (const d of dataArray) {
-    //       var rows = await sqlAdmin.select({
-    //         entity: name,
-    //         fields: [this.MAIN_ID],
-    //         where: { guid: d.guid },
-    //       });
+    if (updateData) {
+      for (const [name, dataArray] of Object.entries(updateData)) {
+        for (const d of dataArray) {
+          var rows = await sqlAdmin.select({
+            entity: name,
+            fields: [this.MAIN_ID],
+            where: { guid: d.guid },
+          });
 
-    //       if (rows.length === 1) {
-    //         await sqlAdmin.update({
-    //           entity: name,
-    //           data: d,
-    //           where: { guid: d.guid },
-    //         });
-    //       } else {
-    //         console.warn("NOt found");
-    //       }
-    //     }
-    //   }
-    // }
+          if (rows.length === 1) {
+            await sqlAdmin.update({
+              entity: name,
+              data: d,
+              where: { guid: d.guid },
+            });
+          } else {
+            console.warn("NOt found");
+          }
+        }
+      }
+    }
   }
 
   getSchema() {
@@ -729,19 +763,25 @@ export class Entity {
     return schema;
   }
 
-  async prepareSchema(triggers) {
+  async prepareSchema(
+    { triggers, entities, defaultData, updateData }: any /*{
+    triggers: TriggerItemInternalType[];
+    schemaDefinition: EntitySchema;
+  }*/
+  ) {
+    //
     if (process.env.e2etest == "true") {
       await this.resetPublicSchema();
     }
 
-    await defaultExecute().map(async (e) => {
+    await this.defaultExecute().map(async (e) => {
       await this.db.raw(e).setUser({ id: 1 });
     });
     // this.registerTriggers();
 
-    const schemaDefinition = defaultEntities();
+    // const schemaDefinition = defaultEntities();
 
-    const entityDef = addDefaultFields(schemaDefinition);
+    const entityDef = addDefaultFields(entities);
 
     // Dohledani tabulek a slopupcu ktere jsou ve Schematu a pridam je do DB
     const actualDBSchema = await this.getTablesAndColumns(entityDef);
@@ -772,20 +812,15 @@ export class Entity {
       user: { id: 1 } as any,
     });
 
-    // await this.createData({
-    //   data: defaultUsers(),
-    //   sqlAdmin,
-    // });
-
     await this.triggers.initTriggers(this.schema, triggers);
 
     await this.createData({
-      data: defaultData(),
+      data: defaultData,
       sqlAdmin,
-      // updateData: updateData(),
+      updateData: updateData,
     });
 
-    for (const tableName in schemaDefinition) {
+    for (const tableName in entities) {
       if (fieldsAdd[tableName]?.foreignKeys) {
         await this.createForeignKeys({
           table: tableName,

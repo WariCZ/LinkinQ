@@ -1,4 +1,4 @@
-import { EntitySchema } from "../types";
+import { EntitySchema } from "../../lib/entity/types";
 const entityFields: EntitySchema = {
   attachments_history: {
     system: true,
@@ -14,4 +14,4 @@ const entityFields: EntitySchema = {
   },
 };
 
-export default { entityFields };
+export default entityFields;
