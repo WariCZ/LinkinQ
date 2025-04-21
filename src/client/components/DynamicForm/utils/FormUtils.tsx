@@ -107,7 +107,6 @@ export const renderItem = ({
         key={key}
         section={formField}
         control={control}
-        gap={gap}
         schema={schema}
         readOnly={readOnly}
       />

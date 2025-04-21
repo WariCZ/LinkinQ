@@ -35,7 +35,7 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={`my-2 ${formField.className || ""} ${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+          className={`${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
         >
           <Label htmlFor={formField.field}>
             {formField.label}
@@ -72,7 +72,10 @@ export const FormField = ({
       );
     case "checkbox":
       return (
-        <div key={formField.field} className={formField?.className}>
+        <div
+          key={formField.field}
+          className={`${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           {formField.required && <span className="text-red-600 px-1">*</span>}
           <Controller
@@ -106,7 +109,7 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={`test select ${formField.className}`}
+          className={`select ${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
         >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           {formField.required && <span className="text-red-600 px-1">*</span>}
@@ -132,7 +135,10 @@ export const FormField = ({
       );
     case "datetime":
       return (
-        <div key={formField.field} className={formField?.className}>
+        <div
+          key={formField.field}
+          className={`${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
             name={formField.field}
@@ -150,6 +156,7 @@ export const FormField = ({
                   onBlur={field.onBlur}
                   name={field.name}
                   disabled={isDisabled}
+                  isReadonly={isDisabled}
                 />
                 {fieldState.error && (
                   <p className="text-red-600 text-sm mt-1">
@@ -163,7 +170,10 @@ export const FormField = ({
       );
     case "attachment":
       return (
-        <div key={formField.field} className={formField?.className}>
+        <div
+          key={formField.field}
+          className={`${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
             name={formField.field}
@@ -187,7 +197,10 @@ export const FormField = ({
       );
     case "richtext":
       return (
-        <div className={`flex flex-col my-2 gap-2 ${formField.className}`}>
+        <div
+          key={formField.field}
+          className={`flex flex-col gap-2 ${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           {formField.required && <span className="text-red-600 px-1">*</span>}
           <Controller
@@ -258,7 +271,10 @@ export const FormField = ({
       );
     case "progress":
       return (
-        <div className={`my-2 ${formField.className || ""}`}>
+        <div
+          key={formField.field}
+          className={`${formField.className || ""} ${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
             name={formField.field}
@@ -279,7 +295,10 @@ export const FormField = ({
       );
     case "textWithIcon":
       return (
-        <div className={`my-2 ${formField.className || ""}`}>
+        <div
+          key={formField.field}
+          className={`${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
             name={formField.field}
@@ -307,7 +326,7 @@ export const FormField = ({
           />
         </div>
       );
-    case "СollapsibleSection":
+    case "CollapsibleSection":
       return (
         <CollapsibleSection
           key={formField.label}
@@ -335,7 +354,10 @@ export const FormField = ({
       );
     case "dateRangePicker":
       return (
-        <div key={formField.field} className={formField?.className}>
+        <div
+          key={formField.field}
+          className={`${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+        >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
             name={formField.field}

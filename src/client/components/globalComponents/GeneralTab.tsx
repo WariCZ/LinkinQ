@@ -33,7 +33,7 @@ function GeneralTab(props) {
       <FormField
         readOnly={props.readOnly}
         formField={{
-          type: "СollapsibleSection",
+          type: "CollapsibleSection",
           field: "parentSR",
           label: "Nadrizene SR",
           icon: FaFolderOpen,

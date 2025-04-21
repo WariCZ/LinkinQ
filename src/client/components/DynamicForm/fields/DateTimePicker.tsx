@@ -142,7 +142,9 @@ const DateTimePicker = (
           value={inputValue}
           placeholder="Vyberte datum a čas"
           readOnly
-          onClick={() => props.isReadonly && setIsOpen(!isOpen)}
+          onClick={() => {
+            if (props.isReadonly !== true) setIsOpen(!isOpen);
+          }}
           className="w-full"
         />
       </Popover>

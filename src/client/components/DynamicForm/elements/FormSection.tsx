@@ -6,19 +6,19 @@ import { renderItem, translateFormField } from "../utils/FormUtils";
 export const FormSection = ({
   section,
   control,
-  gap,
   schema,
   readOnly,
 }: {
   section: SectionType;
   control: Control<FieldValues, any>;
-  gap?: number;
   schema?: EntityType;
   readOnly?: boolean;
 }) => {
   return (
     <div
-      className={`grid lg:grid-cols-${section.columns || 1} gap-${gap || 4} ${section.className || ""} `}
+      className={`grid gap-4 items-center ${section.className || ""} ${
+        section.columns ? `grid-cols-${section.columns}` : ""
+      }`}
     >
       {section.label && <h3 className="col-span-full">{section.label}</h3>}
       {section.fields.map((field, index) => {
@@ -26,7 +26,6 @@ export const FormSection = ({
           schema: schema,
           field: field,
         });
-
         return renderItem({
           formField,
           key: index,

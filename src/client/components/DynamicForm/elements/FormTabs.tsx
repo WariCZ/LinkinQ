@@ -16,7 +16,7 @@ export const FormTabs = ({
 }) => {
   return (
     <Tabs className={"cursor-pointer"}>
-      <TabList className={"bg-gray-100 border-gray-200 pl-2"}>
+      <TabList className={"bg-gray-100 pl-2"}>
         {tabs.tabs.map((tab) => {
           const IconComponent = Icons[tab.icon] || null;
           return (
@@ -33,7 +33,7 @@ export const FormTabs = ({
       {tabs.tabs.map((tab) => (
         <TabPanel key={tab.name}>
           {tab.fields && (
-            <div className="cursor-pointer border-t-2 border-gray-300 px-2">
+            <div className="cursor-pointer border-t border-gray-300 px-2">
               {tab.fields.map((field, index) => {
                 let formField: FormFieldType = translateFormField({
                   schema: schema,

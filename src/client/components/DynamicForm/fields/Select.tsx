@@ -17,7 +17,6 @@ const Select = React.forwardRef(
     const [menuIsOpen, setMenuIsOpen] = useState(false);
     const [value, setValue] = useState(props.value);
 
-    console.log(props.readOnly)
     useEffect(() => {
       if (props.value) {
         if (props.entity) {

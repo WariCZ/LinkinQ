@@ -4,6 +4,7 @@ import React from "react";
 import { ManualTask } from "./components/ManualTask";
 import { FaDownload, FaPlus } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { ConfigurableForm } from "./components/ConfigurableForm";
 
 export const Examples = () => {
   const { t } = useTranslation();
@@ -31,6 +32,19 @@ export const Examples = () => {
       >
         <FaPlus className="ml-0 m-1 h-3 w-3" />
         {t("labels.addManualTask")}
+      </Button>
+
+      <Button
+        className="mt-2"
+        onClick={() =>
+          openModal(<ConfigurableForm entity={entity} />, {
+            title: "New Task",
+            size: "7xl",
+          })
+        }
+      >
+        <FaPlus className="ml-0 m-1 h-3 w-3" />
+        Add task
       </Button>
     </>
   );
