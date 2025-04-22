@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
+<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
   xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
   xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
@@ -8,18 +8,19 @@
   id="sample-diagram"
   targetNamespace="http://bpmn.io/schema/bpmn"
   xmlns:linkinq="http://linkinq.physter.com"
-  xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd">
-  <bpmn2:process id="Process_1"
+  xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL bpmn0.xsd">
+  <bpmn:process id="Process_1"
     linkinq:entity="tasks"
+    linkinq:filter="{&quot;kind&quot;: 1}"
     isExecutable="false">
-    <bpmn2:startEvent id="StartEvent_1">
-      <bpmn2:outgoing>Flow_0bzpzvg</bpmn2:outgoing>
-    </bpmn2:startEvent>
-    <bpmn2:userTask id="Activity_18jjnij"
+    <bpmn:startEvent id="StartEvent_1">
+      <bpmn:outgoing>Flow_0bzpzvg</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:userTask id="Activity_18jjnij"
       name="Nový"
       linkinq:status="New"
       camunda:formKey="move1">
-      <bpmn2:extensionElements>
+      <bpmn:extensionElements>
         <camunda:formData>
           <camunda:formField id="move"
             label="MoveTo"
@@ -30,26 +31,26 @@
               name="Close" />
           </camunda:formField>
         </camunda:formData>
-      </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_0bzpzvg</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_0zv3jdc</bpmn2:outgoing>
-      <bpmn2:outgoing>Flow_1et8mvy</bpmn2:outgoing>
-    </bpmn2:userTask>
-    <bpmn2:sequenceFlow id="Flow_0bzpzvg"
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0bzpzvg</bpmn:incoming>
+      <bpmn:outgoing>Flow_0zv3jdc</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1et8mvy</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0bzpzvg"
       sourceRef="StartEvent_1"
       targetRef="Activity_18jjnij" />
-    <bpmn2:endEvent id="Event_1pamluw"
+    <bpmn:endEvent id="Event_1pamluw"
       linkinq:status="Closed"
       name="Uzavřeno">
-      <bpmn2:incoming>Flow_0wopcd0</bpmn2:incoming>
-      <bpmn2:incoming>Flow_0zv3jdc</bpmn2:incoming>
-    </bpmn2:endEvent>
-    <bpmn2:userTask id="Activity_1tnilen"
+      <bpmn:incoming>Flow_0wopcd0</bpmn:incoming>
+      <bpmn:incoming>Flow_0zv3jdc</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="Activity_1tnilen"
       name="Přiděleno"
       linkinq:status="Assign"
       linkinq:assignee="$user"
       camunda:formKey="move2">
-      <bpmn2:extensionElements>
+      <bpmn:extensionElements>
         <camunda:formData>
           <camunda:formField id="move"
             type="enum">
@@ -59,51 +60,51 @@
               name="Close" />
           </camunda:formField>
         </camunda:formData>
-      </bpmn2:extensionElements>
-      <bpmn2:incoming>Flow_1et8mvy</bpmn2:incoming>
-      <bpmn2:incoming>Flow_0114fg0</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_0wopcd0</bpmn2:outgoing>
-      <bpmn2:outgoing>Flow_0zzkew6</bpmn2:outgoing>
-    </bpmn2:userTask>
-    <bpmn2:sequenceFlow id="Flow_0zv3jdc"
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1et8mvy</bpmn:incoming>
+      <bpmn:incoming>Flow_0114fg0</bpmn:incoming>
+      <bpmn:outgoing>Flow_0wopcd0</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0zzkew6</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0zv3jdc"
       name="Close"
       sourceRef="Activity_18jjnij"
       targetRef="Event_1pamluw">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"
-        language="JavaScript">$(item.data.move=="toClose")</bpmn2:conditionExpression>
-    </bpmn2:sequenceFlow>
-    <bpmn2:sequenceFlow id="Flow_0wopcd0"
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
+        language="JavaScript">$(item.data.move=="toClose")</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0wopcd0"
       name="Close"
       sourceRef="Activity_1tnilen"
       targetRef="Event_1pamluw">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"
-        language="JavaScript">$(item.data.move=="toClose")</bpmn2:conditionExpression>
-    </bpmn2:sequenceFlow>
-    <bpmn2:sequenceFlow id="Flow_1et8mvy"
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
+        language="JavaScript">$(item.data.move=="toClose")</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1et8mvy"
       name="Assign"
       sourceRef="Activity_18jjnij"
       targetRef="Activity_1tnilen">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"
-        language="JavaScript">$(item.data.move=="toAssignee")</bpmn2:conditionExpression>
-    </bpmn2:sequenceFlow>
-    <bpmn2:sequenceFlow id="Flow_0zzkew6"
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
+        language="JavaScript">$(item.data.move=="toAssignee")</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0zzkew6"
       name="Pause"
       sourceRef="Activity_1tnilen"
       targetRef="Activity_1clrplr">
-      <bpmn2:conditionExpression xsi:type="bpmn2:tFormalExpression"
-        language="JavaScript">$(item.data.move=="toPause")</bpmn2:conditionExpression>
-    </bpmn2:sequenceFlow>
-    <bpmn2:sequenceFlow id="Flow_0114fg0"
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression"
+        language="JavaScript">$(item.data.move=="toPause")</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0114fg0"
       name="Assign"
       sourceRef="Activity_1clrplr"
       targetRef="Activity_1tnilen" />
-    <bpmn2:userTask id="Activity_1clrplr"
+    <bpmn:userTask id="Activity_1clrplr"
       linkinq:status="Pause"
       name="Pause">
-      <bpmn2:incoming>Flow_0zzkew6</bpmn2:incoming>
-      <bpmn2:outgoing>Flow_0114fg0</bpmn2:outgoing>
-    </bpmn2:userTask>
-  </bpmn2:process>
+      <bpmn:incoming>Flow_0zzkew6</bpmn:incoming>
+      <bpmn:outgoing>Flow_0114fg0</bpmn:outgoing>
+    </bpmn:userTask>
+  </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1"
       bpmnElement="Process_1">
@@ -232,4 +233,4 @@
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
-</bpmn2:definitions>
+</bpmn:definitions>

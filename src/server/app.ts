@@ -32,6 +32,7 @@ import { loadConfigurations } from "../lib/configurations";
 import fs from "fs";
 import { dirname } from "path";
 import { fileURLToPath } from "url";
+import _ from "lodash";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -95,25 +96,56 @@ export class Linkinq {
       this.bpmnServer = new BPMNServer(BPMNConfiguration, wflogger);
 
       const bpmnAPI = new BPMNAPI(this.bpmnServer);
-      this.entity.triggers.startWorkflow = async ({ table, data }) => {
-        var caseId = Math.floor(Math.random() * 10000);
-        let context = await bpmnAPI.engine.start(
-          "Tasks schema",
-          { caseId: caseId++ },
-          { userName: "admin" } as any
-        );
 
-        const entityData = {};
-        Object.keys(context.item.element.def.$attrs).forEach((attr) => {
-          if (attr.indexOf("linkinq:") > -1) {
-            entityData[attr.replace("linkinq:", "")] =
-              context.item.element.def.$attrs[attr];
-          }
+      this.entity.triggers.startWorkflow = async ({ table, data }) => {
+        const models = await sqlAdmin.select({
+          entity: "wf_models",
+          fields: ["id", "name", "filter", "default"],
+          where: {
+            entity: table,
+          },
+          orderBy: ["ordering"],
         });
-        return {
-          id: (context.instance as any).dbId,
-          data: entityData,
-        };
+
+        if (models.length > 0) {
+          let defaultModel;
+
+          const filteredModels = models.filter((m) => {
+            if (m.default) {
+              defaultModel = m;
+            }
+            if (m.filter) {
+              return _.isMatch(data, m.filter);
+            } else {
+              return true;
+            }
+          });
+          let mod =
+            filteredModels.length > 0 ? filteredModels[0] : defaultModel;
+
+          if (!mod) {
+            mod = filteredModels[0] || models[0];
+          }
+
+          let caseId = Math.floor(Math.random() * 10000);
+          let context = await bpmnAPI.engine.start(
+            mod.name,
+            { caseId: caseId++ },
+            { userName: "admin" } as any
+          );
+
+          const entityData = {};
+          Object.keys(context.item.element.def.$attrs).forEach((attr) => {
+            if (attr.indexOf("linkinq:") > -1) {
+              entityData[attr.replace("linkinq:", "")] =
+                context.item.element.def.$attrs[attr];
+            }
+          });
+          return {
+            id: (context.instance as any).dbId,
+            data: entityData,
+          };
+        }
       };
 
       this.bpmnRoutes = new BpmnRoutes({

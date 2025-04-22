@@ -12,7 +12,7 @@ import {
 import { db, prepareConditions } from "../../knex";
 import { BpmnModelData } from "./ModelsData";
 import fs from "fs";
-
+import { XMLParser } from "fast-xml-parser";
 // import { Definition } from "../elements";
 // import { BPMNServer } from "../server";
 
@@ -49,7 +49,6 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
     const list = records.map((r) => ({ name: r.name }));
     return list;
   }
-
   /*
    *	Load a definition
    */
@@ -182,12 +181,29 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
   }
 
   async saveModel(model: IBpmnModelData, owner = null): Promise<boolean> {
+    //
     model.saved = new Date();
     const existingRecord = await this.db(Definition_collection)
       .setUser({ id: 1 })
       .where({ name: model.name })
       .first();
 
+    const parser = new XMLParser({
+      ignoreAttributes: false, // důležité pro čtení atributů!
+      attributeNamePrefix: "@_",
+      allowBooleanAttributes: true,
+      ignoreDeclaration: false,
+      parseAttributeValue: true,
+    });
+
+    const parsed = parser.parse(model.source);
+
+    const process = parsed["bpmn:definitions"]["bpmn:process"];
+
+    const entity = process["@_linkinq:entity"];
+    const filter =
+      process["@_linkinq:filter"] && JSON.parse(process["@_linkinq:filter"]);
+    //
     if (existingRecord) {
       await this.db(Definition_collection)
         .setUser({ id: 1 })
@@ -200,6 +216,8 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
           svg: model.svg,
           processes: JSON.stringify(model.processes),
           events: JSON.stringify(model.events),
+          filter: filter,
+          entity: entity,
         });
     } else {
       await this.db(Definition_collection)
@@ -212,8 +230,11 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
           svg: model.svg,
           processes: JSON.stringify(model.processes),
           events: JSON.stringify(model.events),
+          filter: filter,
+          entity: entity,
         });
     }
+
     return true;
   }
 

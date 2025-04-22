@@ -90,6 +90,30 @@ const entityFields: EntitySchema = {
         description: "GUID record",
         system: true,
       },
+      ordering: {
+        type: "integer",
+        label: "Order",
+        description: "Order record",
+        system: true,
+      },
+      entity: {
+        type: "text",
+        label: "Entity",
+        description: "Entity",
+        system: true,
+      },
+      filter: {
+        type: "jsonb",
+        label: "Filter",
+        description: "Filter for model",
+        system: true,
+      },
+      default: {
+        type: "boolean",
+        label: "Default",
+        description: "Default",
+        system: true,
+      },
     },
   },
 };

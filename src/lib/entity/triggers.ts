@@ -257,7 +257,7 @@ export class Triggers {
     return [...existingKeys, ...uniqueKeys];
   }
 
-  translateIdsToNumber = async (table: string, data: any) => {
+  translateIdsToNumber = (table: string, data: any) => {
     const fields = this.schema?.[table].fields;
 
     for (const d of Array.isArray(data) ? data : [data]) {
@@ -382,7 +382,7 @@ export class Triggers {
                     return { ...bd, ...d };
                   });
 
-                beforeData = await that.translateIdsToNumber(table, beforeData);
+                beforeData = that.translateIdsToNumber(table, beforeData);
               }
             }
           }
@@ -440,17 +440,20 @@ export class Triggers {
                     return ins;
                   });
               } else {
-                runner.builder._single.insert = {
-                  ...runner.builder._single.insert,
-                  createdby: runner.builder?._user.id,
-                  createtime: DateTime.utc().toFormat(
-                    "yyyy-MM-dd HH:mm:ss.SSSZZ"
-                  ),
-                  updatedby: runner.builder?._user.id,
-                  updatetime: DateTime.utc().toFormat(
-                    "yyyy-MM-dd HH:mm:ss.SSSZZ"
-                  ),
-                };
+                runner.builder._single.insert = that.translateIdsToNumber(
+                  table,
+                  {
+                    ...runner.builder._single.insert,
+                    createdby: runner.builder?._user.id,
+                    createtime: DateTime.utc().toFormat(
+                      "yyyy-MM-dd HH:mm:ss.SSSZZ"
+                    ),
+                    updatedby: runner.builder?._user.id,
+                    updatetime: DateTime.utc().toFormat(
+                      "yyyy-MM-dd HH:mm:ss.SSSZZ"
+                    ),
+                  }
+                );
 
                 if (that.schema?.[table]?.workflow && that.startWorkflow) {
                   const workflowData: any = await that.startWorkflow({
@@ -540,7 +543,7 @@ export class Triggers {
           }
           if (operation == "C") {
             afterData = [
-              await that.translateIdsToNumber(table, {
+              that.translateIdsToNumber(table, {
                 ...changedData,
                 ...runner.builder._single.insert,
                 ...afterData[0],
