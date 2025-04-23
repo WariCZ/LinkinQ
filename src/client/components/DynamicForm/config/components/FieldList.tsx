@@ -15,7 +15,10 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { FaTrashAlt, FaCog } from "react-icons/fa";
-import { FormFieldType, SectionType } from "@/client/types/DynamicForm/types";
+import {
+  FormFieldType,
+  SectionType,
+} from "../../../../../client/types/DynamicForm/types";
 import { useFormConfigStore } from "../../_store";
 
 type FieldListProps = {
@@ -99,7 +102,7 @@ export const FieldList = ({
     }
   };
 
-  console.log(localFields)
+  console.log(localFields);
   return (
     <table className="w-full text-sm border-t">
       <thead className="text-left text-xs text-gray-500 uppercase border-b">

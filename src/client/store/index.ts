@@ -1,7 +1,7 @@
 import create from "zustand";
 import axios from "axios";
-import { User } from "@/lib/auth";
-import { EntitySchema, FieldType } from "@/lib/entity/types";
+import { User } from "../../lib/auth";
+import { EntitySchema, FieldType } from "../../lib/entity/types";
 import { AppToastType } from "../components/Toast";
 
 type GuiEntitySchema = Record<string, FieldType>;

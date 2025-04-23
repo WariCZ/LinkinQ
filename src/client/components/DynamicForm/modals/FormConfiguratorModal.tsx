@@ -1,7 +1,7 @@
 import { useModalStore } from "../../Modal/modalStore";
 import { FaEdit } from "react-icons/fa";
 import { Button } from "flowbite-react";
-import { FieldType } from "@/lib/entity/types";
+import { FieldType } from "../../../../lib/entity/types";
 import { useFormConfigStore } from "../_store";
 import { FormConfigurator } from "../config";
 

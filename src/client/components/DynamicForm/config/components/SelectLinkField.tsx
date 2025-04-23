@@ -1,6 +1,6 @@
-import { useModalStore } from "@/client/components/Modal/modalStore";
-import useStore from "@/client/store";
-import { FieldType } from "@/lib/entity/types";
+import { useModalStore } from "../../../../../client/components/Modal/modalStore";
+import useStore from "../../../../../client/store";
+import { FieldType } from "../../../../../lib/entity/types";
 import { FiArrowRight } from "react-icons/fi";
 import { getFieldName } from "../../utils/getFieldName";
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFormConfigStore } from "../_store";
-import { FormFieldType } from "@/client/types/DynamicForm/types";
+import { FormFieldType } from "../../../../client/types/DynamicForm/types";
 
 export const useActiveFormFields = (
   formFields: (FormFieldType | string)[]
