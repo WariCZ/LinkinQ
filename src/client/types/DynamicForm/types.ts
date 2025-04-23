@@ -85,7 +85,7 @@ type FormFieldTextWithIcon = {
   TextInputProps;
 
 type FormFieldCollapsibleSection = {
-  type: "СollapsibleSection";
+  type: "CollapsibleSection";
   icon?: IconType;
   children: FormFieldType[];
 } & FormFieldDefault;

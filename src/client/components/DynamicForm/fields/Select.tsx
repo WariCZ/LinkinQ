@@ -111,12 +111,10 @@ const Select = React.forwardRef(
           {...props}
           value={value}
           isDisabled={props.readOnly}
-          // ref={ref}
-          // menuIsOpen
           className="w-full min-w-fit"
           classNamePrefix="flowbite-select"
           placeholder="Vyberte možnosti"
-          menuPortalTarget={document.body} // Přesměrování dropdownu mimo modal
+          menuPortalTarget={document.body}
           onChange={(selectedOptions: any, b) => {
             const values =
               selectedOptions && Array.isArray(selectedOptions)
@@ -125,7 +123,7 @@ const Select = React.forwardRef(
             props.onChange && props.onChange(values, b);
           }}
           styles={{
-            option: (base, props) => ({
+            option: (base) => ({
               ...base,
               padding: "3px 10px",
             }),

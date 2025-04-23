@@ -92,12 +92,14 @@ export const renderItem = ({
   control,
   gap,
   schema,
+  readOnly,
 }: {
   formField: FormFieldType;
   key: number;
   control: Control<FieldValues, any>;
   gap?: number;
   schema?: EntityType;
+  readOnly?: boolean;
 }): React.ReactNode => {
   if (formField.type === "Section") {
     return (
@@ -105,8 +107,8 @@ export const renderItem = ({
         key={key}
         section={formField}
         control={control}
-        gap={gap}
         schema={schema}
+        readOnly={readOnly}
       />
     );
   }
@@ -126,7 +128,7 @@ export const renderItem = ({
       return null;
     }
 
-    return <Component key={key} formField={formField} control={control} />;
+    return <Component key={key} formField={formField} control={control} readOnly={readOnly}/>;
   }
 
   if (formField.type === "СollapsibleSection") {
@@ -152,5 +154,5 @@ export const renderItem = ({
     );
   }
 
-  return <FormField key={key} formField={formField} control={control} />;
+  return <FormField key={key} formField={formField} control={control} readOnly={readOnly}/>;
 };

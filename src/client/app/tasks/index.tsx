@@ -110,23 +110,6 @@ export const Tasks = () => {
     }
   }, [filters]);
 
-  useEffect(() => {
-    if (guidDetail && dataDetail?.guid) {
-      openModal(
-        <TaskDetail
-          data={dataDetail}
-          entity={entity}
-          refresh={refreshDetail}
-          setRecord={setRecord}
-        />,
-        {
-          title: t("Detail task"),
-          size: "xl",
-          modalSingle: true,
-        }
-      );
-    }
-  }, [dataDetail, guidDetail]);
 
   return (
     <div className="mx-3">
@@ -161,6 +144,19 @@ export const Tasks = () => {
         data={data}
         rowClick={(data: any) => {
           setGuidDetail(data?.guid as string);
+          openModal(
+            <TaskDetail
+              data={dataDetail}
+              entity={entity}
+              refresh={refreshDetail}
+              setRecord={setRecord}
+            />,
+            {
+              title: t("Detail task"),
+              size: "xl",
+              modalSingle: true,
+            }
+          );
         }}
         columns={columns}
         loading={loading}

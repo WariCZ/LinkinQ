@@ -14,6 +14,7 @@ const FileUpload = forwardRef(
     onChange?: (guids: string[]) => void;
     name?: string;
     value: any;
+    disabled?: boolean;
   }) => {
     console.log("FileUpload props ", props);
     const [files, setFiles] = useState<UploadedFile[]>([]);
@@ -98,7 +99,7 @@ const FileUpload = forwardRef(
               : "border-gray-300 bg-white"
           }`}
         >
-          <input {...getInputProps()} />
+          <input {...getInputProps()} disabled={props.disabled} />
           <div className="flex flex-wrap items-center gap-2" style={{}}>
             {files.length === 0 && (
               <p className="text-gray-500 text-sm">

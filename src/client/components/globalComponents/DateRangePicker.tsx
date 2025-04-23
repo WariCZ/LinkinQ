@@ -13,9 +13,10 @@ interface DateRangePickerProps {
   value?: DateRange;
   onChange?: (value: DateRange) => void;
   name?: string;
+  disabled?: boolean
 }
 
-const DateRangePicker = ({ value, onChange }: DateRangePickerProps) => {
+const DateRangePicker = ({ value, onChange, disabled }: DateRangePickerProps) => {
   const popoverRef = useRef(null);
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
@@ -87,6 +88,7 @@ const DateRangePicker = ({ value, onChange }: DateRangePickerProps) => {
                   defaultDate={from}
                   onSelectedDateChanged={setFrom}
                   maxDate={to}
+                  disabled={disabled}
                 />
               </div>
               <div>
@@ -98,6 +100,7 @@ const DateRangePicker = ({ value, onChange }: DateRangePickerProps) => {
                   defaultDate={to}
                   onSelectedDateChanged={setTo}
                   minDate={from}
+                  disabled={disabled}
                 />
               </div>
             </div>

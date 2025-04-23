@@ -12,7 +12,7 @@ const DateTimePicker = (
     value?: string;
     format?: string;
     onlydate?: boolean;
-    onChange?: (value: React.ChangeEvent<HTMLInputElement> | string) => void;
+    isReadonly?: boolean;
   }
 ) => {
   const popoverRef = useRef(null);
@@ -74,7 +74,6 @@ const DateTimePicker = (
     setIsOpen(false);
   };
 
-  // Kliknutí mimo Popover
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -107,6 +106,7 @@ const DateTimePicker = (
                 // step="1"
                 value={time}
                 onChange={handleTimeChange}
+                disabled={props.isReadonly}
               />
             )}
             <Datepicker
@@ -116,6 +116,7 @@ const DateTimePicker = (
               defaultDate={date}
               onSelectedDateChanged={handleDateChange}
               weekStart={1}
+              disabled={props.isReadonly}
             />
             {props.onlydate ? null : (
               <div className="flex justify-end mt-4 space-x-2">
@@ -141,7 +142,9 @@ const DateTimePicker = (
           value={inputValue}
           placeholder="Vyberte datum a čas"
           readOnly
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            if (props.isReadonly !== true) setIsOpen(!isOpen);
+          }}
           className="w-full"
         />
       </Popover>

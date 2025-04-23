@@ -43,6 +43,7 @@ export const ManualTask = (props: ManualTaskProps) => {
   return (
     <>
       <DynamicForm
+        readOnly={true}
         onSubmit={({ data }) => {
           console.log("data", data);
           // setRecord(data);

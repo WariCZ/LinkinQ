@@ -25,6 +25,7 @@ type SlateEditorProps = {
   onChange: (value: Descendant[]) => void;
   placeholder: string;
   field: any;
+  readOnly?: boolean;
 };
 
 const HOTKEYS: Record<string, any> = {
@@ -49,6 +50,7 @@ const SlateEditor = ({
   onChange,
   placeholder,
   field,
+  readOnly,
 }: SlateEditorProps) => {
   const renderElement = useCallback(
     (props: any) => <SlateElement {...props} />,
@@ -117,6 +119,7 @@ const SlateEditor = ({
         </div>
       )}
       <Editable
+        readOnly={readOnly}
         renderElement={renderElement}
         renderLeaf={renderLeaf}
         // placeholder={placeholder}

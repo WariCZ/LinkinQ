@@ -7,13 +7,17 @@ import {
   FormProvider,
 } from "react-hook-form";
 import useStore from "../../store";
-import { EntityType } from "../../../lib/entity/types";
+import { EntityType, FieldType} from "../../../lib/entity/types";
 import _ from "lodash";
 import { ConditionType, FormFieldType } from "../../types/DynamicForm/types";
 import { renderItem, translateFormField } from "./utils/FormUtils";
+import { FormConfiguratorModal } from "./modals/FormConfiguratorModal";
+import { useFormConfigStore } from "./_store";
+import { useActiveFormFields } from "./hooks/useActiveFormFields";
 
 interface DynamicFormProps {
   formFields: (FormFieldType | string)[];
+  isConfigurable?: boolean;
   onSubmit?: (props: {
     data: Record<string, any>;
     setError: UseFormSetError<any>;
@@ -26,6 +30,7 @@ interface DynamicFormProps {
   columns?: number;
   gap?: number;
   children?: React.ReactElement;
+  readOnly?: boolean;
 }
 
 const getFieldsForForm = (
@@ -97,8 +102,11 @@ const DynamicForm = ({
   columns,
   gap,
   children,
+  readOnly,
+  isConfigurable = false,
 }: DynamicFormProps) => {
-  const schema: any = useStore((state) => state.schema);
+  const schema = useStore((state) => state.schema);
+  const activeFields = useActiveFormFields(formFields);
 
   const form = useForm({
     disabled: disabled,
@@ -186,40 +194,53 @@ const DynamicForm = ({
       });
   };
 
+  const fields: FieldType[] = Object.entries(
+    schema?.[entity]?.fields ?? {}
+  ).map(([key, value]) => ({
+    ...value,
+    name: key,
+  }));
+
+  console.log(activeFields);
+
   return (
-    <FormProvider {...form}>
-      <form
-        ref={formRef}
-        onSubmit={handleSubmit(formSubmit)}
-        className={columns && `grid lg:grid-cols-${columns} gap-${gap || 2}`}
-      >
-        {formFields.map((item, index) => {
-          let formField: FormFieldType = translateFormField({
-            schema: schema[entity],
-            field: item,
-          });
+    <>
+      {isConfigurable && <FormConfiguratorModal fields={fields} />}
+      <FormProvider {...form}>
+        <form
+          ref={formRef}
+          onSubmit={handleSubmit(formSubmit)}
+          className={columns && `grid lg:grid-cols-${columns} gap-${gap || 2}`}
+        >
+          {activeFields.map((item, index) => {
+            let formField: FormFieldType = translateFormField({
+              schema: schema[entity],
+              field: item,
+            });
 
-          if (formField.rules) {
-            formField = {
-              ...formField,
-              ...evaluateRules(formField.rules, watchAllFields),
-            };
-          }
+            if (formField.rules) {
+              formField = {
+                ...formField,
+                ...evaluateRules(formField.rules, watchAllFields),
+              };
+            }
 
-          if (formField.visible === false) return null;
+            if (formField.visible === false) return null;
 
-          const c: Control<FieldValues, any> = control as any;
-          return renderItem({
-            formField,
-            key: index,
-            control: c,
-            gap,
-            schema: schema[entity],
-          });
-        })}
-        {children}
-      </form>
-    </FormProvider>
+            const c: Control<FieldValues, any> = control as any;
+            return renderItem({
+              formField,
+              key: index,
+              control: c,
+              gap,
+              schema: schema[entity],
+              readOnly,
+            });
+          })}
+          {children}
+        </form>
+      </FormProvider>
+    </>
   );
 };
 
