@@ -32,9 +32,9 @@
     "clean": "tsc --build --clean",
     "test": "echo \"Error: no test specified\" && exit 1",
     "client:dev": "vite",
-    "server:start": "ts-node src/server/index",
-    "server:dev": "tsx watch src/server/runner.ts",
-    "server:e2etest": "ts-node-dev --respawn src/server/index e2etest=true"
+    "server:start": "tsx --conditions development src/server/runner.ts",
+    "server:dev": "tsx watch --conditions development src/server/runner.ts",
+    "server:e2etest": "tsx watch --conditions development src/server/runner.ts e2etest=true"
   },
   "author": "",
   "license": "ISC",
@@ -120,6 +120,7 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsc-esm-fix": "^3.1.2",
+    "tsx": "^4.19.3",
     "typescript": "^5.6.3"
   },
   "optionalDependencies": {

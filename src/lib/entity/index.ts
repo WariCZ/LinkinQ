@@ -118,36 +118,14 @@ export class Entity {
 
           foreignTable =
             foreignTableRows.length > 0 ? foreignTableRows[0].table_name : null;
-
-          // const referencedTable = await this.db
-          //   .select("unique_constraint_name")
-          //   .from("information_schema.referential_constraints")
-          //   .where("constraint_name", foreignKeyInfo.constraint_name)
-          //   .andWhere("constraint_schema", "public");
-
-          // if (referencedTable.length > 0) {
-          //   if (referencedTable.length > 1) {
-          //     debugger;
-          //   }
-          //   dbSchema.foreignKeys.push(
-          //     referencedTable[0].unique_constraint_name
-          //   );
-          // }
-          // referencedtableName =
-          //   referencedTable.length > 0
-          //     ? referencedTable[0].unique_constraint_name
-          //     : null;
         }
-
-        // get description
-        // console.log([table_name, column_name, table_name]);
 
         const desc_result = await this.db
           .raw(
             `SELECT col_description(?::regclass::oid,
       (SELECT attnum FROM pg_attribute
        WHERE attname = ? AND attrelid = ?::regclass))`,
-            [table_name, column_name, table_name]
+            [`"${table_name}"`, `"${column_name}"`, `"${table_name}"`]
           )
           .setUser({ id: 1 });
 
@@ -485,21 +463,10 @@ export class Entity {
                 .uuid(this.MAIN_ID)
                 .primary()
                 .defaultTo(this.db.raw("gen_random_uuid()"));
-              //Zatim nevim proc ??????
-              // table.text(this.MAIN_ID);
-              // // table.primary([this.MAIN_ID]);
-              // if (
-              //   schemaDefinition[tableName].fields[this.MAIN_ID].description
-              // ) {
-              //   column.comment(
-              //     schemaDefinition[tableName].fields[this.MAIN_ID]
-              //       .description || "ID record"
-              //   );
-              // }
             } else {
               column = table.bigIncrements(this.MAIN_ID);
               table.primary([this.MAIN_ID]);
-              // }
+
               if (
                 schemaDefinition[tableName].fields[this.MAIN_ID].description
               ) {
@@ -711,8 +678,9 @@ export class Entity {
     Object.keys(schema).forEach((table) => {
       Object.keys(schema[table].fields).forEach((f) => {
         if (schema[table]) {
-          const relTable =
-            schema[table].fields[f].type.match(/.*link\((\w+)\)/);
+          const relTable = schema[table].fields[f].type.match(
+            /.*(?:link|lov)\((\w+)\)/
+          );
           if (relTable) {
             const isNLink = relTable[0].indexOf("nlink(");
             if (isNLink > -1) {
@@ -728,7 +696,13 @@ export class Entity {
                 field: f,
               });
             } else {
-              schema[table].fields[f].link = relTable[1];
+              const isLov = relTable[0].indexOf("lov(") > -1;
+              if (isLov) {
+                schema[table].fields[f].link = "lov";
+                schema[table].fields[f].lov = relTable[1];
+              } else {
+                schema[table].fields[f].link = relTable[1];
+              }
             }
           }
         }
