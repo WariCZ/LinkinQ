@@ -31,7 +31,9 @@ export type FieldPrimitiveType =
   | "integer"
   | "datetime"
   | `link(${string})`
-  | `nlink(${string})`;
+  | `nlink(${string})`
+  | `lov(${string})`
+  | `nlov(${string})`;
 
 export type FieldType = {
   type: FieldPrimitiveType;
@@ -47,6 +49,7 @@ export type FieldType = {
   system?: boolean;
   nlinkTable?: string;
   link?: string;
+  lov?: string;
 };
 
 export type DBFieldType = {
@@ -63,6 +66,7 @@ export type DBFieldType = {
   system?: boolean;
   nlinkTable?: string;
   link?: string;
+  lov?: string;
 };
 
 export type DbSchemaType = { tables: DBSchema; foreignKeys: string[] };

@@ -4,6 +4,10 @@ const entityFields: EntitySchema = {
     system: true,
     journal: true,
     fields: {
+      kind: {
+        type: "lov(usersKind)",
+        default: 1,
+      },
       fullname: {
         type: "text",
         label: "Fullname",

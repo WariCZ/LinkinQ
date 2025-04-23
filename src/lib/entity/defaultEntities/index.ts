@@ -27,7 +27,7 @@ export const defaultFields = (entity: string): Record<string, FieldType> => ({
     system: true,
   },
   kind: {
-    type: "integer",
+    type: `lov(${entity}Kind)`,
     label: "Type",
     description: "Record type",
     system: true,

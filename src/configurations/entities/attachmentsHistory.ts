@@ -1,6 +1,6 @@
 import { EntitySchema } from "../../lib/entity/types";
 const entityFields: EntitySchema = {
-  attachments_history: {
+  attachmentsHistory: {
     system: true,
     fields: {
       data: {

@@ -9,6 +9,12 @@ const entityFields: EntitySchema = {
         description: "Value",
         isRequired: false,
       },
+      lov: {
+        type: "text",
+        label: "Lov",
+        description: "Lov",
+        isRequired: false,
+      },
     },
   },
 };

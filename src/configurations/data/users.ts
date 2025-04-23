@@ -8,7 +8,6 @@ const defaultData = ({ env }) => ({
       password: env.DEFAULT_PASSWORD,
       createdby: 1,
       updatedby: 1,
-      kind: 1,
     },
     {
       guid: "1500b584-fa8a-4a3c-8fa4-92f2221db78b",
@@ -18,7 +17,6 @@ const defaultData = ({ env }) => ({
       password: env.DEFAULT_PASSWORD,
       createdby: 1,
       updatedby: 1,
-      kind: 1,
     },
   ],
 });
@@ -28,6 +26,11 @@ const updateData = {
     {
       guid: "9500b584-fa8a-4a3c-8f94-92f2221db78b",
       roles: ["9500b584-fa8a-4a3c-8f91-92f2221db78b"],
+      kind: 1,
+    },
+    {
+      guid: "1500b584-fa8a-4a3c-8fa4-92f2221db78b",
+      kind: 1,
     },
   ],
 };

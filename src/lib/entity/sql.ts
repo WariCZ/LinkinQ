@@ -79,14 +79,41 @@ export class Sql {
     const data = { ...dataItem };
     console.log("getLinks", dataItem);
     for (let d of Object.keys(newDataItem) as any) {
-      if (this.#schema[entity].fields[d].type.indexOf("link(") > -1) {
+      if (
+        this.#schema[entity].fields[d].type.indexOf("link(") > -1 ||
+        this.#schema[entity].fields[d].type.indexOf("lov(") > -1
+      ) {
         if (this.user.id == 1 && Number.isInteger(newDataItem[d])) {
           // admin muze zadavat pres konkretni id ostatni musi pres GUID
           data[d] = newDataItem[d];
         } else {
-          const match =
-            this.#schema[entity].fields[d].type.match(/.*link\((\w+)\)/);
+          const match = this.#schema[entity].fields[d].type.match(
+            /.*(?:link|lov)\((\w+)\)/
+          );
           if (match && match[0].indexOf("nlink") > -1 && match[1]) {
+            const joinTable = entity + "2" + match[1] + "4" + d;
+
+            const w = Array.isArray(newDataItem[d])
+              ? newDataItem[d]
+              : [newDataItem[d]];
+
+            let targetIds;
+            if (Number.isInteger(w[0])) {
+              targetIds = await this.#db("lov")
+                .select("id")
+                .whereIn("value", w)
+                .where("lov", match[1]);
+            } else {
+              targetIds = await this.#db("lov")
+                .select("id")
+                .whereIn("guid", w)
+                .where("lov", match[1]);
+            }
+
+            joinsIds[joinTable] = targetIds;
+            data[d] = targetIds.map((t) => parseInt(t[MAIN_ID]));
+            delete newDataItem[d];
+          } else if (match && match[0].indexOf("nlov") > -1 && match[1]) {
             const joinTable = entity + "2" + match[1] + "4" + d;
 
             const w = Array.isArray(newDataItem[d])
@@ -117,6 +144,36 @@ export class Sql {
                   throw "Nalezeno guid pro vice linku";
                 } else {
                   throw "Nenalezen guid pro link";
+                }
+              }
+            }
+            ///////// LOV ///////////////////
+          } else if (match && match[0].indexOf("lov") > -1 && match[1]) {
+            if (newDataItem[d] === null) {
+              newDataItem[d] = null;
+              data[d] = null;
+            } else {
+              let targetData;
+              if (Number.isInteger(newDataItem[d])) {
+                targetData = await this.#db("lov")
+                  .select("id")
+                  .where("value", newDataItem[d])
+                  .where("lov", match[1]);
+              } else {
+                targetData = await this.#db("lov")
+                  .select("id")
+                  .where("guid", newDataItem[d])
+                  .where("lov", match[1]);
+              }
+
+              if (targetData.length == 1) {
+                newDataItem[d] = targetData[0].id;
+                data[d] = parseInt(targetData[0].id);
+              } else {
+                if (targetData.length > 1) {
+                  throw "Nalezeno guid pro vice lov";
+                } else {
+                  throw "Nenalezen guid pro lov";
                 }
               }
             }

@@ -4,7 +4,7 @@ const entityFields: EntitySchema = {
     system: true,
     fields: {
       currentversion: {
-        type: "link(attachments_history)",
+        type: "link(attachmentsHistory)",
         label: "Current version",
         description: "Current version",
         isRequired: true,

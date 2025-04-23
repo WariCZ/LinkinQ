@@ -20,6 +20,8 @@ import logger from "../logger";
 import EventEmitter from "events";
 import { Sql } from "./sql";
 import { TriggerItemInternalType, Triggers } from "./triggers";
+import { debug } from "console";
+import { console } from "inspector";
 
 export class Entity {
   db: Knex;
@@ -294,68 +296,36 @@ export class Entity {
           const rel = columnDef.type.match(/^nlink\((\w+)\)$/);
           if (rel) {
             const linkTable = `${tableName}2${rel[1]}4${columnName}`;
-            // if (
-            //   !(await this.db.schema
-            //     .setUser({ id: 1 })
-            //     .hasTable(tableName + "2" + rel[1] + "4" + columnName))
-            // ) {
 
             createLinkTables.push({
               tableName: linkTable,
               sourceTable: tableName,
               targetTable: rel[1],
             });
-            // t.bigIncrements(this.MAIN_ID).primary([this.MAIN_ID]);
-            // t.bigint("source");
-            // t.bigint("target");
+          } else {
+            logger.info(`Sloupec ${columnDef.type} je mimo regularni vyraz.`);
+          }
+        } else if (columnDef.type?.match(/^lov\(\w+\)$/)) {
+          const rel = columnDef.type.match(/^lov\((\w+)\)$/);
+          if (rel) {
+            foreignKeys.push({
+              table: tableName,
+              column: columnName,
+              refTable: "lov",
+              // refTable: rel[1],
+              refCol: this.MAIN_ID,
+              onDelete: false,
+            });
 
-            // foreignKeys.push({
-            //   table: linkTable,
-            //   column: "source",
-            //   refTable: tableName,
-            //   refCol: this.MAIN_ID,
-            //   onDelete: true,
-            // });
-            // foreignKeys.push({
-            //   table: linkTable,
-            //   column: "target",
-            //   refTable: rel[1],
-            //   refCol: this.MAIN_ID,
-            //   onDelete: true,
-            // });
-
-            // await this.db.schema
-            //   .setUser({ id: 1 })
-            //   .createTable(
-            //     tableName + "2" + rel[1] + "4" + columnName,
-            //     (table: any) => {
-            //       table.bigIncrements(this.MAIN_ID).primary([this.MAIN_ID]);
-
-            //       table.bigint("source");
-            //       table.bigint("target");
-
-            //       table
-            //         .foreign("source")
-            //         .references(tableName + "." + this.MAIN_ID)
-            //         .onDelete("CASCADE");
-            //       //TODO: musi se provest az uplne na konci Conclusion nema taky :-)
-
-            //       table
-            //         .foreign("target")
-            //         .references(rel[1] + "." + this.MAIN_ID)
-            //         .onDelete("CASCADE");
-            //     }
-            //   );
+            column = table.bigint(columnName);
           } else {
             logger.info(
-              `Tabulka ${
-                tableName + "2" + rel[1] + "4" + columnName
-              } již existuje.`
+              `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ link ${columnDef.type}.`
             );
           }
         } else {
           logger.error(
-            `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ nlink ${columnDef.type}.`
+            `  Sloupec ${columnName} v tabulce ${tableName} má neznámy typ ${columnDef.type}.`
           );
         }
         // } else {
@@ -376,6 +346,8 @@ export class Entity {
         if (column && columnDef.default) {
           if (columnDef.default == "now()") {
             column.defaultTo(this.db.fn.now());
+          } else {
+            column.defaultTo(columnDef.default);
           }
         }
 
@@ -415,6 +387,7 @@ export class Entity {
       if (fk) {
         await this.db.schema.setUser({ id: 1 }).alterTable(table, (table) => {
           const foreignKey = fk.refTable + "_" + fk.column + "_foreign";
+          console.log(`CREATE FK - "${foreignKey}"`);
           if (
             !actualDBSchema ||
             actualDBSchema?.foreignKeys.indexOf(foreignKey) == -1
@@ -584,6 +557,7 @@ export class Entity {
     schemaDefinition: EntitySchema;
     actualDBSchema?: DbSchemaType;
   }) {
+    //
     for (const tableName in schemaDefinition) {
       await this.createTable({
         tableName,

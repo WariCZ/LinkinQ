@@ -19,6 +19,8 @@ export const addDefaultFields = (schemaDefinition: EntitySchema) => {
     _.mapKeys(defaultFields(k), function (fieldDef, name) {
       if (!fields[name]) {
         fields[name] = fieldDef;
+      } else {
+        fields[name] = _.merge(fieldDef, fields[name]);
       }
     });
 
