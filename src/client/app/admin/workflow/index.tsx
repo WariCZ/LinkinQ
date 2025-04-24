@@ -47,7 +47,6 @@ export const Workflow = () => {
   // const test = (a, b, c) => {
   //   debugger;
   // };
-  console.log(workflows);
   return (
     <div className="h-full">
       <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">

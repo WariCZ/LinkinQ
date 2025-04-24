@@ -63,7 +63,7 @@ export const ServerScript = () => {
 
   return (
     <div className="h-full">
-      <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
+      <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
         <span className="font-bold">Server side scripts</span>
         <Button className="absolute top-2 right-3" onClick={runCode}>
           Spustit kód

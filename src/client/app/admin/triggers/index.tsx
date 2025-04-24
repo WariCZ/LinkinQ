@@ -12,6 +12,7 @@ import axios from "axios";
 import _ from "lodash";
 import { AddTrigger } from "./components/AddTrigger";
 import { fieldFormTriggers } from "./utils/fieldFormTriggers";
+import { AppButton } from "../../../../client/components/common/AppButton";
 
 export const Triggers = () => {
   const schema = useStore((state) => state.schema);
@@ -68,36 +69,31 @@ export const Triggers = () => {
     }));
   }
 
-  console.log("selectedTriggers", selectedTriggers);
   return (
     <div className="h-full">
       <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
         <span className="font-bold">Triggers editor</span>
       </div>
-      <div className="flex items-start h-full">
-        <div className="px-3 w-2/12 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
-          <div className="py-1"></div>
-          <div className="pt-1">
-            <Button
-              className="h-full"
+      <div className="flex items-start h-full gap-2">
+        <div className="px-3 w-4/12 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
+          <div className="pt-1 flex justify-between items-center my-1">
+            <div>
+              <span className="font-bold">Triggers</span>
+              <span className="float-end pl-1">({triggers.length})</span>
+            </div>
+            <AppButton
+              icon={<FaPlus />}
               onClick={() => {
                 openModal(
-                  <AddTrigger modalLabel="Add trigger" modalSingle={true} />
+                  <AddTrigger modalLabel="Add trigger" modalSingle={true} />, {
+                    title: "Add new trigger",
+                  }
                 );
               }}
             >
-              <span className="top-0 flex items-center left-4">
-                <FaPlus className="h-3 w-3 mr-2" />
-                <span>Add</span>
-              </span>
-            </Button>
+              Add
+            </AppButton>
           </div>
-
-          <div className="pt-1">
-            <span className="font-bold">Triggers</span>
-            <span className="float-end">{triggers.length}</span>
-          </div>
-          <div className="pt-1"></div>
           <div>
             <Tree
               data={transformToTree(triggers)}
@@ -109,7 +105,7 @@ export const Triggers = () => {
         </div>
         {_.keys(selectedTriggers).length > 0 ? (
           <>
-            <div className="w-2/12 p-2">
+            <div className="w-4/12 px-3">
               <Form
                 data={selectedTriggers}
                 onSubmit={async ({ data }) => {
@@ -151,7 +147,7 @@ export const Triggers = () => {
               </Form>
             </div>
             <MonacoEditor
-              className="w-8/12"
+              className="w-4/12"
               value={selectedTriggers.code}
               height="60vh"
               defaultLanguage="javascript"

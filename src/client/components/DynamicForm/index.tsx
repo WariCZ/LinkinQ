@@ -31,6 +31,7 @@ interface DynamicFormProps {
   gap?: number;
   children?: React.ReactElement;
   readOnly?: boolean;
+  className?: string;
 }
 
 const getFieldsForForm = (
@@ -49,13 +50,13 @@ const getFieldsForForm = (
 
 const evaluateConditions = (
   conditions: ConditionType[],
-  watchAllFields: any
+  watchAllFields: Record<string, any>
 ) => {
   return conditions.some((cond) => {
     for (const key in cond) {
-      if (watchAllFields[key] !== cond[key]) {
-        return false;
-      }
+      const watchedValue = watchAllFields?.[key];
+      if (watchedValue === undefined || watchedValue === null) return false;
+      if (watchedValue !== cond[key]) return false;
     }
     return true;
   });
@@ -99,14 +100,17 @@ const DynamicForm = ({
   entity,
   data,
   disabled,
-  columns,
+  columns = 1,
   gap,
   children,
   readOnly,
   isConfigurable = false,
+  className,
 }: DynamicFormProps) => {
   const schema = useStore((state) => state.schema);
-  const activeFields = useActiveFormFields(formFields);
+  const activeFields = isConfigurable
+    ? useActiveFormFields(formFields)
+    : formFields;
 
   const form = useForm({
     disabled: disabled,
@@ -182,7 +186,7 @@ const DynamicForm = ({
     onChange && onChange({ data: watchAllFields });
   }, [watchAllFields]);
 
-  const formSubmit = (formdata: any, e: any) => {
+  const formSubmit = (formdata: any) => {
     const changedData: any = findChanges(formdata, data);
     if (formdata.guid) {
       changedData.guid = formdata.guid;
@@ -201,8 +205,6 @@ const DynamicForm = ({
     name: key,
   }));
 
-  console.log(activeFields);
-
   return (
     <>
       {isConfigurable && <FormConfiguratorModal fields={fields} />}
@@ -210,22 +212,22 @@ const DynamicForm = ({
         <form
           ref={formRef}
           onSubmit={handleSubmit(formSubmit)}
-          className={columns && `grid lg:grid-cols-${columns} gap-${gap || 2}`}
+          className={`${columns ? `grid lg:grid-cols-${columns} gap-${gap || 2}` : ""} ${className ?? "px-2 py-4"}`}
         >
-          {activeFields.map((item, index) => {
+          {activeFields?.map((item, index) => {
             let formField: FormFieldType = translateFormField({
               schema: schema[entity],
               field: item,
             });
 
-            if (formField.rules) {
+            if (formField?.rules) {
               formField = {
                 ...formField,
                 ...evaluateRules(formField.rules, watchAllFields),
               };
             }
 
-            if (formField.visible === false) return null;
+            if (formField?.visible === false) return null;
 
             const c: Control<FieldValues, any> = control as any;
             return renderItem({

@@ -5,7 +5,7 @@ import { FormSection } from "../elements/FormSection";
 import { FormTabs } from "../elements/FormTabs";
 import { FormField } from "../fields/FormField";
 import globalComponents from "../../globalComponents";
-import { CollapsibleSection } from "../../CollapsibleSection";
+// import { CollapsibleSection } from "../../CollapsibleSection";
 
 export const translateFormField = ({
   field,
@@ -14,76 +14,90 @@ export const translateFormField = ({
   field: FormFieldType | string;
   schema?: EntityType;
 }): FormFieldType => {
-  if (typeof field == "string") {
-    const s = schema?.fields[field];
+  if (typeof field === "string") {
+    const s = schema?.fields?.[field];
 
-    if (s && s.link && s.link == "attachments") {
+    if (!s) {
       return {
-        field: field,
-        label: s?.label || "",
-        required: s?.isRequired,
-        multi: s.nlinkTable ? true : false,
-        type: "attachment",
-      };
-    } else if (s && s.link) {
-      return {
-        field: field,
-        label: s?.label || "",
-        required: s?.isRequired,
-        default: s?.default,
-        entity: s.link,
-        isMulti: s.nlinkTable ? true : false,
-        type: "select",
-      };
-    } else {
-      return {
-        field: field,
-        label: s?.label || "",
-        required: s?.isRequired,
-        default: s?.default,
+        field,
+        label: field,
         type: "text",
-      };
+      } as FormFieldType;
     }
-  } else {
-    if (
-      field.type == "Section" ||
-      field.type == "Tabs" ||
-      field.type == "Сomponent" ||
-      field.type == "СollapsibleSection"
-    ) {
-      return field;
-    }
-    const s = schema?.fields[field.field];
-    if (s && s.link && s.link == "attachments") {
+
+    if (s.link === "attachments") {
       return {
-        field: field.field,
-        label: field.label || s?.label || "",
-        required: field.required !== undefined ? field.required : s?.isRequired,
-        multi: s.nlinkTable ? true : false,
+        field,
+        label: s.label || field,
+        required: s.isRequired,
+        multi: !!s.nlinkTable,
         type: "attachment",
-      };
-    } else if (s && s.link) {
-      return {
-        ...field,
-        field: field.field,
-        label: field.label || s?.label || "",
-        required: field.required !== undefined ? field.required : s?.isRequired,
-        default: field.default || s?.default,
-        entity: s.link,
-        isMulti: s.nlinkTable ? true : false,
-        type: "select",
-      };
-    } else {
-      return {
-        ...field,
-        field: field.field,
-        label: field.label || s?.label || "",
-        required: field.required !== undefined ? field.required : s?.isRequired,
-        default: field.default || s?.default,
-        type: field.type || "text",
-      };
+      } as FormFieldType;
     }
+
+    if (s.link) {
+      return {
+        field,
+        label: s.label || field,
+        required: s.isRequired,
+        default: s.default,
+        entity: s.link,
+        isMulti: !!s.nlinkTable,
+        type: "select",
+        options: [], // 👈 добавлено для соответствия типу FormFieldSelect
+      } as FormFieldType;
+    }
+
+    return {
+      field,
+      label: s.label || field,
+      required: s.isRequired,
+      default: s.default,
+      type: "text",
+    } as FormFieldType;
   }
+
+  if (
+    field.type === "Section" ||
+    field.type === "Tabs" ||
+    field.type === "Сomponent" ||
+    field.type === "CollapsibleSection"
+  ) {
+    return field;
+  }
+
+  const s = schema?.fields?.[field.field];
+
+  if (s?.link === "attachments") {
+    return {
+      ...field,
+      label: field.label || s.label || field.field,
+      required: field.required ?? s.isRequired,
+      multi: !!s.nlinkTable,
+      type: "attachment",
+    } as FormFieldType;
+  }
+
+  if (s?.link) {
+    return {
+      ...field,
+      label: field.label || s.label || field.field,
+      required: field.required ?? s.isRequired,
+      default: field.default ?? s.default,
+      entity: s.link,
+      isMulti: !!s.nlinkTable,
+      type: "select",
+      options: [],
+    } as FormFieldType;
+  }
+
+  return {
+    ...field,
+    label: field.label || s?.label || field.field,
+    required: field.required ?? s?.isRequired,
+    default: field.default ?? s?.default,
+    type: field.type || "text",
+  } as FormFieldType;
 };
 
 export const renderItem = ({
@@ -128,31 +142,45 @@ export const renderItem = ({
       return null;
     }
 
-    return <Component key={key} formField={formField} control={control} readOnly={readOnly}/>;
-  }
-
-  if (formField.type === "СollapsibleSection") {
     return (
-      <CollapsibleSection
+      <Component
         key={key}
-        title={formField.label}
-        icon={formField.icon}
-      >
-        {formField.children?.map((childField, index) =>
-          childField.type === "Section" ? (
-            <FormSection
-              key={index}
-              section={childField as SectionType}
-              control={control}
-              schema={schema}
-            />
-          ) : (
-            <FormField key={index} formField={childField} control={control} />
-          )
-        )}
-      </CollapsibleSection>
+        formField={formField}
+        control={control}
+        readOnly={readOnly}
+      />
     );
   }
 
-  return <FormField key={key} formField={formField} control={control} readOnly={readOnly}/>;
+  // if (formField.type === "СollapsibleSection") {
+  //   return (
+  //     <CollapsibleSection
+  //       key={key}
+  //       title={formField.label}
+  //       icon={formField.icon}
+  //     >
+  //       {formField.children?.map((childField, index) =>
+  //         childField.type === "Section" ? (
+  //           <FormSection
+  //             key={index}
+  //             section={childField as SectionType}
+  //             control={control}
+  //             schema={schema}
+  //           />
+  //         ) : (
+  //           <FormField key={index} formField={childField} control={control} />
+  //         )
+  //       )}
+  //     </CollapsibleSection>
+  //   );
+  // }
+
+  return (
+    <FormField
+      key={key}
+      formField={formField}
+      control={control}
+      readOnly={readOnly}
+    />
+  );
 };

@@ -37,6 +37,7 @@ export const FieldDetail = (
         props.closeModal && props.closeModal();
       }}
       data={props.data}
+      columns={1}
       formFields={[
         {
           label: "Name",

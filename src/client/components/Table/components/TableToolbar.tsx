@@ -21,6 +21,7 @@ interface TableToolbarProps {
   setSelectedRows?: Dispatch<SetStateAction<string[]>>;
   deleteSelected?: () => void;
   multiUpdate?: (guids: string[], data: Partial<any>) => Promise<void>;
+  fullTextSearchEnabled?: boolean
 }
 
 export const TableToolbar = ({
@@ -33,6 +34,7 @@ export const TableToolbar = ({
   selectedRows,
   deleteSelected,
   multiUpdate,
+  fullTextSearchEnabled = true
 }: TableToolbarProps) => {
   const { t } = useTranslation();
   const { openModal, closeModal } = useModalStore();
@@ -47,7 +49,6 @@ export const TableToolbar = ({
           {
             type: "Section",
             fields: fields,
-            className: "flex flex-col p-4",
           },
         ]}
         onSubmit={({ data }) => {
@@ -149,11 +150,10 @@ export const TableToolbar = ({
     <>
       <div className="flex justify-between mb-2">
         <div
-          className={`flex items-center gap-3 transition-opacity duration-200 ${
-            selectedRows.length > 0
-              ? "opacity-100"
-              : "opacity-0 pointer-events-none"
-          }`}
+          className={`flex items-center gap-3 transition-opacity duration-200 ${selectedRows.length > 0
+            ? "opacity-100"
+            : "opacity-0 pointer-events-none"
+            }`}
         >
           <Button onClick={deleteSelected} color="light">
             <div className="flex gap-2 items-center">
@@ -196,20 +196,21 @@ export const TableToolbar = ({
           </Button>
         )}
       </div>
-      <div className="flex justify-between py-3 items-center border-t">
-        <TextInput
-          id="base"
-          type="text"
-          className="w-full max-w-[300px]"
-          placeholder={t("labels.fullTextSearch")}
-          sizing="md"
-          value={fullTextSearch}
-          onChange={(e) => {
-            const value = e.target.value;
-            applyFullTextSeacrh(value);
-          }}
-        />
-      </div>
+      {fullTextSearchEnabled &&
+        <div className="flex justify-between py-3 items-center border-t">
+          <TextInput
+            id="base"
+            type="text"
+            className="w-full max-w-[300px]"
+            placeholder={t("labels.fullTextSearch")}
+            sizing="md"
+            value={fullTextSearch}
+            onChange={(e) => {
+              const value = e.target.value;
+              applyFullTextSeacrh(value);
+            }}
+          />
+        </div>}
     </>
   );
 };

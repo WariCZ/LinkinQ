@@ -21,6 +21,7 @@ interface TableHeaderProps<T> {
   schema: Record<string, any>;
   entity?: string;
   selectable?: boolean;
+  settingColumnsEnabled?: boolean;
 }
 
 export const TableHeader = <T,>({
@@ -36,10 +37,11 @@ export const TableHeader = <T,>({
   schema,
   entity,
   selectable,
+  settingColumnsEnabled = true,
 }: TableHeaderProps<T>) => {
   const { openModal, closeModal } = useModalStore();
   return (
-    <thead className="bg-[#2c3a54] text-xs text-gray-50 uppercase dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
+    <thead className="bg-[#2c3a54] text-xs text-gray-50 uppercase dark:bg-gray-700 dark:text-gray-400 sticky top-0">
       {getHeaderGroups().map((headerGroup) => (
         <tr key={headerGroup.id}>
           {getRowModel().rows.length && selectable ? (
@@ -63,12 +65,13 @@ export const TableHeader = <T,>({
           ) : (
             <></>
           )}
+
           {headerGroup.headers.map((header) => {
             return (
               <th
                 key={header.id}
                 style={{ minWidth: `${header.getSize()}px` }}
-                className="relative group px-4 whitespace-nowrap border-r hover:bg-gray-700"
+                className="relative group px-4 whitespace-nowrap border-r hover:bg-gray-700 py-2"
                 colSpan={header.colSpan}
                 onClick={header.column.getToggleSortingHandler()}
               >
@@ -109,35 +112,41 @@ export const TableHeader = <T,>({
               </th>
             );
           })}
-          <th key={headerGroup.id} className="w-14 hover:bg-gray-700">
-            <button
-              onClick={() => {
-                openModal(
-                  <ColumnSelector
-                    ref={columnSelectorRef}
-                    initialColumns={selectedColumns}
-                    columns={columns}
-                    schema={schema}
-                    entity={entity}
-                  />,
-                  {
-                    title: "Change columns visible",
-                    size: "2xl",
-                    modalSingle: true,
-                    modalOnSuccess: () => {
-                      const selected =
-                        columnSelectorRef.current?.getSelectedColumns();
-                      if (selected) setSelectedColumns(selected);
-                      closeModal();
-                    },
-                  }
-                );
-              }}
-              className="px-4 py-2"
+          {settingColumnsEnabled ? (
+            <th
+              key={headerGroup.id}
+              className="hover:bg-gray-700 px-4 pt-2 pb-1 text-center"
             >
-              <IoSettingsOutline size={20} />
-            </button>
-          </th>
+              <button
+                onClick={() => {
+                  openModal(
+                    <ColumnSelector
+                      ref={columnSelectorRef}
+                      initialColumns={selectedColumns}
+                      columns={columns}
+                      schema={schema}
+                      entity={entity}
+                    />,
+                    {
+                      title: "Change columns visible",
+                      size: "2xl",
+                      modalSingle: true,
+                      modalOnSuccess: () => {
+                        const selected =
+                          columnSelectorRef.current?.getSelectedColumns();
+                        if (selected) setSelectedColumns(selected);
+                        closeModal();
+                      },
+                    }
+                  );
+                }}
+              >
+                <IoSettingsOutline size={18} />
+              </button>
+            </th>
+          ) : (
+            <th></th>
+          )}
         </tr>
       ))}
     </thead>

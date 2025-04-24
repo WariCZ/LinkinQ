@@ -22,7 +22,6 @@ export const EditAdapters = (props: ModalPropsType & { guid: string }) => {
   //   getRoutes();
   // }, []);
 
-  console.log("EditAdapters", props, adapter);
   if (!adapter) return null;
   return (
     <div>
@@ -42,6 +41,7 @@ export const EditAdapters = (props: ModalPropsType & { guid: string }) => {
           //     setSelectedAdapter(adapters[data.adapterType]);
           // }}
           entity="adapters"
+          columns={1}
           data={adapter}
           formFields={[
             {

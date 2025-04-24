@@ -35,6 +35,8 @@ interface TableProps<T> {
   fetchNextPage?: () => Promise<void>;
   hasMore?: boolean;
   multiUpdate?: (guids: string[], data: Partial<any>) => Promise<void>;
+  fullTextSearchEnabled?: boolean;
+  settingColumnsEnabled?: boolean;
 }
 
 const Table = <T, _>({
@@ -52,6 +54,8 @@ const Table = <T, _>({
   hasMore,
   multiUpdate,
   selectable,
+  fullTextSearchEnabled,
+  settingColumnsEnabled
 }: TableProps<T>) => {
   const schema = useStore((state) => state.schema);
   const columnSelectorRef = useRef<any>(null);
@@ -209,6 +213,7 @@ const Table = <T, _>({
           setSelectedRows([]);
         }}
         multiUpdate={multiUpdate}
+        fullTextSearchEnabled={fullTextSearchEnabled}
       />
       <div
         className="overflow-auto rounded-md"
@@ -234,6 +239,7 @@ const Table = <T, _>({
             entity={entity}
             selectable={selectable}
             setSelectedColumns={setSelectedColumns}
+            settingColumnsEnabled={settingColumnsEnabled}
           />
           <TableBody
             rows={getRowModel().rows}

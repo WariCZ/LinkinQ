@@ -102,7 +102,6 @@ export const FieldList = ({
     }
   };
 
-  console.log(localFields);
   return (
     <table className="w-full text-sm border-t">
       <thead className="text-left text-xs text-gray-500 uppercase border-b">

@@ -4,8 +4,9 @@ import { EntityType } from "../../../../../lib/entity/types";
 import { Button } from "flowbite-react";
 import { FieldDetail } from "./FieldDetail";
 import { DeleteEntity } from "./DeleteEntity";
-import { FaFileExport } from "react-icons/fa";
+import { FaFileExport, FaPlus } from "react-icons/fa";
 import Table from "../../../../../client/components/Table";
+import { AppButton } from "../../../../../client/components/common/AppButton";
 
 export const EntityDetail = ({
   entity,
@@ -29,21 +30,24 @@ export const EntityDetail = ({
     });
   };
 
-  if (!entity) return <div>Not selected</div>;
+  if (!entity) return <div className="p-2 w-[65vw]">Not selected</div>;
 
   return (
-    <div className="p-2 w-full">
+    <div className="p-2 w-[65vw]">
       <div className="flex w-full">
         <span className="pr-2">Entity:</span>
         <span className="font-bold pr-2">{entity}</span>
-        <Button
+        <AppButton
+          icon={<FaPlus />}
           onClick={() => {
-            openModal(<FieldDetail entity={entity} />);
+            openModal(<FieldDetail entity={entity} />, {
+              title: "Add new field",
+            });
           }}
-          size="xs"
+          size={"xs"}
         >
           Add Field
-        </Button>
+        </AppButton>
         <span className="ml-auto"></span>
         <span className="ml-auto">
           <FaFileExport
@@ -55,7 +59,9 @@ export const EntityDetail = ({
             disabled={definition?.system}
             color="failure"
             onClick={() => {
-              openModal(<DeleteEntity entity={entity} />);
+              openModal(<DeleteEntity entity={entity} />, {
+                title: "Delete entity",
+              });
             }}
             size="xs"
           >

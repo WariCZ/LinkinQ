@@ -27,7 +27,6 @@ const Select = React.forwardRef(
             setValue([]);
           } else {
             fetchOptions({ guid: props.value as any }).then((value: any) => {
-              console.log("value", props, value);
               value &&
                 setValue([
                   ...value.map((item) => ({

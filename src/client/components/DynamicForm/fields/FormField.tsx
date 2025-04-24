@@ -21,10 +21,10 @@ export const FormField = ({
   control: Control<FieldValues, any>;
   readOnly?: boolean;
 }) => {
-  const isDisabled = formField.disabled || readOnly;
 
-  if (!formField.type) {
-    debugger;
+  const isDisabled = formField?.disabled || formField?.readOnly || readOnly;
+
+  if (!formField?.type) {
     formField.type = "text";
   }
 
@@ -74,7 +74,7 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={`${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+          className={`flex gap-2 flex-row-reverse justify-end items-center ${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : "flex gap-2 flex-row-reverse justify-end items-center"}`}
         >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           {formField.required && <span className="text-red-600 px-1">*</span>}

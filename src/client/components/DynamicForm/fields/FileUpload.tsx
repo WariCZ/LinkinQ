@@ -16,7 +16,6 @@ const FileUpload = forwardRef(
     value: any;
     disabled?: boolean;
   }) => {
-    console.log("FileUpload props ", props);
     const [files, setFiles] = useState<UploadedFile[]>([]);
 
     useEffect(() => {

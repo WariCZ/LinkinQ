@@ -160,7 +160,7 @@ export const ColumnSelector = forwardRef<
                   onChange={() => handleColumnChange(key)}
                   className="w-4 h-4 cursor-pointer"
                 />
-                <span>{label}</span>
+                <span>{label || key}</span>
               </label>
             );
           })}
@@ -187,7 +187,7 @@ export const ColumnSelector = forwardRef<
                     <SortableItem
                       key={key}
                       id={key}
-                      label={label}
+                      label={label || key}
                       onRemove={handleRemoveColumn}
                     />
                   );

@@ -9,7 +9,6 @@ export const QueryBuilderDetail = (
 ) => {
   const entity = props.entity;
   const schema = useStore((state) => state.schema);
-  console.log("ss", schema[entity]);
   const fields = Object.keys(schema[entity].fields);
 
   const [data, setData, { setRecord, loading, refresh }] = useDataDetail(

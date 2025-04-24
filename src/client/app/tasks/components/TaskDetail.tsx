@@ -46,10 +46,13 @@ export const TaskDetail = (props: TaskDetailProps) => {
             : "",
         }}
         entity={entity}
+        columns={0}
+        className="px-0"
         formFields={[
           {
             type: "Section",
-            className: "px-4 items-center bg-gray-100",
+            className: "px-4 pt-4 items-center bg-gray-100",
+            columns: 1,
             fields: [
               {
                 type: "text",
@@ -61,12 +64,10 @@ export const TaskDetail = (props: TaskDetailProps) => {
               },
             ],
           },
-
           {
             type: "Section",
             columns: 2,
-            colSpan: 2,
-            className: "px-4 items-center bg-gray-100",
+            className: "px-4 items-center bg-gray-100 pt-2",
             fields: [
               {
                 type: "text",
@@ -151,11 +152,13 @@ export const TaskDetail = (props: TaskDetailProps) => {
                     field: "attn",
                     type: "text",
                     label: "Attention",
+                    className: "mb-2 mt-2",
                   },
                   {
                     type: "richtext",
                     field: "description",
                     label: "Description",
+                    className: "mb-2"
                   },
                   {
                     type: "Section",
@@ -167,7 +170,6 @@ export const TaskDetail = (props: TaskDetailProps) => {
                         type: "number",
                         label: "Effort planned:",
                         readOnly: true,
-                        // customComponent: EffortField,
                         unit: "MD",
                       },
                       {
@@ -175,14 +177,12 @@ export const TaskDetail = (props: TaskDetailProps) => {
                         type: "number",
                         label: "Effort spent:",
                         readOnly: true,
-                        // customComponent: EffortField,
                         unit: "MD",
                       },
                       {
                         field: "effortsWorked",
                         type: "number",
                         label: "Efforts worked (MD):",
-                        // customComponent: EffortField,
                         unit: "MD",
                         validate: (value) =>
                           value === undefined ||
@@ -195,7 +195,6 @@ export const TaskDetail = (props: TaskDetailProps) => {
                         field: "reportedEffort",
                         type: "number",
                         label: "Reported effort (MH):",
-                        // customComponent: EffortField,
                         unit: "MH",
                         validate: (value) =>
                           value === undefined ||
@@ -215,6 +214,7 @@ export const TaskDetail = (props: TaskDetailProps) => {
                     type: "attachment",
                     field: "attachments",
                     label: "Attachments",
+                    className: "mt-2"
                   },
                 ],
               },

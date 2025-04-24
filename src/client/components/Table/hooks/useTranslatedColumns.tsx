@@ -46,7 +46,9 @@ export const useTranslatedColumns = ({
           const val = info.getValue();
 
           if (schemaField?.type === "datetime" && !isNested) {
-            return DateTime.fromISO(val).toFormat("dd.MM.yyyy HH:mm:ss");
+            return val
+              ? DateTime.fromISO(val).toFormat("dd.MM.yyyy HH:mm:ss")
+              : "-";
           }
 
           if (schemaField?.type === "richtext" && val) {
@@ -58,16 +60,40 @@ export const useTranslatedColumns = ({
           }
 
           if (isNested) {
+            const nestedVal = _.get(val, nestedKey);
             if (Array.isArray(val)) {
               return (
-                <span>{val.map((v) => _.get(v, nestedKey)).join(", ")}</span>
+                <span>
+                  {val
+                    .map((v) => {
+                      const nested = _.get(v, nestedKey);
+                      return typeof nested === "object"
+                        ? JSON.stringify(nested)
+                        : String(nested ?? "-");
+                    })
+                    .join(", ")}
+                </span>
               );
-            } else if (typeof val === "object") {
-              return <span>{_.get(val, nestedKey)}</span>;
+            } else if (typeof nestedVal === "object" && nestedVal !== null) {
+              return (
+                <pre className="whitespace-nowrap text-xs">
+                  {JSON.stringify(nestedVal)}
+                </pre>
+              );
+            } else {
+              return <span>{String(nestedVal ?? "-")}</span>;
             }
           }
 
-          return <span>{val}</span>;
+          if (typeof val === "object" && val !== null) {
+            return (
+              <pre className="whitespace-nowrap text-xs">
+                {JSON.stringify(val, null, 2)}
+              </pre>
+            );
+          }
+
+          return <span>{String(val ?? "-")}</span>;
         },
       };
     });

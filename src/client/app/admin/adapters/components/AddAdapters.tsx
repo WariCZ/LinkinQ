@@ -17,34 +17,29 @@ export const AddAdapters = (props: ModalPropsType) => {
   }, []);
 
   return (
-    <div>
-      AddAdapters
-      <div>
-        <Form
-          onSubmit={async ({ data, setError }) => {
-            debugger;
-            await axios.post("/adapters/setAdapter", data);
-          }}
-          onChange={({ data }) => {
-            if (data.type) setSelectedAdapter(adapters[data.type]);
-          }}
-          //   data={}
-          formFields={[
-            {
-              type: "select",
-              field: "type",
-              label: "Type",
-              required: true,
-              options: _.keys(adapters)?.map((item) => ({
-                value: item,
-                label: item,
-              })),
-            },
-            ...(selectedAdapter?.form || []),
-          ]}
-          formRef={props.formRef}
-        />
-      </div>
-    </div>
+    <Form
+      onSubmit={async ({ data, setError }) => {
+        debugger;
+        await axios.post("/adapters/setAdapter", data);
+      }}
+      onChange={({ data }) => {
+        if (data.type) setSelectedAdapter(adapters[data.type]);
+      }}
+      columns={1}
+      formFields={[
+        {
+          type: "select",
+          field: "type",
+          label: "Type",
+          required: true,
+          options: _.keys(adapters)?.map((item) => ({
+            value: item,
+            label: item,
+          })),
+        },
+        ...(selectedAdapter?.form || []),
+      ]}
+      formRef={props.formRef}
+    />
   );
 };

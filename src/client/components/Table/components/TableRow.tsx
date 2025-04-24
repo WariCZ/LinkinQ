@@ -11,6 +11,7 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import { Dispatch, SetStateAction } from "react";
+import React from "react";
 
 interface TableRowProps<T> {
   row: Row<any>;
@@ -63,17 +64,17 @@ export const TableRow = <T,>({
       ) : (
         <></>
       )}
-
-      {row.getVisibleCells().map((cell: any) => (
-        <td
-          key={cell.id}
-          className="px-4 py-2 whitespace-nowrap text-ellipsis overflow-hidden max-w-80 cursor-pointer"
-        >
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-        </td>
-      ))}
-
-      <td className="px-4 py-2 text-right" onClick={(e) => e.stopPropagation()}>
+      {row.getVisibleCells().map((cell) => {
+        return (
+          <td
+            key={cell.id}
+            className="px-4 pt-2 whitespace-nowrap text-ellipsis overflow-hidden max-w-80 cursor-pointer"
+          >
+            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+          </td>
+        );
+      })}
+      <td className="px-4 pt-2 text-right" onClick={(e) => e.stopPropagation()}>
         <RowMenu
           key={row.id + "-" + i}
           onColorSelect={(color) => console.log("color", color)}

@@ -10,21 +10,21 @@ import _ from "lodash";
 import { useTranslation } from "react-i18next";
 import ReactSelect from "react-select";
 import { QueryBuilderDetail } from "./components/QueryBuilderDetail";
+import { IoReload } from "react-icons/io5";
+import { AppButton } from "../../../../client/components/common/AppButton";
 
 export const QueryBuilder = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const filters = location?.state?.filter;
   const header = location?.state?.header;
-
   const schema = useStore((state) => state.schema);
   const initColumns = ["guid", "caption", "createdby.fullname"];
+  const { openModal } = useModalStore();
+
   const [columns, setColumns] = useState(initColumns);
   const [columnsInput, setColumnsInput] = useState(initColumns.join());
-
   const [entity, setEntity] = useState("tasks" as string);
-
-  console.log("call ProtectedPage", columns);
 
   const [
     data,
@@ -52,34 +52,34 @@ export const QueryBuilder = () => {
     }
   }, [filters]);
 
-  const { openModal } = useModalStore();
+  useEffect(() => {
+    refresh();
+  }, [entity]);
 
-  console.log("fields", fields);
   return (
     <div className="h-full">
       <div className="flex items-center p-2 justify-between border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
         <div className="font-bold">
           {header || t("page.admin.querybuilder")}
         </div>
-        <div>
-          <Button
-            className="inline-block mr-2"
+        <div className="flex gap-2">
+          <AppButton
+            icon={<FaPlus />}
             onClick={() =>
               openModal(
-                <QueryBuilderDetail entity={entity} refresh={refresh} />
+                <QueryBuilderDetail entity={entity} refresh={refresh} />,
+                { title: "Query Create" }
               )
             }
           >
-            <FaPlus className="ml-0 m-1 h-3 w-3" />
             {t("add")}
-          </Button>
-          <Button className="inline-block" onClick={() => refresh()}>
-            <FaPlus className="ml-0 m-1 h-3 w-3" />
-            {t("refresh")}
-          </Button>
+          </AppButton>
+          <AppButton icon={<IoReload />} onClick={() => refresh()}>
+            Reload
+          </AppButton>
         </div>
       </div>
-      <div className="p-2">
+      <div className="p-2 flex items-center">
         <ReactSelect
           className="inline-block min-w-64"
           classNamePrefix="flowbite-select"
@@ -121,7 +121,8 @@ export const QueryBuilder = () => {
                 modalLabel={"Detail " + entity}
                 data={data}
                 entity={entity}
-              />
+              />,
+              { title: "Query detail" }
             )
           }
           columns={fields}
@@ -129,6 +130,7 @@ export const QueryBuilder = () => {
           highlightedRow={highlightedRow}
           ordering={ordering}
           setOrdering={setOrdering}
+          fullTextSearchEnabled={false}
         />
       </div>
     </div>
