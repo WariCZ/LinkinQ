@@ -109,7 +109,6 @@ function useDataTable<T, U>(
         limit: limit || DEFAULT_LIMIT,
         offset: offset,
       });
-
       if (response) {
         if (offset && offset > 0) {
           setData((prev: any[]) => [...prev, ...response.data]);
@@ -123,7 +122,6 @@ function useDataTable<T, U>(
       }
     } catch (err: any) {
       setError(err.message);
-      console.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -223,6 +221,10 @@ function useDataTable<T, U>(
 
     setTimeout(() => setHighlightedRow([]), 700);
   };
+
+  useEffect(() => {
+    refresh();
+  }, [fieldsEntity]);
 
   return [
     data,

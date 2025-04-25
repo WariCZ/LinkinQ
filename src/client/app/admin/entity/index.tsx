@@ -25,12 +25,12 @@ export const Entity = () => {
   };
 
   return (
-    <div className="h-full">
-      <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+    <div className="h-full w-full">
+      <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 w-full">
         <span className="font-bold">Entity editor</span>
       </div>
       <div className="flex items-start h-full justify-between">
-        <div className="px-3 w-full h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
+        <div className="w-1/3 max-w-sm min-w-[240px] px-3 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
           <div className="pt-1 flex justify-between items-center my-1">
             <div>
               <span className="font-bold pr-1">Entities</span>

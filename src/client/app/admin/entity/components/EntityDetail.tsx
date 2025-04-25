@@ -33,7 +33,7 @@ export const EntityDetail = ({
   if (!entity) return <div className="p-2 w-[65vw]">Not selected</div>;
 
   return (
-    <div className="p-2 w-[65vw]">
+    <div className="p-2 w-full overflow-auto">
       <div className="flex w-full">
         <span className="pr-2">Entity:</span>
         <span className="font-bold pr-2">{entity}</span>
