@@ -10,9 +10,15 @@ const defaultData = ({ env }) => ({
     },
     {
       guid: uuid(),
-      caption: "Tabulka",
+      caption: "User settings",
       value: 1,
-      lov: "userConfigurations",
+      lov: "userConfigurationsKind",
+    },
+    {
+      guid: uuid(),
+      caption: "Tabulka",
+      value: 2,
+      lov: "userConfigurationsKind",
     },
   ],
 });

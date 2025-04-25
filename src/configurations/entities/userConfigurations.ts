@@ -4,7 +4,6 @@ const entityFields: EntitySchema = {
   userConfigurations: {
     system: true,
     journal: true,
-    workflow: true,
     fields: {
       definition: {
         type: "jsonb",
@@ -16,6 +15,11 @@ const entityFields: EntitySchema = {
         type: "link(users)",
         label: "User",
         description: "User",
+      },
+      key: {
+        type: "text",
+        label: "Key",
+        description: "Key",
       },
     },
   },

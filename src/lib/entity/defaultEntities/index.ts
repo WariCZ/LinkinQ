@@ -8,7 +8,6 @@ export const defaultFields = (entity: string): Record<string, FieldType> => ({
   caption: {
     type: "text",
     label: "Title",
-    isRequired: true,
     description: "Title record",
     system: true,
   },
