@@ -1,12 +1,9 @@
-"use client";
 import useStore from "../../store";
 // import { useSidebarContext } from "@/context/SidebarContext";
 // import { isSmallScreen } from "@/helpers/is-small-screen";
 // import Search from "../search/search";
 import {
   Avatar,
-  Button,
-  DarkThemeToggle,
   Dropdown,
   Navbar,
 } from "flowbite-react";
@@ -14,14 +11,14 @@ import {
 // import Image from "next/image";
 // import Link from "next/link";
 // import useLocalStorage from "../../lib/useLocalStorage";
-import { useContext, type FC } from "react";
 import { HiMenuAlt1, HiX } from "react-icons/hi";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // import { sidebarContext } from "../sidebarProvider";
 // import NotificationButton from "../notifications/notificationButton";
 
 import logo from "../../static/logo.png";
 import { useTranslation } from "react-i18next";
+import { ThemeSwitcher } from "../ThemeSwitcher";
 // const logo = require("../../static/logo.png");
 
 const isSmallScreen = () => {
@@ -88,7 +85,6 @@ const UserAvatar = () => {
       <Dropdown.Item onClick={() => logout()}>
         {t("header.signout")}
       </Dropdown.Item>
-      <Dropdown.Item onClick={() => console.log("kuk")}>test</Dropdown.Item>
     </Dropdown>
   );
 };
@@ -140,7 +136,7 @@ export const DashboardHeader = function (props: { admin?: boolean }) {
 
             <div className="flex gap-5">
               {/* <NotificationButton /> */}
-              <DarkThemeToggle className="p-1" />
+              <ThemeSwitcher />
               <div>
                 <UserAvatar />
               </div>

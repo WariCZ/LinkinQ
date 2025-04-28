@@ -4,6 +4,7 @@ import _ from "lodash";
 import { AppColumnDef } from "../types";
 import { getLabel } from "../utils";
 import { Node } from "slate";
+import useStore from "../../../../../src/client/store";
 
 interface UseTranslatedColumnsArgs {
   columns: any[];
@@ -18,6 +19,11 @@ export const useTranslatedColumns = ({
   entity,
   columnSizing,
 }: UseTranslatedColumnsArgs): AppColumnDef<any, any>[] => {
+  const profileSettings = useStore(
+    (state) => state.userConfigurations["profileSettings"]?.definition ?? {}
+  );
+  const dateFormat = profileSettings.dateFormat || "dd.MM.yyyy HH:mm:ss";
+
   return useMemo(() => {
     return columns.map((c): AppColumnDef<any, any> => {
       const columnKey = typeof c === "string" ? c : c.field;
@@ -46,9 +52,7 @@ export const useTranslatedColumns = ({
           const val = info.getValue();
 
           if (schemaField?.type === "datetime" && !isNested) {
-            return val
-              ? DateTime.fromISO(val).toFormat("dd.MM.yyyy HH:mm:ss")
-              : "-";
+            return val ? DateTime.fromISO(val).toFormat(dateFormat) : "-";
           }
 
           if (schemaField?.type === "richtext" && val) {
@@ -97,5 +101,5 @@ export const useTranslatedColumns = ({
         },
       };
     });
-  }, [columns, schema, entity, columnSizing]);
+  }, [columns, schema, entity, columnSizing, dateFormat]);
 };

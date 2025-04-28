@@ -24,6 +24,9 @@ interface StoreState {
   toasts: AppToastType[];
   setToast: (toast: AppToastType) => void;
   removeToast: (item: number) => void;
+
+  userConfigurations: Record<string, any>;
+  getUserConfigurations: () => Promise<void>;
 }
 
 const useStore = create<StoreState>((set, get) => ({
@@ -32,6 +35,7 @@ const useStore = create<StoreState>((set, get) => ({
   roles: [],
   loading: true,
   sidebar: false,
+  userConfigurations: {},
   setUser: (user) => set({ user }),
   logout: async () => {
     await axios.post("/logout");
@@ -48,6 +52,7 @@ const useStore = create<StoreState>((set, get) => ({
     try {
       await get().checkAuth();
       await get().getSchema();
+      await get().getUserConfigurations();
     } catch (error) {
       set({ user: null });
     } finally {
@@ -85,7 +90,25 @@ const useStore = create<StoreState>((set, get) => ({
       set({ loading: false });
     }
   },
-
+  getUserConfigurations: async () => {
+    try {
+      const response = await axios.get("/api/entity/userConfigurations", {
+        withCredentials: true,
+      });
+      const configs = response.data || [];
+      const configMap = configs.reduce(
+        (acc: Record<string, any>, item: any) => {
+          acc[item.key] = item;
+          return acc;
+        },
+        {}
+      );
+      set({ userConfigurations: configMap });
+    } catch (error) {
+      console.error("Failed to fetch user configurations", error);
+      set({ userConfigurations: {} });
+    }
+  },
   toasts: [
     // { msg: "test 1", type: "error" },
     // { msg: "test 2", type: "info" },

@@ -64,7 +64,7 @@ const Table = <T, _>({
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [fullTextSearch, setFullTextSearch] = useState("");
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
-
+  
   const {
     selectedColumns,
     columnSizing,
