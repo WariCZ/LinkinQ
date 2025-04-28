@@ -20,6 +20,18 @@ const defaultData = ({ env }) => ({
       value: 2,
       lov: "userConfigurationsKind",
     },
+    {
+      guid: uuid(),
+      caption: "Settings",
+      value: 1,
+      lov: "appConfigurationsKind",
+    },
+    {
+      guid: uuid(),
+      caption: "Forms",
+      value: 2,
+      lov: "appConfigurationsKind",
+    },
   ],
 });
 
