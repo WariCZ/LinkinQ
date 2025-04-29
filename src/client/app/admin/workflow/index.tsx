@@ -8,6 +8,7 @@ import { Button, TextInput } from "flowbite-react";
 import { useMemo, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { AddWorkflow } from "./components/AddWorkflow";
+import BpmnDiagram from "../../../../client/components/BpmnDiagram/";
 
 type WorkflowType = { name: string; source: string; guid: string };
 
@@ -29,19 +30,18 @@ export const Workflow = () => {
     setSearchValue(e.target.value);
     // setTableWorkflows(workflows.filter((m) => m.indexOf(e.target.value) > -1));
   };
-
   const bpmnReactJs = useBpmnJsReact();
 
   const handleShown = (viewer: any) => {
     // bpmnReactJs.addMarker("Activity_03i6maz", "moje");
   };
-  const saveXml = async () => {
-    const result = await bpmnReactJs.saveXml();
-
-    console.log(result?.xml);
-    console.log(selectedWorkflow);
-    await setRecord({ guid: selectedWorkflow.guid, source: result?.xml });
-    alert("Saved");
+  const saveXml = async (xml) => {
+    // const result = await bpmnReactJs.saveXml();
+    debugger;
+    // console.log(result?.xml);
+    // console.log(selectedWorkflow);
+    await setRecord({ guid: selectedWorkflow.guid, source: xml });
+    console.log("Saved");
   };
 
   // const test = (a, b, c) => {
@@ -56,6 +56,13 @@ export const Workflow = () => {
         <div className="px-3 w-48 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
           <div className="py-1"></div>
           <div className="pt-1">
+            <div
+              onClick={() => {
+                refresh();
+              }}
+            >
+              refresh
+            </div>
             <Button
               className="h-full"
               onClick={() => {
@@ -102,21 +109,19 @@ export const Workflow = () => {
           <div className="w-full">
             {selectedWorkflow ? (
               <>
-                <Button
+                {/* <Button
                   className="h-full"
                   onClick={() => {
                     saveXml();
                   }}
                 >
                   Save
-                </Button>
-                <BpmnJsReact
-                  useBpmnJsReact={bpmnReactJs}
-                  mode="edit"
-                  xml={selectedWorkflow.source || ""}
-                  onShown={handleShown}
-                  // click={test}
-                />
+                </Button> */}
+                <BpmnDiagram
+                  editor={true}
+                  xml={selectedWorkflow.source}
+                  onSave={saveXml}
+                ></BpmnDiagram>
               </>
             ) : (
               <span>Vyberte worflow</span>

@@ -29,6 +29,7 @@ export type TriggerItemInternalType = TriggerItemType & {
 
 export class Triggers {
   db: dbType;
+  dbCore: Knex<any, unknown[]>;
   path: string;
   definitions: Record<
     string,
@@ -46,6 +47,7 @@ export class Triggers {
   }) {
     this.eventsOnEntities = eventsOnEntities;
     this.db = (table: string) => db(table).setUser({ id: 1 });
+    this.dbCore = db;
 
     this.registerTriggers(db);
     this.startWorkflow = undefined;
@@ -300,21 +302,36 @@ export class Triggers {
     }
   };
 
+  formatSeqId = function (data, field, seqformat) {
+    const pattern = /^(\w+)\{(\w+)\}(\d)(\d+)d$/;
+    const match = seqformat.match(pattern);
+
+    if (match) {
+      const [, prefix, f, variable, padding, type] = match;
+
+      const idStr = data[f].toString().padStart(padding, variable);
+      return `${prefix}${idStr}`;
+    } else {
+      return data[field];
+    }
+  };
+
   processDataAfter = async ({
     entity,
     diffDataItem,
     operation,
     entityid,
+    afterData,
   }: {
     entity: string;
     diffDataItem: Object;
     operation?: "C" | "D" | "U" | "";
     entityid: number;
+    afterData?: Record<string, any>;
   }) => {
-    if (diffDataItem) {
-      try {
-        const fields = this.schema?.[entity].fields;
-
+    try {
+      const fields = this.schema?.[entity].fields;
+      if (diffDataItem) {
         for (const f of Object.keys(diffDataItem)) {
           if (fields[f].link && fields[f].link == "attachments") {
             const data = diffDataItem[f];
@@ -326,9 +343,33 @@ export class Triggers {
               .update({ entity: entity, entityid: entityid, field: f });
           }
         }
-      } catch (e) {
-        debugger;
+      } else {
+        if (
+          afterData &&
+          operation === "C" &&
+          this.schema?.[entity].sequencesFields
+        ) {
+          let set = [];
+          for (const f of this.schema?.[entity].sequencesFields) {
+            if (fields[f].seqformat) {
+              const seqId = this.formatSeqId(afterData, f, fields[f].seqformat);
+
+              set.push(`${f} = '${seqId}'`);
+            }
+          }
+
+          if (set.length)
+            await this.dbCore
+              .raw(
+                `UPDATE ${entity} set ${set.join(",")}  where id = ${
+                  afterData.id
+                }`
+              )
+              .setUser({ id: 1 });
+        }
       }
+    } catch (e) {
+      debugger;
     }
   };
 
@@ -586,6 +627,7 @@ export class Triggers {
               operation,
               diffDataItem,
               entityid: beforeDataItem?.id || afterDataDataItem?.id,
+              afterData: afterDataDataItem,
             });
 
             if (that.schema[table].journal)
