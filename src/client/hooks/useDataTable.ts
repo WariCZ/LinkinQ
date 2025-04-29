@@ -11,6 +11,7 @@ function useDataTable<T, U>(
     fields?: string[];
     filter?: Object;
     limit?: number;
+    structure?: "topdown";
     ordering?: {
       id: string;
       desc: boolean;
@@ -60,6 +61,7 @@ function useDataTable<T, U>(
     filter,
     ordering,
     limit,
+    structure,
     offset,
   }: {
     entity: string;
@@ -67,6 +69,7 @@ function useDataTable<T, U>(
     filter?: Record<string, any>;
     ordering?: string;
     limit?: number;
+    structure?: "topdown";
     offset?: number;
   }) =>
     httpRequest({
@@ -77,6 +80,7 @@ function useDataTable<T, U>(
         __orderby: ordering,
         __limit: limit,
         __offset: offset,
+        __structure: structure,
         ...filter,
       },
     });
@@ -87,12 +91,14 @@ function useDataTable<T, U>(
     filter,
     ordering,
     limit,
+    structure,
     offset,
   }: {
     entity: string;
     fields?: string[];
     filter?: Object;
     limit?: number;
+    structure?: "topdown";
     offset?: number;
     ordering?: {
       id: string;
@@ -107,6 +113,7 @@ function useDataTable<T, U>(
         filter: filter || {},
         ordering: ordering?.map((o) => o.id + (o.desc ? "-" : "")).join(","),
         limit: limit || DEFAULT_LIMIT,
+        structure: structure,
         offset: offset,
       });
       if (response) {
@@ -134,6 +141,7 @@ function useDataTable<T, U>(
     filter?: Object;
     entity?: string;
     limit?: number;
+    structure?: "topdown";
     offset?: number;
     ordering?: {
       id: string;
@@ -152,6 +160,7 @@ function useDataTable<T, U>(
       filter: params?.filter || filter,
       ordering: params?.ordering || ordering,
       limit: params?.limit || param.limit,
+      structure: params?.structure || param.structure,
       offset: params?.offset,
     });
   };
@@ -168,6 +177,7 @@ function useDataTable<T, U>(
       filter,
       ordering,
       limit: param.limit || DEFAULT_LIMIT,
+      structure: param.structure,
       offset,
     });
 

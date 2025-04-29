@@ -142,18 +142,63 @@ export class EntityRoutes extends Entity {
               ? parseInt(req.query.__offset as string)
               : undefined;
 
+            const structure = (
+              req.query.__structure ? req.query.__structure : undefined
+            ) as "topdown" | undefined;
+
+            // const structure = "topdown" as "topdown" | undefined;
+            if (!(!structure || structure === "topdown")) {
+              throw `Query with structure ${structure} is not supported `;
+            }
+
+            // const x = await this.db
+            //   .setUser({ id: 1 })
+            //   .withRecursive("task_tree", (cte) => {
+            //     // ROOT: najdi všechny tasky bez parenta, ale v daném projektu
+            //     cte
+            //       .setUser({ id: 1 })
+            //       .select(
+            //         "id",
+            //         "caption",
+            //         "parent",
+            //         "createdby",
+            //         this.db.raw("1 as depth").setUser({ id: 1 })
+            //       )
+            //       .from("tasks")
+            //       // .where('project_id', projectId)
+            //       .whereNull("parent")
+
+            //       // REKURZE: najdi childy k uzlům ze stromu
+            //       .unionAll(function () {
+            //         this.select(
+            //           "t.id",
+            //           "t.caption",
+            //           "t.parent",
+            //           "t.createdby",
+            //           that.db.raw("task_tree.depth + 1").setUser({ id: 1 })
+            //         )
+            //           .from("tasks as t")
+            //           .join("task_tree", "t.parent", "task_tree.id");
+            //       });
+            //   })
+            //   .select("*")
+            //   .from("task_tree")
+            //   .orderBy("depth", "asc");
+
             const ret = await sql.select({
               entity: req.params.entity,
               fields,
               orderBy,
               limit,
               offset,
+              structure,
               where: _.omit(req.query as any, [
                 "entity",
                 "__fields",
                 "__orderby",
                 "__limit",
                 "__offset",
+                "__structure",
               ]),
             });
 
