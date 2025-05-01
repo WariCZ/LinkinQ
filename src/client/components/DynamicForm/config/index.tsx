@@ -15,7 +15,7 @@ interface FormConfiguratorProps {
 
 export const FormConfigurator = ({ fields }: FormConfiguratorProps) => {
   const { openModal, closeModal } = useModalStore();
-  const { localFields, setLocalFields } = useFormConfigStore();
+  const { editingFields, setEditingFields } = useFormConfigStore();
 
   const handleAddSection = () => {
     const newSection: SectionType = {
@@ -25,22 +25,22 @@ export const FormConfigurator = ({ fields }: FormConfiguratorProps) => {
       id: `section-${Date.now()}`,
     };
 
-    setLocalFields([...localFields, newSection]);
+    setEditingFields([...editingFields, newSection]);
   };
 
   const handleEditSection = (sectionIndex: number) => {
-    const section = localFields[sectionIndex] as SectionType;
+    const section = editingFields[sectionIndex] as SectionType;
     const labelRef = { current: section.label || "" };
     const columnsRef = { current: section.columns ?? 1 };
 
     const handleSave = () => {
-      const updated = [...localFields];
+      const updated = [...editingFields];
       (updated[sectionIndex] as SectionType) = {
         ...section,
         label: labelRef.current,
         columns: columnsRef.current,
       };
-      setLocalFields(updated);
+      setEditingFields(updated);
     };
 
     openModal(
@@ -68,10 +68,10 @@ export const FormConfigurator = ({ fields }: FormConfiguratorProps) => {
 
   const handleEditField = (sectionIndex: number | null, fieldIndex: number) => {
     let field: any;
-    const updated = [...localFields];
+    const updated = [...editingFields];
 
     if (sectionIndex === null) {
-      field = localFields[fieldIndex];
+      field = editingFields[fieldIndex];
     } else {
       const section = updated[sectionIndex];
       if (section.type !== "Section" || !Array.isArray(section.fields)) return;
@@ -96,7 +96,7 @@ export const FormConfigurator = ({ fields }: FormConfiguratorProps) => {
         };
       }
 
-      setLocalFields(updated);
+      setEditingFields(updated);
     };
 
     openModal(
@@ -135,7 +135,7 @@ export const FormConfigurator = ({ fields }: FormConfiguratorProps) => {
         onEditSection={handleEditSection}
         onEditField={handleEditField}
         onDelete={(sectionIndex, fieldIndex) => {
-          const updated = [...localFields];
+          const updated = [...editingFields];
 
           if (sectionIndex === null) {
             updated.splice(fieldIndex, 1);
@@ -148,23 +148,23 @@ export const FormConfigurator = ({ fields }: FormConfiguratorProps) => {
             }
           }
 
-          setLocalFields(updated);
+          setEditingFields(updated);
         }}
         onReorder={(sectionIndex, newFields) => {
-          const updated = [...localFields];
+          const updated = [...editingFields];
           const section = updated[sectionIndex];
           if (section.type === "Section") {
             updated[sectionIndex] = { ...section, fields: [...newFields] };
-            setLocalFields(updated);
+            setEditingFields(updated);
           }
         }}
         onDeleteSection={(sectionIndex) => {
-          const updated = [...localFields];
+          const updated = [...editingFields];
           updated.splice(sectionIndex, 1);
-          setLocalFields([...updated]);
+          setEditingFields([...updated]);
         }}
         onReorderSections={(newSections) => {
-          setLocalFields(newSections);
+          setEditingFields(newSections);
         }}
       />
     </div>

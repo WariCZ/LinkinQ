@@ -13,7 +13,7 @@ type AddFieldModalProps = {
 };
 
 export const AddFieldModal = ({ fields }: AddFieldModalProps) => {
-  const { localFields, setLocalFields } = useFormConfigStore();
+  const { editingFields, setEditingFields } = useFormConfigStore();
   const { openModal, closeModal } = useModalStore();
 
   function mapFieldPrimitiveToFormType(
@@ -45,7 +45,7 @@ export const AddFieldModal = ({ fields }: AddFieldModalProps) => {
                 visible: true,
               } as FormFieldType;
 
-              const updated = [...localFields];
+              const updated = [...editingFields];
 
               let lastSection = [...updated]
                 .reverse()
@@ -65,7 +65,7 @@ export const AddFieldModal = ({ fields }: AddFieldModalProps) => {
 
               lastSection.fields.push(newField);
 
-              setLocalFields([...updated]);
+              setEditingFields([...updated]);
               closeModal();
             }}
           />,

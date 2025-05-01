@@ -7,13 +7,13 @@ import {
   FormProvider,
 } from "react-hook-form";
 import useStore from "../../store";
-import { EntityType, FieldType} from "../../../lib/entity/types";
+import { EntityType, FieldType } from "../../../lib/entity/types";
 import _ from "lodash";
 import { ConditionType, FormFieldType } from "../../types/DynamicForm/types";
 import { renderItem, translateFormField } from "./utils/FormUtils";
 import { FormConfiguratorModal } from "./modals/FormConfiguratorModal";
-import { useFormConfigStore } from "./_store";
-import { useActiveFormFields } from "./hooks/useActiveFormFields";
+// import { useFormStorage } from "./hooks/useActiveFormFields";
+import { useFormConfigManager } from "./hooks/useFormConfigManager";
 
 interface DynamicFormProps {
   formFields: (FormFieldType | string)[];
@@ -32,6 +32,7 @@ interface DynamicFormProps {
   children?: React.ReactElement;
   readOnly?: boolean;
   className?: string;
+  tableConfigKey?: string
 }
 
 const getFieldsForForm = (
@@ -106,11 +107,13 @@ const DynamicForm = ({
   readOnly,
   isConfigurable = false,
   className,
+  tableConfigKey
 }: DynamicFormProps) => {
   const schema = useStore((state) => state.schema);
-  const activeFields = isConfigurable
-    ? useActiveFormFields(formFields)
-    : formFields;
+
+  const { activeFields } = useFormConfigManager(tableConfigKey, formFields, isConfigurable);
+
+  // const activeFields = isConfigurable ? localFields : formFields;
 
   const form = useForm({
     disabled: disabled,
@@ -207,7 +210,7 @@ const DynamicForm = ({
 
   return (
     <>
-      {isConfigurable && <FormConfiguratorModal fields={fields} />}
+      {isConfigurable && <FormConfiguratorModal fields={fields} tableConfigKey={tableConfigKey} />}
       <FormProvider {...form}>
         <form
           ref={formRef}

@@ -22,6 +22,7 @@ interface TableRowProps<T> {
   highlightedRow?: string[];
   deleteRecord?: (guid: string) => Promise<void>;
   selectable?: boolean;
+  rowMenuEnabled?: boolean
 }
 
 export const TableRow = <T,>({
@@ -33,6 +34,7 @@ export const TableRow = <T,>({
   highlightedRow = [],
   deleteRecord,
   selectable,
+  rowMenuEnabled = true
 }: TableRowProps<T>) => {
   const guid = row.original.guid;
   const isSelected = selectedRows.includes(guid);
@@ -74,7 +76,7 @@ export const TableRow = <T,>({
           </td>
         );
       })}
-      <td className="px-4 pt-2 text-right" onClick={(e) => e.stopPropagation()}>
+      {rowMenuEnabled ? (<td className="px-4 pt-2 text-right" onClick={(e) => e.stopPropagation()}>
         <RowMenu
           key={row.id + "-" + i}
           onColorSelect={(color) => console.log("color", color)}
@@ -129,7 +131,7 @@ export const TableRow = <T,>({
             },
           ]}
         />
-      </td>
+      </td>) : <td></td>}
     </tr>
   );
 };

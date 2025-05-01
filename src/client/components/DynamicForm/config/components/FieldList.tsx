@@ -38,7 +38,7 @@ export const FieldList = ({
   onEditSection,
   onEditField,
 }: FieldListProps) => {
-  const { localFields } = useFormConfigStore();
+  const { editingFields } = useFormConfigStore();
   const sensors = useSensors(useSensor(PointerSensor));
 
   const handleDragEnd = ({ active, over }: DragEndEvent) => {
@@ -47,9 +47,9 @@ export const FieldList = ({
     const [activeType, ...activeIndexes] = (active.id as string).split("-");
     const [overType, ...overIndexes] = (over.id as string).split("-");
 
-    const updated = [...localFields];
+    const updated = [...editingFields];
 
-    // 💡 1. Drag section (e.g., section-0)
+    // 1. Drag section (e.g., section-0)
     if (activeType === "section" && overType === "section") {
       const fromIndex = Number(activeIndexes[0]);
       const toIndex = Number(overIndexes[0]);
@@ -58,7 +58,7 @@ export const FieldList = ({
       return;
     }
 
-    // 💡 2. Drag standalone field (e.g., field-1) between other standalone fields
+    // 2. Drag standalone field (e.g., field-1) between other standalone fields
     if (
       activeType === "field" &&
       overType === "field" &&
@@ -72,7 +72,7 @@ export const FieldList = ({
       return;
     }
 
-    // 💡 3. Drag field from one section to another
+    // 3. Drag field from one section to another
     if (
       activeType === "field" &&
       overType === "field" &&
@@ -103,59 +103,61 @@ export const FieldList = ({
   };
 
   return (
-    <table className="w-full text-sm border-t">
-      <thead className="text-left text-xs text-gray-500 uppercase border-b">
-        <tr>
-          <th className="py-2 px-3"></th>
-          <th className="py-2 px-3">Path</th>
-          <th className="py-2 px-3">Label</th>
-          <th className="py-2 px-3">Description</th>
-          <th className="py-2 px-3"></th>
-        </tr>
-      </thead>
-      <tbody>
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={localFields.map((f, i) =>
-              f.type === "Section" ? `section-${i}` : `field-${i}`
-            )}
-            strategy={verticalListSortingStrategy}
+    <div className="mb-6">
+      <table className="w-full text-sm border-t">
+        <thead className="text-left text-xs text-gray-500 uppercase border-b">
+          <tr>
+            <th className="py-2 px-3"></th>
+            <th className="py-2 px-3">Path</th>
+            <th className="py-2 px-3">Label</th>
+            <th className="py-2 px-3">Description</th>
+            <th className="py-2 px-3"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
           >
-            {localFields.map((field, index) => {
-              if (field.type === "Section" && Array.isArray(field.fields)) {
+            <SortableContext
+              items={editingFields.map((f, i) =>
+                f.type === "Section" ? `section-${i}` : `field-${i}`
+              )}
+              strategy={verticalListSortingStrategy}
+            >
+              {editingFields.map((field, index) => {
+                if (field.type === "Section" && Array.isArray(field.fields)) {
+                  return (
+                    <SortableSection
+                      key={`section-${index}`}
+                      id={`section-${index}`}
+                      section={field}
+                      sectionIndex={index}
+                      onEditSection={onEditSection}
+                      onEditField={onEditField}
+                      onDelete={onDelete}
+                      onReorder={onReorder}
+                      onDeleteSection={onDeleteSection}
+                    />
+                  );
+                }
+
                 return (
-                  <SortableSection
-                    key={`section-${index}`}
-                    id={`section-${index}`}
-                    section={field}
-                    sectionIndex={index}
-                    onEditSection={onEditSection}
-                    onEditField={onEditField}
-                    onDelete={onDelete}
-                    onReorder={onReorder}
-                    onDeleteSection={onDeleteSection}
+                  <SortableRow
+                    key={`field-${index}`}
+                    id={`field-${index}`}
+                    field={field}
+                    onEdit={() => onEditField?.(null, index)}
+                    onDelete={() => onDelete?.(null, index)}
                   />
                 );
-              }
-
-              return (
-                <SortableRow
-                  key={`field-${index}`}
-                  id={`field-${index}`}
-                  field={field}
-                  onEdit={() => onEditField?.(null, index)}
-                  onDelete={() => onDelete?.(null, index)}
-                />
-              );
-            })}
-          </SortableContext>
-        </DndContext>
-      </tbody>
-    </table>
+              })}
+            </SortableContext>
+          </DndContext>
+        </tbody>
+      </table>
+    </div>
   );
 };
 
