@@ -111,6 +111,7 @@ export const QueryBuilder = () => {
       </div>
       <div className="p-2 pt-0">
         <Table
+          settingColumnsEnabled={false}
           tableConfigKey="queryBuilder"
           entity={entity}
           data={data}

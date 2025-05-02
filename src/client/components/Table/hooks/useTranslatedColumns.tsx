@@ -26,6 +26,18 @@ export const useTranslatedColumns = ({
 
   return useMemo(() => {
     return columns.map((c): AppColumnDef<any, any> => {
+
+      if (typeof c !== "string" && c.cell) {
+        return {
+          ...c,
+          header: c.label ?? c.field ?? c.id,
+          id: c.id ?? c.field,
+          size: columnSizing?.[c.field] ?? 200,
+          minSize: 50,
+          enableResizing: true,
+        };
+      }
+
       const columnKey = typeof c === "string" ? c : c.field;
       const schemaField = schema?.[entity]?.fields?.[columnKey];
 

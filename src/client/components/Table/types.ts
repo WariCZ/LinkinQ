@@ -6,7 +6,9 @@ export type TableFieldType =
       field: string;
       label?: string;
       className?: string;
-      cell?: ({ getValue }: CellContext<any, unknown>) => string;
+      cell?: ({
+        getValue,
+      }: CellContext<any, unknown>) => string | React.JSX.Element;
       size?: number;
       maxSize?: number;
     }

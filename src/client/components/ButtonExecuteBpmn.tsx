@@ -10,10 +10,12 @@ const ButtonExecuteBpmn = ({
   status,
   wf,
   refresh,
+  showBtnSchema = true,
 }: {
   status?: string;
   wf: any;
   refresh: any;
+  showBtnSchema?: boolean
 }) => {
   const { t } = useTranslation();
   const executeItems = wf.items.filter((item) => item.status !== "end");
@@ -47,8 +49,8 @@ const ButtonExecuteBpmn = ({
   };
 
   return (
-    <span className="flex items-center my-3 justify-end">
-      <MdOutlineSchema
+    <span className="flex items-center justify-end">
+      {showBtnSchema && <MdOutlineSchema
         className="mx-1 cursor-pointer"
         onClick={() =>
           openModal(
@@ -56,7 +58,7 @@ const ButtonExecuteBpmn = ({
           )
         }
       />
-
+      }
       <Dropdown
         className="w-40"
         label={
