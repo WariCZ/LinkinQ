@@ -134,6 +134,11 @@ export class EntityRoutes extends Entity {
                 ? req.query.__orderby.split(",")
                 : undefined;
 
+            const groupBy =
+              req.query.__groupby && typeof req.query.__groupby === "string"
+                ? req.query.__groupby.split(",")
+                : undefined;
+
             const limit = req.query.__limit
               ? parseInt(req.query.__limit as string)
               : undefined;
@@ -151,44 +156,11 @@ export class EntityRoutes extends Entity {
               throw `Query with structure ${structure} is not supported `;
             }
 
-            // const x = await this.db
-            //   .setUser({ id: 1 })
-            //   .withRecursive("task_tree", (cte) => {
-            //     // ROOT: najdi všechny tasky bez parenta, ale v daném projektu
-            //     cte
-            //       .setUser({ id: 1 })
-            //       .select(
-            //         "id",
-            //         "caption",
-            //         "parent",
-            //         "createdby",
-            //         this.db.raw("1 as depth").setUser({ id: 1 })
-            //       )
-            //       .from("tasks")
-            //       // .where('project_id', projectId)
-            //       .whereNull("parent")
-
-            //       // REKURZE: najdi childy k uzlům ze stromu
-            //       .unionAll(function () {
-            //         this.select(
-            //           "t.id",
-            //           "t.caption",
-            //           "t.parent",
-            //           "t.createdby",
-            //           that.db.raw("task_tree.depth + 1").setUser({ id: 1 })
-            //         )
-            //           .from("tasks as t")
-            //           .join("task_tree", "t.parent", "task_tree.id");
-            //       });
-            //   })
-            //   .select("*")
-            //   .from("task_tree")
-            //   .orderBy("depth", "asc");
-
             const ret = await sql.select({
               entity: req.params.entity,
               fields,
               orderBy,
+              groupBy,
               limit,
               offset,
               structure,
@@ -196,6 +168,7 @@ export class EntityRoutes extends Entity {
                 "entity",
                 "__fields",
                 "__orderby",
+                "__groupby",
                 "__limit",
                 "__offset",
                 "__structure",

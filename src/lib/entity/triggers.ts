@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 import EventEmitter from "events";
 import { EntitySchema } from "./types";
 import { dbType, Sql } from "./sql";
-import { MAIN_GUID, MAIN_ID } from "../knex";
+import { MAIN_GUID, MAIN_ID, MAIN_TABLE_ALIAS } from "../knex";
 import { hashPassword } from "./utils";
 
 export type CodeType = {
@@ -407,7 +407,10 @@ export class Triggers {
         }
 
         if (["insert", "update", "del"].indexOf(runner.builder._method) > -1) {
-          const table = runner.builder._single.table;
+          let table = runner.builder._single.table;
+          if (typeof table == "object") {
+            table = table[Object.keys(table)[0]];
+          }
 
           if (!that.schema[table]) {
             return;
@@ -430,7 +433,7 @@ export class Triggers {
                 bindsLength - whereBindsLength
               );
 
-              beforeData = await db(table)
+              beforeData = await db({ [MAIN_TABLE_ALIAS]: table })
                 .setUser({ id: 1 })
                 .select("*")
                 .whereRaw(whereRaw, selectBinds);

@@ -1,4 +1,4 @@
-import { MAIN_ID, MAIN_GUID } from "../knex";
+import { MAIN_ID, MAIN_GUID, MAIN_TABLE_ALIAS } from "../knex";
 import _ from "lodash";
 import { EntitySchema, Rule } from "./types";
 import { Knex } from "knex";
@@ -14,6 +14,7 @@ type SelectEntityType = {
   nJoinDirection?: boolean;
   onlyIds?: boolean;
   orderBy?: string[];
+  groupBy?: string[];
   user: User;
   limit?: number;
   offset?: number;
@@ -281,7 +282,6 @@ export const addWhere = async ({
   where:
     | Record<string, string | number | string[] | number[] | undefined>
     | undefined;
-
   user: User;
 }) => {
   const mainWhere: Record<string, any> = {};
@@ -466,10 +466,10 @@ const addWhereToQuery = ({ query, conditions }: any) => {
         Object.entries(condition).forEach(([key, value]) => {
           if (Array.isArray(value)) {
             // Použijeme `whereIn` pro hodnoty typu pole
-            builder.whereIn(key, value);
+            builder.whereIn(`${MAIN_TABLE_ALIAS}.${key}`, value);
           } else {
             // Použijeme `where` pro jednotlivé hodnoty
-            builder.where(key, value);
+            builder.where(`${MAIN_TABLE_ALIAS}.${key}`, value);
           }
         });
       });
@@ -488,6 +488,69 @@ const addWhereToQuery = ({ query, conditions }: any) => {
   });
 };
 
+const getOrder = ({
+  schema,
+  query,
+  orderField,
+  entity,
+  i,
+}: {
+  schema: EntitySchema;
+  query: Knex.QueryBuilder<any, any>;
+  orderField: string;
+  entity: string;
+  i: number;
+}) => {
+  let isDesc = false;
+  if (orderField.indexOf("-") > -1) {
+    isDesc = true;
+    orderField = orderField.replace("-", "");
+  }
+
+  if (orderField.indexOf(".") > -1) {
+    const modelFields = schema[entity];
+    let oSplit = orderField.split(".");
+    const field = oSplit[0];
+    oSplit.shift();
+
+    const isNlink =
+      field &&
+      modelFields.fields &&
+      modelFields.fields[field] &&
+      modelFields.fields[field].type &&
+      modelFields.fields[field].type.indexOf("nlink(") > -1;
+    if (isNlink) {
+      throw "orderby with type nlink is not supported";
+    }
+    const fieldType = modelFields.fields[field];
+
+    const alias = `order_${orderField.replace(/\./g, "_")}_${i}`;
+
+    // query.join(`users as order`, `t.createdby`, `order.id`);
+    // query.orderBy("u.fullname", isDesc ? "desc" : "asc");
+
+    query.join(
+      `${fieldType.link} as ${alias}`,
+      `${MAIN_TABLE_ALIAS}.${field}`,
+      `${alias}.id`
+    );
+
+    if (oSplit.length > 1) {
+      getOrder({
+        schema,
+        query,
+        entity: fieldType.link,
+        orderField: oSplit.join("."),
+        i,
+      });
+    } else {
+      query.orderBy(`${alias}.${oSplit[0]}`, isDesc ? "desc" : "asc");
+    }
+  } else {
+    query.orderBy(`${MAIN_TABLE_ALIAS}.${orderField}`, isDesc ? "desc" : "asc");
+  }
+};
+
 export const getData = async ({
   db,
   schema,
@@ -498,6 +561,7 @@ export const getData = async ({
   nJoin,
   nJoinDirection,
   orderBy,
+  groupBy,
   user,
   limit,
   offset,
@@ -506,44 +570,43 @@ export const getData = async ({
 }: SelectEntityType & { knex: Knex; db: dbType; schema: EntitySchema }) => {
   let query: Knex.QueryBuilder;
 
-  // let query: Knex.QueryBuilder<
-  //   {},
-  //   DeferredKeySelection<
-  //     {},
-  //     never,
-  //     true,
-  //     (string | undefined)[],
-  //     false,
-  //     {},
-  //     never
-  //   >[]
-  // >;
+  //
   if (nJoin) {
     // provedu join s vazebni tabulkou
-
     if (nJoinDirection) {
       query = db(nJoin)
         .select(nJoin + ".source")
         .whereIn(nJoin + ".target", where ? (where.id as any) : [-1]);
     } else {
-      const fieldsArrJoin = fieldsArr.map((f) => entity + "." + f);
+      const fieldsArrJoin = fieldsArr.map((f) => MAIN_TABLE_ALIAS + "." + f);
       fieldsArrJoin.push(nJoin + ".source");
       query = db(entity)
         .select(fieldsArrJoin)
-        .innerJoin(nJoin, entity + ".id", nJoin + ".target")
+        .innerJoin(nJoin, MAIN_TABLE_ALIAS + ".id", nJoin + ".target")
         .whereIn(nJoin + ".source", where ? (where.id as any) : [-1]);
     }
   } else {
-    query = db(entity).select(fieldsArr);
+    query = db(entity).select(fieldsArr.map((f) => `${MAIN_TABLE_ALIAS}.${f}`));
 
     if (orderBy) {
-      orderBy.map((o) => {
-        if (o.indexOf("-") > -1) {
-          query.orderBy(o.replace("-", ""), "desc");
-        } else {
-          query.orderBy(o, "asc");
-        }
+      orderBy.map((o, i) => {
+        getOrder({
+          entity,
+          orderField: o,
+          query,
+          schema,
+          i,
+        });
       });
+    }
+
+    if (groupBy) {
+      // debugger;
+      // query.groupBy(groupBy);
+      groupBy.map((o) => {
+        query.orderBy(o);
+      });
+      query.select(groupBy);
     }
 
     if (limit) {
@@ -626,6 +689,11 @@ export const getData = async ({
     }
   }
 
+  if (groupBy) {
+    const groupedData = buildGroupBy(data, groupBy);
+    return groupedData;
+  }
+
   if (structure) {
     const ids = data.map((d) => d.id);
 
@@ -659,6 +727,7 @@ export const getData = async ({
 
     return treeData;
   }
+
   return data;
 };
 
@@ -695,4 +764,33 @@ function buildTree(tree, fullData) {
   }
 
   return roots;
+}
+
+function buildGroupBy(data, groupFields) {
+  const map = new Map();
+
+  for (const item of data) {
+    const key = groupFields.map((k) => item[k]).join("|");
+
+    if (!map.has(key)) {
+      const group = {
+        key,
+        children: [],
+        count: 0,
+      };
+
+      // přidej jednotlivé klíče jako vlastní pole (např. name, id)
+      for (const k of groupFields) {
+        group[k] = item[k];
+      }
+
+      map.set(key, group);
+    }
+
+    const group = map.get(key);
+    group.children.push(item);
+    group.count += 1;
+  }
+
+  return Array.from(map.values());
 }
