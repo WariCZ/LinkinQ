@@ -2,16 +2,15 @@ import { TriggerItemInternalType } from "../lib/entity/triggers";
 import fs from "fs";
 import { DateTime } from "luxon";
 import path from "path";
-import { dirname } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { EntitySchema } from "./entity/types";
 import _ from "lodash";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 const DEFAULT_CONFIGURATION_PATH = "/src/configurations/";
 const CONFIGURATION_PATH_LINKINQ = path.join(
-  __dirname,
+  dirname,
   "../../",
   DEFAULT_CONFIGURATION_PATH
 );

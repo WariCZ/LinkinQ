@@ -1,18 +1,22 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import "./index.css";
-import "./loc/index";
+// import React from "react";
+// import ReactDOM from "react-dom/client";
+// import App from "./App";
+// import "./index.css";
+// import "./loc/index";
 import ModalContainer from "./components/Modal/ModalContainer";
-import "react-tabs/style/react-tabs.css";
+// import "react-tabs/style/react-tabs.css";
 
-const createLinkinqClient = () => {
-  ReactDOM.createRoot(document.getElementById("root")!).render(
-    <>
-      <App />
-      <ModalContainer />
-    </>
-  );
-};
+// const ModalContainer = () => <div>s</div>;
+import App from "./App";
 
-export { createLinkinqClient, App, ModalContainer };
+// const createLinkinqClient = () => {
+//   ReactDOM.createRoot(document.getElementById("root")!).render(
+//     <>
+//       <App />
+//       <ModalContainer />
+//     </>
+//   );
+// };
+
+export { App, ModalContainer };
+// export { createLinkinqClient, App, ModalContainer };

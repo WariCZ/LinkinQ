@@ -65,7 +65,7 @@ const DateTimePicker = (
     if (date && time) {
       const result = getDatetime(date, time);
       setInputValue(result);
-      props.onChange?.(result);
+      props.onChange?.(result as any);
     }
     setIsOpen(false);
   };

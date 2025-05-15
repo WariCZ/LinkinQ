@@ -31,11 +31,10 @@ import pageflowRouter from "../lib/entity/pageflow";
 import { loadConfigurations } from "../lib/configurations";
 import fs from "fs";
 import path from "path";
-import { dirname } from "path";
 import { fileURLToPath } from "url";
 import _ from "lodash";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const filename = fileURLToPath(import.meta.url);
+const dirname = path.dirname(filename);
 
 dotenv.config();
 
@@ -60,7 +59,7 @@ export class Linkinq {
 
   constructor(config?: LinkinqConfig) {
     this.viteRunning = false;
-    const configPath = __dirname + "/../package.json";
+    const configPath = dirname + "/../package.json";
     if (fs.existsSync(configPath)) {
       this.packageJson = JSON.parse(fs.readFileSync(configPath, "utf8"));
       var _version = this.packageJson["version"];
@@ -163,8 +162,8 @@ export class Linkinq {
       });
     } catch (err) {
       debugger;
-      console.error(err?.message || err);
-      throw err?.message || err;
+      console.error(err?.stack || err?.message || err);
+      throw err?.stack || err?.message || err;
     }
   }
 
@@ -221,7 +220,7 @@ export class Linkinq {
     this.setupRoutes({ schema, sqlAdmin });
 
     const DEFAULT_VITE_PATH = "vite.config.ts";
-    const VITE_PATH_LINKINQ = path.join(__dirname, "../../", DEFAULT_VITE_PATH);
+    const VITE_PATH_LINKINQ = path.join(dirname, "../../", DEFAULT_VITE_PATH);
 
     /**
      * Error Handler.
@@ -229,7 +228,7 @@ export class Linkinq {
     if (process.env.NODE_ENV === "development") {
       // only use in development
       ViteExpress.config({
-        viteConfigFile: VITE_PATH_LINKINQ,
+        // viteConfigFile: VITE_PATH_LINKINQ,
       });
     } else {
       app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
@@ -238,7 +237,7 @@ export class Linkinq {
       });
       ViteExpress.config({
         mode: "production",
-        viteConfigFile: VITE_PATH_LINKINQ,
+        // viteConfigFile: VITE_PATH_LINKINQ,
       });
     }
 

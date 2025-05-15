@@ -98,7 +98,7 @@ export default function ContextPadProvider(
           );
           if (existingFormField) {
             // Přidání nových hodnot
-            existingFormField.values.push(...enumValues);
+            // existingFormField.values.push(...enumValues);
           } else {
             elem.fields.push(formField); // Nový formField
           }
