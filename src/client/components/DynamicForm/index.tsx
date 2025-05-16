@@ -7,7 +7,7 @@ import {
   FormProvider,
 } from "react-hook-form";
 import useStore from "../../store";
-import { EntityType, FieldType} from "../../../lib/entity/types";
+import { EntityType, FieldType } from "../../../lib/entity/types";
 import _ from "lodash";
 import { ConditionType, FormFieldType } from "../../types/DynamicForm/types";
 import { renderItem, translateFormField } from "./utils/FormUtils";
@@ -212,7 +212,9 @@ const DynamicForm = ({
         <form
           ref={formRef}
           onSubmit={handleSubmit(formSubmit)}
-          className={`${columns ? `grid lg:grid-cols-${columns} gap-${gap || 2}` : ""} ${className ?? "px-2 py-4"}`}
+          className={`${
+            columns ? `grid lg:grid-cols-${columns} gap-${gap || 2}` : ""
+          } ${className ?? "px-2 py-4"}`}
         >
           {activeFields?.map((item, index) => {
             let formField: FormFieldType = translateFormField({

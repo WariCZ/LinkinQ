@@ -9,22 +9,26 @@
   "typesVersions": {
     "*": {
       "server": [
-        "./src/server/index.ts"
+        "./dist/server/index.d.ts"
       ],
       "client": [
-        "./src/client/index.tsx"
+        "./dist/client/index.d.ts"
       ]
     }
   },
   "files": [
-    "src",
+    "src/configurations/",
     "dist"
   ],
   "scripts": {
+    "build:rollup": "rollup -c --bundleConfigAsCjs",
     "build:tsup": "tsup",
-    "build:server": "tsc && tsc-esm-fix dist --no-add-extension && cpx \"src/**/*.{css,png}\" dist",
-    "build:client": "vite build",
-    "build": "npm run build:server && npm run build:client",
+    "build:client": "tsc -p tsconfig.client.json && cpx \"src/**/*.{css,png}\" dist",
+    "build:server": "tsc -p tsconfig.server.json",
+    "build:server1": "tsc && cpx \"src/**/*.{css,png}\" dist",
+    "build:server2": "tsc && tsc-esm-fix dist && cpx \"src/**/*.{css,png}\" dist",
+    "build:client2": "vite build",
+    "build": "npm run build:client && npm run build:server",
     "format": "prettier --write ./src",
     "vite:build": "vite build",
     "start": "ts-node src/server",
@@ -101,6 +105,12 @@
     "zustand": "^4.5.4"
   },
   "devDependencies": {
+    "@babel/core": "^7.27.1",
+    "@babel/preset-react": "^7.27.1",
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^28.0.3",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.2",
     "@types/compression": "^1.7.5",
     "@types/cookie-parser": "^1.4.7",
     "@types/express": "^4.17.21",
@@ -119,6 +129,9 @@
     "@types/react-table": "^7.7.20",
     "cpx": "^1.5.0",
     "nodemon": "^3.1.0",
+    "rollup": "^4.40.2",
+    "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsc-esm-fix": "^3.1.2",

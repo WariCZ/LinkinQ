@@ -33,16 +33,13 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import _ from "lodash";
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
+
+// const filename = fileURLToPath(import.meta.url);
+// const dirname = path.dirname(filename);
+const filename = __filename;
+const dirname = __dirname;
 
 dotenv.config();
-
-declare global {
-  var prodigi: {
-    entityModel: EntitySchema;
-  };
-}
 
 type LinkinqPlugin = { triggers: any[]; processes: any[] };
 

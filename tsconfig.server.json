@@ -12,13 +12,21 @@
     "moduleResolution": "node",
     "sourceMap": true,
     "declaration": true,
-    "outDir": "dist",
     "strict": false,
     "skipLibCheck": true,
     "jsx": "preserve",
-    "baseUrl": "."
+    // "baseUrl": "."
+    "outDir": "./dist",
+    // "baseUrl": "./src",
+    "rootDir": "./src"
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/server/**/*",
+    "src/types/**/*",
+    "src/configurations/**/*",
+    "src/lib/**/*"
+  ],
+  "exclude": ["src/client"],
   "paths": {
     "react-icons/*": ["../node_modules/react-icons/*"]
   }

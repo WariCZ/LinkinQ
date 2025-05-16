@@ -8,7 +8,7 @@ import {
   CacheManager,
   ScriptHandler,
   Definition,
-} from "./";
+} from ".";
 
 import { ModelsDatastore, DataStore } from "./datastore";
 import { MyAppDelegate } from "./appDelegate";
@@ -19,8 +19,10 @@ import { MyAppDelegate } from "./appDelegate";
 import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
+const filename = __filename;
+const dirname = __dirname;
+// const filename = fileURLToPath(import.meta.url);
+// const dirname = path.dirname(filename);
 
 dotenv.config();
 const templatesPath = dirname + "/emailTemplates/";

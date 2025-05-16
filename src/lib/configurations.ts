@@ -1,12 +1,14 @@
-import { TriggerItemInternalType } from "../lib/entity/triggers";
+import { TriggerItemInternalType } from "./entity/triggers";
 import fs from "fs";
 import { DateTime } from "luxon";
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { EntitySchema } from "./entity/types";
 import _ from "lodash";
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
+const filename = __filename;
+const dirname = __dirname;
+// const filename = fileURLToPath(import.meta.url);
+// const dirname = path.dirname(filename);
 
 const DEFAULT_CONFIGURATION_PATH = "/src/configurations/";
 const CONFIGURATION_PATH_LINKINQ = path.join(
@@ -158,11 +160,17 @@ const getUpdateData = async () => {
 
 const loadConfigurations = async () => {
   return {
-    updateData: await getUpdateData(),
-    defaultData: await getDefaultData(),
-    entities: await getEntities(),
-    processes: await getprocesses(),
-    triggers: await getTriggers(),
+    // updateData: await getUpdateData(),
+    // defaultData: await getDefaultData(),
+    // entities: await getEntities(),
+    // processes: await getprocesses(),
+    // triggers: await getTriggers(),
+
+    updateData: {},
+    defaultData: {},
+    entities: {},
+    processes: [],
+    triggers: [],
   };
 };
 

@@ -1,4 +1,4 @@
-import { uuid } from "../../../src/server";
+import { uuid } from "../../server";
 
 const defaultData = ({ env }) => ({
   lov: [
