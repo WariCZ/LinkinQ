@@ -2,7 +2,7 @@
 // import ReactDOM from "react-dom/client";
 // import App from "./App";
 // import "./index.css";
-// import "./loc/index";
+import "./loc/index";
 import ModalContainer from "./components/Modal/ModalContainer";
 // import "react-tabs/style/react-tabs.css";
 

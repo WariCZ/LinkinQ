@@ -1,33 +1,32 @@
 {
-  "name": "linkinq",
-  "version": "1.3.2",
+  "name": "@physter/linkinq",
+  "version": "1.1.0",
   "description": "",
   "exports": {
-    "./server": "./dist/server/index.js",
-    "./client": "./dist/client/index.jsx"
+    "./server": "./src/server/index.js",
+    "./client": "./src/client/index.jsx"
   },
   "typesVersions": {
     "*": {
       "server": [
-        "./dist/server/index.d.ts"
+        "./src/server/index.ts"
       ],
       "client": [
-        "./dist/client/index.d.ts"
+        "./src/client/index.tsx"
       ]
     }
   },
   "files": [
-    "src/configurations/",
     "dist"
   ],
   "scripts": {
+    "release": "npm version patch && git push && git push --tags",
+    "prepack": "node switch-mode.js prod",
+    "postpack": "node switch-mode.js dev",
     "build:rollup": "rollup -c --bundleConfigAsCjs",
     "build:tsup": "tsup",
     "build:client": "tsc -p tsconfig.client.json && cpx \"src/**/*.{css,png}\" dist",
     "build:server": "tsc -p tsconfig.server.json",
-    "build:server1": "tsc && cpx \"src/**/*.{css,png}\" dist",
-    "build:server2": "tsc && tsc-esm-fix dist && cpx \"src/**/*.{css,png}\" dist",
-    "build:client2": "vite build",
     "build": "npm run build:client && npm run build:server",
     "format": "prettier --write ./src",
     "vite:build": "vite build",
@@ -143,5 +142,7 @@
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.9.5"
   },
-  "packageManager": "pnpm@9.8.0+sha512.8e4c3550fb500e808dbc30bb0ce4dd1eb614e30b1c55245f211591ec2cdf9c611cabd34e1364b42f564bd54b3945ed0f49d61d1bbf2ec9bd74b866fcdc723276"
+  "packageManager": "pnpm@9.8.0+sha512.8e4c3550fb500e808dbc30bb0ce4dd1eb614e30b1c55245f211591ec2cdf9c611cabd34e1364b42f564bd54b3945ed0f49d61d1bbf2ec9bd74b866fcdc723276",
+  "main": "src/index.ts",
+  "types": "src/index.ts"
 }

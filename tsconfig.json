@@ -15,11 +15,6 @@
     "outDir": "dist",
     "strict": false,
     "skipLibCheck": true,
-    "jsx": "preserve",
-    "baseUrl": "."
-  },
-  "include": ["src/**/*"],
-  "paths": {
-    "react-icons/*": ["../node_modules/react-icons/*"]
+    "jsx": "preserve"
   }
 }
