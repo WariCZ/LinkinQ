@@ -705,6 +705,12 @@ export class Entity {
               }
             }
           }
+          if (schema[table].fields[f].seqformat) {
+            if (!schema[table].sequencesFields) {
+              schema[table].sequencesFields = [];
+            }
+            schema[table].sequencesFields.push(f);
+          }
         }
       });
     });

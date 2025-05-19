@@ -6,6 +6,7 @@ export type Rule =
   | { type: "role"; roles: string[]; filter: Record<string, string | number> };
 
 export type EntityType<T = FieldType> = {
+  sequencesFields?: string[];
   system?: boolean;
   withoutDefaultFields?: boolean;
   journal?: boolean;
@@ -50,6 +51,7 @@ export type FieldType = {
   nlinkTable?: string;
   link?: string;
   lov?: string;
+  seqformat?: string;
 };
 
 export type DBFieldType = {
