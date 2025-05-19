@@ -1,0 +1,98 @@
+default:
+  tags:
+    - LINUX
+    - OCP
+
+include:
+  - project: "common/openshift/gitlab-ci-templates"
+    file: "openshift/application-template.yml"
+  - project: "common/openshift/gitlab-ci-templates"
+    file: "image/image-npm.yml"
+  - project: "common/openshift/gitlab-ci-templates"
+    file: "npm/local-repo.yml"
+
+variables:
+  # Nazov projektu
+  OC_PROJECT: dev-linkinq
+  OC_NAME: linkinq
+  # Hostname, kde to bude vystavena dokumentacia pomocou storybooku
+  # OC_DOC_HOSTNAME: $OC_PROJECT-storybook
+  # Nazov entit suvisiacich s dokumentaciou pomocou storybooku
+  # OC_DOC_NAME: $OC_NAME-storybook
+  # Verzia nginx
+  NGINX_VERSION: latest
+  # Umiestnenie templateov pre openshift
+  OC_FOLDER: openshift
+
+stages:
+  - init #initialize npm local repo. To run it, modify .npm-init in root of the project
+  - update #update npm local repo
+  # - test
+  - check_build
+  - art_build
+  # - openshift-install
+  # - openshift-build
+  # - openshift-deploy
+
+# unit_test:
+#   stage: test
+#   variables:
+#     NODE_ENV: test
+#   before_script:
+#     - npm install
+#   script:
+#     - npm run test:build
+#     - mv coverage/ public/
+#   artifacts:
+#     paths:
+#       - public
+#   coverage: /All\sfiles.*?\s+(\d+.\d+)/
+#   except:
+#     - tags
+#     - /^devel-openshift$/
+
+check_build:
+  #image: node
+  stage: check_build
+  script:
+    #  - npm install
+    - npm run build
+  artifacts:
+    paths:
+      - build
+  except:
+    - /^devel-openshift$/
+
+art_build:
+  # image: node
+  stage: art_build
+  only:
+    - tags
+  except:
+    - /^devel-openshift$/
+    - /^TEST_TAG$/
+  script:
+    - node copy-modules.js
+    - npm publish
+    # - npm publish ./dist --force
+# openshift-install:
+#   extends: .install
+#   stage: openshift-install
+#   only:
+#     - /^devel-openshift$/
+#     - tags
+
+# openshift-build:
+#   extends: .build
+#   stage: openshift-build
+#   only:
+#     - /^devel-openshift$/
+#     - tags
+
+# openshift-deploy:
+#   extends: .deploy
+#   stage: openshift-deploy
+#   only:
+#     - /^devel-openshift$/
+#     - tags
+
