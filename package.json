@@ -1,6 +1,6 @@
 {
   "name": "@physter/linkinq",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "",
   "exports": {
     "./server": "./src/server/index.js",
