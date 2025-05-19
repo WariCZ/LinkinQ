@@ -3,7 +3,7 @@ import { addWhere, getData, getQueries } from "./methodsDB";
 import { EntitySchema } from "./types";
 import { User } from "../auth";
 import _ from "lodash";
-import { MAIN_ID } from "../knex";
+import { MAIN_ID, MAIN_TABLE_ALIAS } from "../knex";
 
 export type dbType = (table: string) => Knex.QueryBuilder<any, unknown[]>;
 export class Sql {
@@ -23,7 +23,8 @@ export class Sql {
   }) {
     this.#schema = schema;
     this.#knex = db;
-    this.#db = (table: string) => db(table).setUser(user);
+    this.#db = (table: string) =>
+      db({ [MAIN_TABLE_ALIAS]: table }).setUser(user);
     this.user = user;
   }
 
@@ -65,7 +66,7 @@ export class Sql {
           limit: limit,
           offset: offset,
           structure: structure,
-          // groupBy: groupBy
+          groupBy: groupBy,
         });
 
         return ret;
@@ -83,106 +84,101 @@ export class Sql {
     const data = { ...dataItem };
     console.log("getLinks", dataItem);
     for (let d of Object.keys(newDataItem) as any) {
-      if (
-        this.#schema[entity].fields[d].type.indexOf("link(") > -1 ||
-        this.#schema[entity].fields[d].type.indexOf("lov(") > -1
-      ) {
-        if (this.user.id == 1 && Number.isInteger(newDataItem[d])) {
-          // admin muze zadavat pres konkretni id ostatni musi pres GUID
-          data[d] = newDataItem[d];
-        } else {
-          const match = this.#schema[entity].fields[d].type.match(
-            /.*(?:link|lov)\((\w+)\)/
-          );
-          if (match && match[0].indexOf("nlink") > -1 && match[1]) {
-            const joinTable = entity + "2" + match[1] + "4" + d;
+      if (this.#schema[entity].fields[d]) {
+        if (
+          this.#schema[entity].fields[d].type.indexOf("link(") > -1 ||
+          this.#schema[entity].fields[d].type.indexOf("lov(") > -1
+        ) {
+          if (this.user.id == 1 && Number.isInteger(newDataItem[d])) {
+            // admin muze zadavat pres konkretni id ostatni musi pres GUID
+            data[d] = newDataItem[d];
+          } else {
+            const match = this.#schema[entity].fields[d].type.match(
+              /.*(?:link|lov)\((\w+)\)/
+            );
+            if (match && match[0].indexOf("nlink") > -1 && match[1]) {
+              const joinTable = entity + "2" + match[1] + "4" + d;
 
-            const w = Array.isArray(newDataItem[d])
-              ? newDataItem[d]
-              : [newDataItem[d]];
+              const w = Array.isArray(newDataItem[d])
+                ? newDataItem[d]
+                : [newDataItem[d]];
 
-            let targetIds;
-            if (Number.isInteger(w[0])) {
-              targetIds = await this.#db("lov")
+              const targetIds = await this.#db(match[1])
                 .select("id")
-                .whereIn("value", w)
-                .where("lov", match[1]);
-            } else {
-              targetIds = await this.#db("lov")
+                .whereIn("guid", w);
+
+              joinsIds[joinTable] = targetIds;
+              data[d] = targetIds.map((t) => parseInt(t[MAIN_ID]));
+              delete newDataItem[d];
+            } else if (match && match[0].indexOf("nlov") > -1 && match[1]) {
+              const joinTable = entity + "2" + match[1] + "4" + d;
+
+              const w = Array.isArray(newDataItem[d])
+                ? newDataItem[d]
+                : [newDataItem[d]];
+
+              const targetIds = await this.#db(match[1])
                 .select("id")
-                .whereIn("guid", w)
-                .where("lov", match[1]);
-            }
-
-            joinsIds[joinTable] = targetIds;
-            data[d] = targetIds.map((t) => parseInt(t[MAIN_ID]));
-            delete newDataItem[d];
-          } else if (match && match[0].indexOf("nlov") > -1 && match[1]) {
-            const joinTable = entity + "2" + match[1] + "4" + d;
-
-            const w = Array.isArray(newDataItem[d])
-              ? newDataItem[d]
-              : [newDataItem[d]];
-
-            const targetIds = await this.#db(match[1])
-              .select("id")
-              .whereIn("guid", w);
-            joinsIds[joinTable] = targetIds;
-            data[d] = targetIds.map((t) => parseInt(t[MAIN_ID]));
-            delete newDataItem[d];
-          } else if (match && match[0].indexOf("link") > -1 && match[1]) {
-            console.log("getLinks", newDataItem, d);
-            if (newDataItem[d] === null) {
-              newDataItem[d] = null;
-              data[d] = null;
-            } else {
-              const targetData: any = await this.#db(match[1])
-                .select("id")
-                .where("guid", newDataItem[d]);
-
-              if (targetData.length == 1) {
-                newDataItem[d] = targetData[0].id;
-                data[d] = parseInt(targetData[0].id);
+                .whereIn("guid", w);
+              joinsIds[joinTable] = targetIds;
+              data[d] = targetIds.map((t) => parseInt(t[MAIN_ID]));
+              delete newDataItem[d];
+            } else if (match && match[0].indexOf("link") > -1 && match[1]) {
+              console.log("getLinks", newDataItem, d);
+              if (newDataItem[d] === null) {
+                newDataItem[d] = null;
+                data[d] = null;
               } else {
-                if (targetData.length > 1) {
-                  throw "Nalezeno guid pro vice linku";
+                const targetData: any = await this.#db(match[1])
+                  .select("id")
+                  .where("guid", newDataItem[d]);
+
+                if (targetData.length == 1) {
+                  newDataItem[d] = targetData[0].id;
+                  data[d] = parseInt(targetData[0].id);
                 } else {
-                  throw "Nenalezen guid pro link";
+                  if (targetData.length > 1) {
+                    throw "Nalezeno guid pro vice linku";
+                  } else {
+                    throw "Nenalezen guid pro link";
+                  }
                 }
               }
-            }
-            ///////// LOV ///////////////////
-          } else if (match && match[0].indexOf("lov") > -1 && match[1]) {
-            if (newDataItem[d] === null) {
-              newDataItem[d] = null;
-              data[d] = null;
-            } else {
-              let targetData;
-              if (Number.isInteger(newDataItem[d])) {
-                targetData = await this.#db("lov")
-                  .select("id")
-                  .where("value", newDataItem[d])
-                  .where("lov", match[1]);
+              ///////// LOV ///////////////////
+            } else if (match && match[0].indexOf("lov") > -1 && match[1]) {
+              if (newDataItem[d] === null) {
+                newDataItem[d] = null;
+                data[d] = null;
               } else {
-                targetData = await this.#db("lov")
-                  .select("id")
-                  .where("guid", newDataItem[d])
-                  .where("lov", match[1]);
-              }
-
-              if (targetData.length == 1) {
-                newDataItem[d] = targetData[0].id;
-                data[d] = parseInt(targetData[0].id);
-              } else {
-                if (targetData.length > 1) {
-                  throw "Nalezeno guid pro vice lov";
+                let targetData;
+                if (Number.isInteger(newDataItem[d])) {
+                  targetData = await this.#db("lov")
+                    .select("id")
+                    .where("value", newDataItem[d])
+                    .where("lov", match[1]);
                 } else {
-                  throw "Nenalezen guid pro lov";
+                  targetData = await this.#db("lov")
+                    .select("id")
+                    .where("guid", newDataItem[d])
+                    .where("lov", match[1]);
+                }
+
+                if (targetData.length == 1) {
+                  newDataItem[d] = targetData[0].id;
+                  data[d] = parseInt(targetData[0].id);
+                } else {
+                  if (targetData.length > 1) {
+                    throw "Nalezeno guid pro vice lov";
+                  } else {
+                    throw "Nenalezen guid pro lov";
+                  }
                 }
               }
             }
           }
         }
+      } else {
+        throw `Column ${d} not exists in entity ${entity}`;
       }
     }
     return { dataItem: newDataItem, joinsIds, data };
@@ -201,9 +197,7 @@ export class Sql {
 
         let retData: any = [];
         for (let dataItem of dataArray) {
-          console.log("call getLinks");
           const gl = await this.getLinks(entity, dataItem);
-          console.log("finish call getLinks");
           let joinsIds = gl.joinsIds;
           dataItem = gl.dataItem;
           //
@@ -260,7 +254,9 @@ export class Sql {
           query,
           user: this.user,
         });
-        const updateIdsData = await query.select(MAIN_ID);
+        const updateIdsData = await query.select(
+          `${MAIN_TABLE_ALIAS}.${MAIN_ID}`
+        );
         const idForDeleteIfIsJoinEmpty = updateIdsData.map((u) => u[MAIN_ID]);
 
         // add nlink joins

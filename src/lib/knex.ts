@@ -26,6 +26,7 @@ const configDb: Knex.Config = {
 
 export const MAIN_ID = "id";
 export const MAIN_GUID = "guid";
+export const MAIN_TABLE_ALIAS = "t";
 
 let dbInstance = null;
 export const db = () => {
