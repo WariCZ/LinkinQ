@@ -282,7 +282,15 @@ export class Triggers {
     return data;
   };
 
-  processDataBefore = async ({ table, data }: { table: string; data: any }) => {
+  processDataBefore = async ({
+    table,
+    data,
+    db,
+  }: {
+    table: string;
+    data: any;
+    db: Knex;
+  }) => {
     if (data) {
       try {
         const fields = this.schema?.[table].fields;
@@ -293,6 +301,21 @@ export class Triggers {
               if (fields[f].type == "password") {
                 d[f] = await hashPassword(d[f]);
               }
+            }
+          }
+        }
+
+        if (data.parent) {
+          const parent = await db(table)
+            .setUser({ id: 1 })
+            .select(["id", "root", "parent"])
+            .where("id", data.parent);
+          console.log(parent);
+          if (parent && parent[0]) {
+            if (parent[0].root) {
+              data.root = parent[0].root;
+            } else {
+              data.root = parent[0].id;
             }
           }
         }
@@ -438,7 +461,7 @@ export class Triggers {
             runner.builder._method == "del" ? "delete" : runner.builder._method;
           const data = runner.builder._single[runner.builder._method];
 
-          await that.processDataBefore({ table, data });
+          await that.processDataBefore({ table, data, db });
           if (
             that.definitions["before"] &&
             that.definitions["before"][method] &&

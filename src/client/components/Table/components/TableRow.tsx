@@ -44,7 +44,10 @@ export const TableRow = <T,>({
     <tr
       onClick={() => rowClick && rowClick(row.original)}
       key={row.id + "-" + i}
-      className={`hover:bg-gray-100 dark:hover:bg-gray-600 ${isHighlighted ? "highlight" : ""}`}
+      data-guid={guid}
+      className={`hover:bg-gray-100 dark:hover:bg-gray-600 ${
+        isHighlighted ? "highlight" : ""
+      }`}
     >
       {selectable ? (
         <td className="px-4">

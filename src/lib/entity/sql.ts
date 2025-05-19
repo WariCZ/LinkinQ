@@ -35,6 +35,7 @@ export class Sql {
     groupBy,
     limit,
     offset,
+    structure,
   }: {
     entity: string;
     fields?: string[];
@@ -43,6 +44,7 @@ export class Sql {
     groupBy?: string[];
     limit?: number;
     offset?: number;
+    structure?: "topdown";
   }) => {
     if (entity) {
       if (this.#schema[entity]) {
@@ -56,11 +58,13 @@ export class Sql {
 
         const ret = await getData({
           db: this.#db,
+          knex: this.#knex,
           ...queries,
           schema: this.#schema,
           orderBy: orderBy,
           limit: limit,
           offset: offset,
+          structure: structure,
           // groupBy: groupBy
         });
 
@@ -251,6 +255,7 @@ export class Sql {
           where,
           schema: this.#schema,
           db: this.#db,
+          knex: this.#knex,
           entity,
           query,
           user: this.user,
@@ -337,6 +342,7 @@ export class Sql {
           where,
           schema: this.#schema,
           db: this.#db,
+          knex: this.#knex,
           entity,
           query,
           user: this.user,

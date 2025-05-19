@@ -17,6 +17,7 @@ type SelectEntityType = {
   user: User;
   limit?: number;
   offset?: number;
+  structure?: "topdown";
 };
 
 export const whereQueries = ({
@@ -265,6 +266,7 @@ export const getQueries = ({
 
 export const addWhere = async ({
   db,
+  knex,
   query,
   entity,
   schema,
@@ -272,6 +274,7 @@ export const addWhere = async ({
   user,
 }: {
   db: dbType;
+  knex: Knex;
   query: Knex.QueryBuilder;
   entity: string;
   schema: EntitySchema;
@@ -314,6 +317,7 @@ export const addWhere = async ({
         if (schema[entity].fields[fieldWhere].nlinkTable) {
           const dd = await getData({
             db,
+            knex,
             schema,
             entity: query.entity,
             fieldsArr: query.fieldsArr,
@@ -323,6 +327,7 @@ export const addWhere = async ({
 
           d = await getData({
             db,
+            knex,
             schema,
             entity: query.entity,
             fieldsArr: query.fieldsArr,
@@ -338,6 +343,7 @@ export const addWhere = async ({
         } else {
           d = await getData({
             db,
+            knex,
             schema,
             entity: query.entity,
             fieldsArr: query.fieldsArr,
@@ -495,10 +501,9 @@ export const getData = async ({
   user,
   limit,
   offset,
-}: SelectEntityType & {
-  db: dbType;
-  schema: EntitySchema;
-}) => {
+  structure,
+  knex,
+}: SelectEntityType & { knex: Knex; db: dbType; schema: EntitySchema }) => {
   let query: Knex.QueryBuilder;
 
   // let query: Knex.QueryBuilder<
@@ -550,6 +555,7 @@ export const getData = async ({
     // Pridam WHERE
     await addWhere({
       db,
+      knex,
       query,
       entity,
       schema,
@@ -572,6 +578,7 @@ export const getData = async ({
       if (ids.length > 0) {
         const joindata = await getData({
           db,
+          knex,
           schema,
           entity: query.entity,
           fieldsArr: [MAIN_ID, MAIN_GUID, ...query.fieldsArr],
@@ -619,5 +626,73 @@ export const getData = async ({
     }
   }
 
+  if (structure) {
+    const ids = data.map((d) => d.id);
+
+    const treeList = await knex
+      .setUser({ id: 1 })
+      .withRecursive("alias_tree", (cte) => {
+        // ROOT: najdi všechny tasky bez parenta, ale v daném projektu
+        cte
+          .setUser({ id: 1 })
+          .select("id", "parent", knex.raw("1 as depth").setUser({ id: 1 }))
+          .from("tasks")
+          .whereIn("id", ids)
+          .whereNull("parent")
+
+          // REKURZE: najdi childy k uzlům ze stromu
+          .unionAll(function () {
+            this.select(
+              "t.id",
+              "t.parent",
+              knex.raw("alias_tree.depth + 1").setUser({ id: 1 })
+            )
+              .from("tasks as t")
+              .join("alias_tree", "t.parent", "alias_tree.id");
+          });
+      })
+      .select("*")
+      .from("alias_tree")
+      .orderBy("depth", "asc");
+
+    const treeData = buildTree(treeList, data);
+
+    return treeData;
+  }
   return data;
 };
+
+function buildTree(tree, fullData) {
+  const idToDataMap = new Map(fullData.map((item) => [item.id, item]));
+  const idToNode = new Map();
+
+  const roots = [];
+
+  for (const { id, parent } of tree) {
+    const data: any = idToDataMap.get(id);
+
+    if (!data) continue; // ochrana: pokud chybí fullData, přeskočíme
+
+    const node = {
+      ...data,
+      childrenLength: 0,
+      children: [],
+    };
+
+    idToNode.set(id, node);
+
+    if (parent) {
+      const parentData = idToNode.get(parent);
+      if (parentData) {
+        parentData.children.push(node);
+        parentData.childrenLength += 1;
+      } else {
+        // fallback: orphan – uložíme ho později, nebo logujeme
+      }
+    } else {
+      roots.push(node);
+    }
+  }
+
+  return roots;
+}
