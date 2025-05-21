@@ -43,7 +43,6 @@ export const Login = () => {
         <div className="relative z-20 flex items-center text-lg font-medium">
           <img alt="Linkinq" src={logo} width="100" height="30" />
         </div>
-        <div>aaaa</div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">&ldquo;This is beta version.&rdquo;</p>
