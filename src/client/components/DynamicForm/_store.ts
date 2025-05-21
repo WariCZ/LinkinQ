@@ -2,55 +2,28 @@ import { FormFieldType } from "../../../client/types/DynamicForm/types";
 import { create } from "zustand";
 
 type FormConfigState = {
-  entity: string | null;
   defaultFields: FormFieldType[];
   localFields: FormFieldType[];
   kind: number | null;
   setDefaultFields: (fields: FormFieldType[]) => void;
   setKind: (kind: number) => void;
-  setEntity: (entity: string) => void;
   setLocalFields: (fields: FormFieldType[]) => void;
-  resetLocalFields: () => void;
-  saveConfig: () => void;
-  getActiveFields: () => FormFieldType[] | [];
+  editingFields: FormFieldType[];
+  setEditingFields: (fields: FormFieldType[]) => void;
+  applyEditingFields: () => void;
 };
 
 export const useFormConfigStore = create<FormConfigState>((set, get) => ({
-  entity: "task",
   defaultFields: [],
   localFields: [],
-  kind: 1,
-  setEntity: (entity) => set({ entity }),
+  editingFields: [],
+  kind: 2,
   setKind: (kind) => {
-    const entity = "task";
-    const key = `formLayout_${entity}_kind_${kind}`;
-    const saved = localStorage.getItem(key);
-    const parsed = saved ? JSON.parse(saved) : null;
-    set({
-      kind,
-      localFields: parsed ?? get().defaultFields,
-    });
+    set({ kind });
   },
   setDefaultFields: (fields) => set({ defaultFields: fields }),
-  saveConfig: () => {
-    const { entity, kind, localFields } = get();
-    if (!entity || kind === null) return;
-    const key = `formLayout_${entity}_kind_${kind}`;
-    localStorage.setItem(key, JSON.stringify(localFields));
-  },
-  getActiveFields: () => {
-    const { entity, kind, defaultFields } = get();
-    const key = `formLayout_${entity}_kind_${kind}`;
-    const saved = localStorage.getItem(key);
-    const parsed = saved ? JSON.parse(saved) : null;
-    return parsed ?? defaultFields;
-  },
   setLocalFields: (fields) => set({ localFields: fields }),
-  resetLocalFields: () => {
-    const { entity, kind, defaultFields } = get();
-    const key = `formLayout_${entity}_kind_${kind}`;
-    const saved = localStorage.getItem(key);
-    const parsed = saved ? JSON.parse(saved) : null;
-    set({ localFields: parsed ?? defaultFields });
-  },
+  setEditingFields: (fields) => set({ editingFields: fields }),
+  applyEditingFields: () =>
+    set((state) => ({ localFields: state.editingFields })),
 }));

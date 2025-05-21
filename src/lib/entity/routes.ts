@@ -15,6 +15,7 @@ export type ServerSideOutputType = {
   msg: string;
 };
 
+//tady
 const upload = multer(); // Ukládá soubory pouze do paměti
 
 export class EntityRoutes extends Entity {

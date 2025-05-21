@@ -1,5 +1,14 @@
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, Method } from "axios";
 import _ from "lodash";
+
+interface HttpRequestParams {
+  method: Method;
+  entity?: string;
+  data?: Record<string, any>;
+  config?: AxiosRequestConfig;
+  params?: Record<string, any>;
+  url?: string;
+}
 
 export const httpRequest = ({
   method,
@@ -8,14 +17,7 @@ export const httpRequest = ({
   config,
   params,
   url,
-}: {
-  method: string;
-  entity: string;
-  data?: Record<string, any>;
-  config?: AxiosRequestConfig;
-  params?: Record<string, any>;
-  url?: string;
-}) => {
+}: HttpRequestParams) => {
   const urlParams = new URLSearchParams();
 
   if (params) {
@@ -31,7 +33,7 @@ export const httpRequest = ({
 
   return axios.request({
     method,
-    url: url || `/api/entity/${entity}`,
+    url: url ?? `/api/entity/${entity}`,
     data,
     params: urlParams,
     ...config,

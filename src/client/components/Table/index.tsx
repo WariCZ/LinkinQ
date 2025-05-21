@@ -37,6 +37,7 @@ interface TableProps<T> {
   multiUpdate?: (guids: string[], data: Partial<any>) => Promise<void>;
   fullTextSearchEnabled?: boolean;
   settingColumnsEnabled?: boolean;
+  rowMenuEnabled?: boolean;
 }
 
 const Table = <T, _>({
@@ -55,7 +56,8 @@ const Table = <T, _>({
   multiUpdate,
   selectable,
   fullTextSearchEnabled,
-  settingColumnsEnabled
+  settingColumnsEnabled,
+  rowMenuEnabled,
 }: TableProps<T>) => {
   const schema = useStore((state) => state.schema);
   const columnSelectorRef = useRef<any>(null);
@@ -253,6 +255,7 @@ const Table = <T, _>({
             deleteRecord={deleteRecord}
             hasMore={hasMore}
             selectable={selectable}
+            rowMenuEnabled={rowMenuEnabled}
           />
         </table>
       </div>

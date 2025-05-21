@@ -45,6 +45,7 @@ export const ConfigurableForm = (props: ConfigurableFormProps) => {
     <div className="p-4">
       <DynamicForm
         isConfigurable
+        tableConfigKey="taskManual"
         {...props}
         data={{
           ...data,

@@ -10,6 +10,7 @@ import { useTranslation } from "react-i18next";
 import { TaskDetail } from "./components/TaskDetail";
 import Table from "../../../client/components/Table";
 import useDataDetail from "../../../client/hooks/useDataDetail";
+import ButtonExecuteBpmn from "../../../../src/client/components/ButtonExecuteBpmn";
 
 const entity = "tasks";
 
@@ -20,34 +21,31 @@ export const Tasks = () => {
   const filters = location?.state?.filter;
   const header = location?.state?.header;
   const [guidDetail, setGuidDetail] = useState(null);
+  const [modalRequestedGuid, setModalRequestedGuid] = useState<string | null>(null);
   const schema = useStore((state) => state.schema);
 
-  const columns = [
-    ...[
-      /*"guid",*/ "caption",
-      "createtime",
-      "updatetime",
-      "createdby.fullname",
-      "updatedby.fullname",
-    ],
+  const fieldKeys = [
+    "caption",
+    "createtime",
+    "updatetime",
+    "createdby.fullname",
+    "updatedby.fullname",
+    "workflowInstance.name",
+    "workflowInstance.source",
+    "workflowInstance.items",
     ...(schema[entity]
       ? Object.keys(schema[entity].fields)
-          .filter((f) => {
-            return !schema[entity].fields[f].system;
-          })
-          .map((f) => {
-            if (schema[entity].fields[f].link) {
-              if (schema[entity].fields[f].link === "users") {
-                return f + ".fullname";
-              } else {
-                return f + ".caption";
-              }
-            } else {
-              return f;
-            }
-          })
+        .filter((f) => !schema[entity].fields[f].system)
+        .map((f) => {
+          const link = schema[entity].fields[f].link;
+          return link
+            ? link === "users"
+              ? f + ".fullname"
+              : f + ".caption"
+            : f;
+        })
       : []),
-    ...["status"],
+    "status",
   ];
 
   const fields = Object.keys(schema[entity].fields).filter((f) => {
@@ -59,7 +57,7 @@ export const Tasks = () => {
   const [
     dataDetail,
     setDataDataDetail,
-    { setRecord, refreshDetail, multiUpdate },
+    { loading: loadingDetail, setRecord, refreshDetail, multiUpdate, getSingleRecord },
   ] = useDataDetail(
     {
       entity: entity,
@@ -80,6 +78,24 @@ export const Tasks = () => {
     {} as any
   );
 
+  const columns = [
+    ...fieldKeys,
+    {
+      field: "actions",
+      label: "Actions",
+      cell: ({ row }) => (
+        <td onClick={(e) => e.stopPropagation()}>
+          <ButtonExecuteBpmn
+            showBtnSchema={false}
+            status={row.original.status}
+            wf={row.original.workflowInstance}
+            refresh={refreshDetail}
+          />
+        </td>
+      )
+    }
+  ];
+
   const [
     data,
     setData,
@@ -97,7 +113,7 @@ export const Tasks = () => {
   ] = useDataTable(
     {
       entity: entity,
-      fields: columns,
+      fields: fieldKeys,
       ordering: [{ id: "createtime", desc: true }],
       filter: filters,
     },
@@ -109,6 +125,29 @@ export const Tasks = () => {
       refresh({ filter: filters || {} });
     }
   }, [filters]);
+
+  useEffect(() => {
+    if (
+      modalRequestedGuid &&
+      !loadingDetail &&
+      dataDetail?.guid === modalRequestedGuid
+    ) {
+      openModal(
+        <TaskDetail
+          data={dataDetail}
+          entity={entity}
+          refresh={refreshDetail}
+          setRecord={setRecord}
+        />,
+        {
+          title: t("Detail task"),
+          size: "xl",
+          modalSingle: true,
+        }
+      );
+      setModalRequestedGuid(null);
+    }
+  }, [modalRequestedGuid, loadingDetail, dataDetail]);
 
 
   return (
@@ -142,21 +181,9 @@ export const Tasks = () => {
         tableConfigKey="tasks"
         entity={entity}
         data={data}
-        rowClick={(data: any) => {
-          setGuidDetail(data?.guid as string);
-          openModal(
-            <TaskDetail
-              data={dataDetail}
-              entity={entity}
-              refresh={refreshDetail}
-              setRecord={setRecord}
-            />,
-            {
-              title: t("Detail task"),
-              size: "xl",
-              modalSingle: true,
-            }
-          );
+        rowClick={(row: any) => {
+          setGuidDetail(row.guid);
+          setModalRequestedGuid(row.guid);
         }}
         columns={columns}
         loading={loading}

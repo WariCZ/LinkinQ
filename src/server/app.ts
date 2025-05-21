@@ -31,6 +31,7 @@ import pageflowRouter from "../lib/entity/pageflow";
 import { loadConfigurations } from "../lib/configurations";
 import fs from "fs";
 import path from "path";
+import { dirname } from "path";
 import { fileURLToPath } from "url";
 import _ from "lodash";
 
@@ -216,12 +217,17 @@ export class Linkinq {
 
     this.setupRoutes({ schema, sqlAdmin });
 
+    const DEFAULT_VITE_PATH = "vite.config.ts";
+    const VITE_PATH_LINKINQ = path.join(__dirname, "../../", DEFAULT_VITE_PATH);
+
     /**
      * Error Handler.
      */
     if (process.env.NODE_ENV === "development") {
       // only use in development
-      ViteExpress.config({});
+      ViteExpress.config({
+        viteConfigFile: VITE_PATH_LINKINQ,
+      });
     } else {
       app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
         logger.error(err);
@@ -229,6 +235,7 @@ export class Linkinq {
       });
       ViteExpress.config({
         mode: "production",
+        viteConfigFile: VITE_PATH_LINKINQ,
       });
     }
 

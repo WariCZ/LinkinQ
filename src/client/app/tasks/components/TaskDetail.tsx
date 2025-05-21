@@ -58,6 +58,7 @@ export const TaskDetail = (props: TaskDetailProps) => {
                 type: "text",
                 field: "caption",
                 label: "Title",
+                required: true,
                 className: "flex items-center w-full bg-gray-100",
                 validate: (value) =>
                   value.length >= 3 || "Title must be at least 3 characters",

@@ -4,6 +4,7 @@ import _ from "lodash";
 import { AppColumnDef } from "../types";
 import { getLabel } from "../utils";
 import { Node } from "slate";
+import useStore from "../../../../../src/client/store";
 
 interface UseTranslatedColumnsArgs {
   columns: any[];
@@ -18,8 +19,25 @@ export const useTranslatedColumns = ({
   entity,
   columnSizing,
 }: UseTranslatedColumnsArgs): AppColumnDef<any, any>[] => {
+  const profileSettings = useStore(
+    (state) => state.userConfigurations["profileSettings"]?.definition ?? {}
+  );
+  const dateFormat = profileSettings.dateFormat || "dd.MM.yyyy HH:mm:ss";
+
   return useMemo(() => {
     return columns.map((c): AppColumnDef<any, any> => {
+
+      if (typeof c !== "string" && c.cell) {
+        return {
+          ...c,
+          header: c.label ?? c.field ?? c.id,
+          id: c.id ?? c.field,
+          size: columnSizing?.[c.field] ?? 200,
+          minSize: 50,
+          enableResizing: true,
+        };
+      }
+
       const columnKey = typeof c === "string" ? c : c.field;
       const schemaField = schema?.[entity]?.fields?.[columnKey];
 
@@ -46,9 +64,7 @@ export const useTranslatedColumns = ({
           const val = info.getValue();
 
           if (schemaField?.type === "datetime" && !isNested) {
-            return val
-              ? DateTime.fromISO(val).toFormat("dd.MM.yyyy HH:mm:ss")
-              : "-";
+            return val ? DateTime.fromISO(val).toFormat(dateFormat) : "-";
           }
 
           if (schemaField?.type === "richtext" && val) {
@@ -97,5 +113,5 @@ export const useTranslatedColumns = ({
         },
       };
     });
-  }, [columns, schema, entity, columnSizing]);
+  }, [columns, schema, entity, columnSizing, dateFormat]);
 };

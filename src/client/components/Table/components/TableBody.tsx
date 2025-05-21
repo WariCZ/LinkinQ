@@ -14,6 +14,7 @@ interface TableBodyProps<T> {
   deleteRecord?: (guid: string) => Promise<void>;
   hasMore?: boolean;
   selectable?: boolean,
+  rowMenuEnabled?: boolean
 }
 
 export const TableBody = <T,>({
@@ -27,7 +28,8 @@ export const TableBody = <T,>({
   translatedColumns,
   deleteRecord,
   hasMore,
-  selectable
+  selectable,
+  rowMenuEnabled
 }: TableBodyProps<T>) => {
   if (rows.length === 0 && !loading) {
     return (
@@ -69,6 +71,7 @@ export const TableBody = <T,>({
               highlightedRow={highlightedRow}
               deleteRecord={deleteRecord}
               selectable={selectable}
+              rowMenuEnabled={rowMenuEnabled}
             />
           ))}
 

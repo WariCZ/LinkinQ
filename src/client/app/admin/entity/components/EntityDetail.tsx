@@ -18,9 +18,9 @@ export const EntityDetail = ({
   const { openModal } = useModalStore();
   const fieldsArray = definition?.fields
     ? Object.entries(definition?.fields).map(([key, value]) => ({
-        name: key,
-        ...value,
-      }))
+      name: key,
+      ...value,
+    }))
     : [];
 
   const exportEntity = () => {
@@ -71,6 +71,9 @@ export const EntityDetail = ({
       </div>
       <div className="pt-1">
         <Table
+          rowMenuEnabled={false}
+          fullTextSearchEnabled={false}
+          settingColumnsEnabled={false}
           tableConfigKey="entity"
           data={fieldsArray}
           rowClick={(data) =>
@@ -83,8 +86,8 @@ export const EntityDetail = ({
             "description",
             "default",
           ]}
-          // loading={loading}
-          // ordering={[{ id: "name" }]}
+        // loading={loading}
+        // ordering={[{ id: "name" }]}
         />
       </div>
     </div>

@@ -24,6 +24,12 @@ interface StoreState {
   toasts: AppToastType[];
   setToast: (toast: AppToastType) => void;
   removeToast: (item: number) => void;
+
+  userConfigurations: Record<string, any>;
+  getUserConfigurations: () => Promise<void>;
+
+  appConfigurations: Record<string, any>;
+  getAppConfigurations: () => Promise<void>;
 }
 
 const useStore = create<StoreState>((set, get) => ({
@@ -32,6 +38,8 @@ const useStore = create<StoreState>((set, get) => ({
   roles: [],
   loading: true,
   sidebar: false,
+  userConfigurations: {},
+  appConfigurations: {},
   setUser: (user) => set({ user }),
   logout: async () => {
     await axios.post("/logout");
@@ -48,6 +56,8 @@ const useStore = create<StoreState>((set, get) => ({
     try {
       await get().checkAuth();
       await get().getSchema();
+      await get().getUserConfigurations();
+      await get().getAppConfigurations();
     } catch (error) {
       set({ user: null });
     } finally {
@@ -85,7 +95,44 @@ const useStore = create<StoreState>((set, get) => ({
       set({ loading: false });
     }
   },
-
+  getUserConfigurations: async () => {
+    try {
+      const response = await axios.get("/api/entity/userConfigurations", {
+        withCredentials: true,
+      });
+      const configs = response.data || [];
+      const configMap = configs.reduce(
+        (acc: Record<string, any>, item: any) => {
+          acc[item.key] = item;
+          return acc;
+        },
+        {}
+      );
+      set({ userConfigurations: configMap });
+    } catch (error) {
+      console.error("Failed to fetch user configurations", error);
+      set({ userConfigurations: {} });
+    }
+  },
+  getAppConfigurations: async () => {
+    try {
+      const response = await axios.get("/api/entity/appConfigurations", {
+        withCredentials: true,
+      });
+      const configs = response.data || [];
+      const configMap = configs.reduce(
+        (acc: Record<string, any>, item: any) => {
+          acc[item.key] = item;
+          return acc;
+        },
+        {}
+      );
+      set({ appConfigurations: configMap });
+    } catch (error) {
+      console.error("Failed to fetch app configurations", error);
+      set({ appConfigurations: {} });
+    }
+  },
   toasts: [
     // { msg: "test 1", type: "error" },
     // { msg: "test 2", type: "info" },

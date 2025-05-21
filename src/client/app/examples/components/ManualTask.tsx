@@ -43,6 +43,7 @@ export const ManualTask = (props: ManualTaskProps) => {
   return (
     <>
       <DynamicForm
+        tableConfigKey="taskManual"
         readOnly={true}
         onSubmit={({ data }) => {
           console.log("data", data);

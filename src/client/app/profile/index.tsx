@@ -1,157 +1,95 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import useStore from "../../../../src/client/store";
+import { useUserConfigurations } from "../../../../src/client/hooks/useUserConfigurations";
+import { Button } from "flowbite-react";
+import { AppSelect } from "../../../../src/client/components/common/AppSelect";
+
+const dateFormatOptions = [
+  { value: "dd.MM.yyyy", label: "dd.MM.yyyy" },
+  { value: "MM/dd/yyyy", label: "MM/dd/yyyy" },
+  { value: "yyyy-MM-dd", label: "yyyy-MM-dd" },
+  { value: "dd/MM/yyyy", label: "dd/MM/yyyy" },
+  { value: "yyyy.MM.dd", label: "yyyy.MM.dd" },
+  { value: "dd.MM.yyyy HH:mm", label: "dd.MM.yyyy HH:mm" },
+  { value: "MM/dd/yyyy HH:mm", label: "MM/dd/yyyy HH:mm" },
+];
 
 export const Profile = () => {
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
+  const userConfigurations = useStore((state) => state.userConfigurations);
+  const profileSettings =
+    userConfigurations["profileSettings"]?.definition ?? {};
+  const { saveUserConfiguration } = useUserConfigurations();
 
-  const changeLanguage = (language) => {
-    i18n.changeLanguage(language);
+  const changeLanguage = async (language: string) => {
+    if (profileSettings.language !== language) {
+      i18n.changeLanguage(language);
+      await saveUserConfiguration("profileSettings", {
+        ...profileSettings,
+        language,
+      });
+    }
+  };
+
+  const changeDateFormat = async (format: string) => {
+    if (profileSettings.dateFormat !== format) {
+      await saveUserConfiguration("profileSettings", {
+        ...profileSettings,
+        dateFormat: format,
+      });
+    }
   };
 
   return (
-    <div className="p-3">
-      {/* <p>{t("home.description")}</p> */}
-      <span>
-        <button onClick={() => changeLanguage("en")}>English</button>
-        {" | "}
-        <button onClick={() => changeLanguage("cs")}>Čeština</button>
-      </span>
+    <div className="flex justify-start items-start p-4 h-full">
+      <div className="flex flex-col gap-8">
+        <div>
+          <h1 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">
+            Profile Settings
+          </h1>
 
-      {/* <p>This page is accessible by anyone.</p>
-      <Spinner aria-label="Default status example" />
-      <WordTagInput />
-      <Button className="">
-        <Link to="/public">Dvojka home</Link>
-      </Button> */}
-      {/* <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2 bg-blue-500 p-4">Item 1 (2 columns)</div>
-        <div className="col-span-1 bg-red-500 p-4">Item 2 (1 column)</div>
-        <div className="col-span-1 bg-green-500 p-4">Item 3 (1 column)</div>
-      </div> */}
-      {/* <Form
-        entity="tasks"
-        formFields={[
-          { field: "caption" },
-          {
-            type: "Section",
-            columns: 2,
-            fields: [
-              { label: "Nazev", field: "caption" },
-              { field: "description" },
-            ],
-          },
-          { field: "description" },
-        ]}
-        onSubmit={({ data }) => {
-          console.log("form 1", data);
-        }}
-      /> */}
-      {/* <div>-----------------------------</div> */}
-      {/* <Form
-        entity="tasks"
-        columns={2}
-        formFields={["caption", "description"]}
-        onSubmit={({ data }) => {
-          console.log("form 1", data);
-        }}
-      />
-      <div>-----------------------------</div> */}
-      {/* <Form
-        columns={2}
-        formFields={[
-          {
-            type: "text",
-            field: "text",
-            label: "Text k",
-            id: "kuk",
-            // color: "success",
-            // required: true,
-            colSpan: 1,
-            // rules: [
-            //   {
-            //     type: "required",
-            //     conditions: [
-            //       {
-            //         field: "select",
-            //         value: 1,
-            //       },
-            //     ],
-            //   },
-            // ],
-          },
-          {
-            type: "text",
-            field: "text2",
-            label: "Text2",
-            id: "kuk2",
-            color: "success",
-            colSpan: 1,
-          },
-          {
-            type: "Section",
-            label: "Jméno2",
-            fields: [
-              {
-                type: "text",
-                label: "Ulice",
-                field: "street",
-                colSpan: 1,
-              },
-              {
-                type: "text",
-                label: "Číslo",
-                field: "street",
-                colSpan: 1,
-              },
-            ],
-          },
-          {
-            field: "users",
-            label: "Users",
-            type: "select",
-            entity: "users",
-          },
-          {
-            field: "select2",
-            label: "Select2",
-            type: "select",
-            required: true,
-            options: [
-              { label: "test 12", value: 1 },
-              { label: "test 22", value: 2 },
-            ],
-            rules: [
-              {
-                type: "show",
-                conditions: [
-                  {
-                    select: 1,
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            field: "select",
-            label: "Select",
-            type: "select",
-            options: [
-              { label: "test 1", value: 1 },
-              { label: "test 2", value: 2 },
-            ],
-          },
-        ]}
-        onSubmit={({ data }) => {
-          console.log("kuk", data);
-        }}
-        data={formData}
-      >
-        <Button type="submit">SEND</Button>
-      </Form> */}
-      {/* <Button onClick={() => setFormData(undefined)}>resert</Button> */}
-      {/* <div>------------</div> */}
-      {/* <Select entity="users" /> */}
-      {/* <div>------------</div> */}
+          <div className="flex flex-col gap-4">
+            <div>
+              <label className="block text-sm font-semibold mb-1 text-gray-600 dark:text-gray-400">
+                Language
+              </label>
+              <div className="flex gap-3">
+                {["en", "cs"].map((lang) => (
+                  <Button
+                    key={lang}
+                    color={
+                      profileSettings.language === lang ? "cyan" : "alternative"
+                    }
+                    onClick={() => changeLanguage(lang)}
+                    size="sm"
+                    className="w-28"
+                  >
+                    {lang === "en" ? "English" : "Čeština"}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold mb-1 text-gray-600 dark:text-gray-400">
+                Date Format
+              </label>
+              <AppSelect
+                id="date-format"
+                value={profileSettings.dateFormat}
+                options={dateFormatOptions.map((opt) => ({
+                  label: opt.label || opt.value,
+                  value: opt.value,
+                }))}
+                placeholder="Select date format"
+                onChange={(value) => changeDateFormat(value)}
+                className="w-full"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

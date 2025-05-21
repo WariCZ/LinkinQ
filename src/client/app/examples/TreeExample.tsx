@@ -1,4 +1,4 @@
-import useDataTable from "../../hooks/useDataTable";
+import useDataTable from "../../../../src/client/hooks/useDataTable";
 
 export function TreeExample() {
   const [

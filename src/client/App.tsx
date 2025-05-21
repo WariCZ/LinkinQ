@@ -27,6 +27,7 @@ import { Notifications } from "./app/admin/notifications";
 import { Triggers } from "./app/admin/triggers";
 import { Examples } from "./app/examples";
 import { TreeExample } from "./app/examples/TreeExample";
+import { useTranslation } from "react-i18next";
 import { GroupExample } from "./app/examples/GroupExample";
 
 const PrivateLayout = (props: { admin?: boolean }) => {
@@ -45,13 +46,27 @@ const PrivateLayout = (props: { admin?: boolean }) => {
 };
 
 const PrivateRoute = (props: { admin?: boolean }) => {
+  const { i18n } = useTranslation();
   const user = useStore((state) => state.user);
   const loading = useStore((state) => state.loading);
   const firstLoad = useStore((state) => state.firstLoad);
+  const userConfigurations = useStore((state) => state.userConfigurations);
 
   useEffect(() => {
     firstLoad();
   }, [firstLoad]);
+
+  useEffect(() => {
+    if (!loading) {
+      const profileSettings = userConfigurations["profileSettings"]?.definition;
+      if (
+        profileSettings?.language &&
+        i18n.language !== profileSettings.language
+      ) {
+        i18n.changeLanguage(profileSettings.language);
+      }
+    }
+  }, [loading, userConfigurations, i18n]);
 
   if (loading) {
     return (

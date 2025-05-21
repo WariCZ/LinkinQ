@@ -44,7 +44,7 @@ const ModalContainer = () => {
                   <h3 className="text-sm font-semibold">{options.title}</h3>
                 )}
               </Modal.Header>
-              <Modal.Body className="max-h-[75vh] min-h-[75vh] overflow-auto p-0">
+              <Modal.Body className="max-h-[75vh] overflow-auto p-0">
                 {ComponentWithProps}
               </Modal.Body>
               <Modal.Footer>

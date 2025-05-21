@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useTableConfigStore } from "../_store";
 import { ColumnSizingState, OnChangeFn } from "@tanstack/react-table";
+import _ from "lodash";
+import useStore from "../../../../../src/client/store";
+import { useUserConfigurations } from "../../../../../src/client/hooks/useUserConfigurations";
 
 type ColumnConfig = {
   key: string;
@@ -11,32 +14,37 @@ export const useColumnStorage = (
   tableKey: string,
   defaultColumns: string[]
 ) => {
-  const { tableConfig, setTableConfig } = useTableConfigStore();
+  const { userConfigurations } = useStore();
+  const { saveUserConfiguration } = useUserConfigurations();
+  const { setTableConfig } = useTableConfigStore();
+
+  const configFromStore = userConfigurations[tableKey]?.definition?.config;
   const [config, setConfig] = useState<ColumnConfig[]>([]);
+  const [initialConfig, setInitialConfig] = useState<ColumnConfig[]>([]);
   const [tempSizing, setTempSizing] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    const local = localStorage.getItem(`tableConfig-${tableKey}`);
-    let loaded: ColumnConfig[] = [];
-
-    if (tableConfig[tableKey]) {
-      loaded = tableConfig[tableKey];
-    } else if (local) {
-      loaded = JSON.parse(local);
-    } else {
-      loaded = defaultColumns.map((key) => ({ key, width: 200 }));
-    }
+    const loaded: ColumnConfig[] =
+      configFromStore ?? defaultColumns.map((key) => ({ key, width: 200 }));
 
     setConfig(loaded);
+    setInitialConfig(loaded);
     setTempSizing(
       Object.fromEntries(loaded.map((c) => [c.key, c.width ?? 200]))
     );
     setTableConfig(tableKey, loaded);
-  }, [tableKey]);
+  }, [configFromStore, tableKey]);
 
   useEffect(() => {
     if (config.length === 0) return;
-    localStorage.setItem(`tableConfig-${tableKey}`, JSON.stringify(config));
+    if (_.isEqual(config, initialConfig)) return;
+
+    const saveConfig = async () => {
+      await saveUserConfiguration(tableKey, { config });
+      setInitialConfig(config);
+    };
+
+    saveConfig();
     setTableConfig(tableKey, config);
   }, [config]);
 

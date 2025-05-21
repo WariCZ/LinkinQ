@@ -32,20 +32,22 @@ export const SectionEdit = ({
         onChange={(e) => setLocalLabel(e.target.value)}
         placeholder="Label"
       />
-      <Label value="Columns" />
-      <Select
-        className="w-full border rounded px-2 py-1"
-        value={localColumns}
-        onChange={(e) =>
-          setLocalColumns(Number(e.target.value) as 1 | 2 | 3 | 4 | 6 | 12)
-        }
-      >
-        {[1, 2, 3, 4, 6, 12].map((val) => (
-          <option key={val} value={val}>
-            {val} column{val > 1 && "s"}
-          </option>
-        ))}
-      </Select>
+      <div className="">
+        <Label value="Columns" />
+        <Select
+          className="w-full rounded"
+          value={localColumns}
+          onChange={(e) =>
+            setLocalColumns(Number(e.target.value) as 1 | 2 | 3 | 4 | 6 | 12)
+          }
+        >
+          {[1, 2, 3, 4, 6, 12].map((val) => (
+            <option key={val} value={val}>
+              {val} column{val > 1 && "s"}
+            </option>
+          ))}
+        </Select>
+      </div>
     </div>
   );
 };

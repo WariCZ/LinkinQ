@@ -2,11 +2,11 @@ import { useModalStore } from "../../Modal/modalStore";
 import { FaEdit } from "react-icons/fa";
 import { Button } from "flowbite-react";
 import { FieldType } from "../../../../lib/entity/types";
-import { useFormConfigStore } from "../_store";
 import { FormConfigurator } from "../config";
+import { useFormConfigManager } from "../hooks/useFormConfigManager";
 
-export const FormConfiguratorModal = ({ fields }: { fields: FieldType[] }) => {
-  const { saveConfig, resetLocalFields } = useFormConfigStore();
+export const FormConfiguratorModal = ({ fields, tableConfigKey }: { fields: FieldType[], tableConfigKey?: string }) => {
+  const { saveFormLayout } = useFormConfigManager(tableConfigKey);
   const { openModal, closeModal } = useModalStore();
 
   return (
@@ -14,7 +14,6 @@ export const FormConfiguratorModal = ({ fields }: { fields: FieldType[] }) => {
       className="ml-auto"
       color="alternative"
       onClick={() => {
-        resetLocalFields();
         openModal(<FormConfigurator fields={fields} />, {
           title: "Customizing the form view",
           size: "7xl",
@@ -24,7 +23,7 @@ export const FormConfiguratorModal = ({ fields }: { fields: FieldType[] }) => {
             {
               label: "Apply",
               onClick: () => {
-                saveConfig();
+                saveFormLayout();
                 closeModal();
               },
             },
