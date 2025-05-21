@@ -46,34 +46,39 @@ export const TableBody = <T,>({
     );
   }
 
+
+  const renderRows = (rows: Row<any>[]) => {
+    return rows.map((row, i) => (
+      <TableRow
+        key={row.id + "-" + i}
+        row={row}
+        i={i}
+        rowClick={rowClick}
+        selectedRows={selectedRows}
+        setSelectedRows={setSelectedRows}
+        highlightedRow={highlightedRow}
+        deleteRecord={deleteRecord}
+        selectable={selectable}
+        rowMenuEnabled={rowMenuEnabled}
+      />
+    ));
+  };
+
   return (
     <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
       {loading
         ? getHeaderGroups().map((headerGroup: any) =>
-            [0, 1, 2].map((_, i) => (
-              <tr key={i} className="max-w-sm animate-pulse">
-                {headerGroup.headers.map((_: any, a: number) => (
-                  <td key={a} className="px-4 py-2 whitespace-nowrap">
-                    <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full"></div>
-                  </td>
-                ))}
-              </tr>
-            ))
-          )
-        : rows.map((row: any, i: number) => (
-            <TableRow
-              key={row.id + "-" + i}
-              row={row}
-              i={i}
-              rowClick={rowClick}
-              selectedRows={selectedRows}
-              setSelectedRows={setSelectedRows}
-              highlightedRow={highlightedRow}
-              deleteRecord={deleteRecord}
-              selectable={selectable}
-              rowMenuEnabled={rowMenuEnabled}
-            />
-          ))}
+          [0, 1, 2].map((_, i) => (
+            <tr key={i} className="max-w-sm animate-pulse">
+              {headerGroup.headers.map((_: any, a: number) => (
+                <td key={a} className="px-4 py-2 whitespace-nowrap">
+                  <div className="h-2.5 bg-gray-200 rounded-full dark:bg-gray-700 w-full"></div>
+                </td>
+              ))}
+            </tr>
+          ))
+        )
+        : renderRows(rows)}
 
       {translatedColumns.length > 50 && (
         <tr>

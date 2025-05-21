@@ -45,9 +45,8 @@ export const TableRow = <T,>({
       onClick={() => rowClick && rowClick(row.original)}
       key={row.id + "-" + i}
       data-guid={guid}
-      className={`hover:bg-gray-100 dark:hover:bg-gray-600 ${
-        isHighlighted ? "highlight" : ""
-      }`}
+      className={`hover:bg-gray-100 dark:hover:bg-gray-600 ${isHighlighted ? "highlight" : ""
+        }`}
     >
       {selectable ? (
         <td className="px-4">
@@ -69,16 +68,21 @@ export const TableRow = <T,>({
       ) : (
         <></>
       )}
-      {row.getVisibleCells().map((cell) => {
-        return (
-          <td
-            key={cell.id}
-            className="px-4 pt-2 whitespace-nowrap text-ellipsis overflow-hidden max-w-80 cursor-pointer"
-          >
-            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-          </td>
-        );
-      })}
+      {row.getVisibleCells().map((cell) => (
+        <td
+          key={cell.id}
+          style={{ paddingLeft: `${row.depth * 20}px` }}
+          className="px-4 py-2 whitespace-nowrap text-ellipsis overflow-hidden max-w-80 cursor-pointer"
+          onClick={() => rowClick?.(row.original)}
+        >
+          {cell.column.id === 'expander' && row.getCanExpand() ? (
+            <button onClick={row.getToggleExpandedHandler()} className="mr-2">
+              {row.getIsExpanded() ? '▼' : '▶'}
+            </button>
+          ) : null}
+          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        </td>
+      ))}
       {rowMenuEnabled ? (<td className="px-4 pt-2 text-right" onClick={(e) => e.stopPropagation()}>
         <RowMenu
           key={row.id + "-" + i}
