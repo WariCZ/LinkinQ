@@ -23,8 +23,6 @@
     "release": "npm version patch && git push && git push --tags",
     "prepack": "node switch-mode.js prod",
     "postpack": "node switch-mode.js dev",
-    "build:rollup": "rollup -c --bundleConfigAsCjs",
-    "build:tsup": "tsup",
     "build:client": "tsc -p tsconfig.client.json && cpx \"src/**/*.{css,png}\" dist",
     "build:server": "tsc -p tsconfig.server.json",
     "build": "npm run build:client && npm run build:server",
@@ -33,12 +31,11 @@
     "start": "ts-node src/server",
     "clean": "tsc --build --clean",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "client:dev": "vite",
-    "server:start": "tsx --conditions development src/server/runner.ts",
-    "server:dev": "tsx watch --conditions development src/server/runner.ts",
-    "server:e2etest": "tsx watch --conditions development src/server/runner.ts e2etest=true"
+    "server:start": "tsx src/server/runner.ts",
+    "server:dev": "tsx watch src/server/runner.ts",
+    "server:e2etest": "tsx watch src/server/runner.ts e2etest=true"
   },
-  "author": "",
+  "author": "Physter technology a.s.",
   "license": "ISC",
   "dependencies": {
     "@bpmn-io/form-js": "^1.11.3",
@@ -106,10 +103,6 @@
   "devDependencies": {
     "@babel/core": "^7.27.1",
     "@babel/preset-react": "^7.27.1",
-    "@rollup/plugin-babel": "^6.0.4",
-    "@rollup/plugin-commonjs": "^28.0.3",
-    "@rollup/plugin-node-resolve": "^16.0.1",
-    "@rollup/plugin-typescript": "^12.1.2",
     "@types/compression": "^1.7.5",
     "@types/cookie-parser": "^1.4.7",
     "@types/express": "^4.17.21",
@@ -134,15 +127,8 @@
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsc-esm-fix": "^3.1.2",
-    "tsup": "^8.4.0",
     "tsx": "^4.19.3",
     "typescript": "^5.6.3",
     "vite-plugin-commonjs": "^0.10.4"
-  },
-  "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "4.9.5"
-  },
-  "packageManager": "pnpm@9.8.0+sha512.8e4c3550fb500e808dbc30bb0ce4dd1eb614e30b1c55245f211591ec2cdf9c611cabd34e1364b42f564bd54b3945ed0f49d61d1bbf2ec9bd74b866fcdc723276",
-  "main": "src/index.ts",
-  "types": "src/index.ts"
+  }
 }

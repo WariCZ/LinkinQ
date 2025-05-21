@@ -225,7 +225,7 @@ export class Linkinq {
     if (process.env.NODE_ENV === "development") {
       // only use in development
       ViteExpress.config({
-        // viteConfigFile: VITE_PATH_LINKINQ,
+        viteConfigFile: VITE_PATH_LINKINQ,
       });
     } else {
       app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
@@ -234,7 +234,7 @@ export class Linkinq {
       });
       ViteExpress.config({
         mode: "production",
-        // viteConfigFile: VITE_PATH_LINKINQ,
+        viteConfigFile: VITE_PATH_LINKINQ,
       });
     }
 
