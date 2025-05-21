@@ -28,5 +28,5 @@ export type AppColumnDef<TData = any, TValue = any> = ColumnDef<
   TValue
 > & {
   accessorKey: string;
-  meta: AppColumnMeta;
+  meta?: AppColumnMeta;
 };

@@ -18,7 +18,7 @@ const ButtonExecuteBpmn = ({
   showBtnSchema?: boolean
 }) => {
   const { t } = useTranslation();
-  const executeItems = wf.items.filter((item) => item.status !== "end");
+  const executeItems = wf?.items?.filter((item) => item.status !== "end");
 
   const { openModal } = useModalStore();
 

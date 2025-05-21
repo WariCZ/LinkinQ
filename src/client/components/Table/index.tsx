@@ -7,6 +7,8 @@ import React, {
 } from "react";
 import {
   getCoreRowModel,
+  getExpandedRowModel,
+  // getGroupedRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -66,6 +68,7 @@ const Table = <T, _>({
   const [filters, setFilters] = useState<Record<string, any>>({});
   const [fullTextSearch, setFullTextSearch] = useState("");
   const [selectedRows, setSelectedRows] = useState<string[]>([]);
+  const [expanded, setExpanded] = useState({});
 
   const {
     selectedColumns,
@@ -151,6 +154,7 @@ const Table = <T, _>({
       });
   }, [data, filters, fullTextSearch]);
 
+  // const [grouping, setGrouping] = useState(['status']);
   const { getRowModel, getHeaderGroups } = useReactTable({
     columns: translatedColumns,
     data: filteredData,
@@ -159,15 +163,22 @@ const Table = <T, _>({
     onSortingChange: (o: any) => {
       setOrdering && setOrdering(o());
     },
+    // getGroupedRowModel: getGroupedRowModel(),
     manualSorting: true,
     columnResizeMode: "onChange",
     enableColumnResizing: true,
+    getExpandedRowModel: getExpandedRowModel(),
+    getSubRows: (row) => row.children,
     state: {
+      expanded,
+      // grouping,
       sorting: ordering?.map((o) => ({ ...o, desc: o.desc || false })),
       columnSizing: columnSizing,
     },
     columnResizeDirection: "rtl",
     onColumnSizingChange: handleColumnSizingChange,
+    onExpandedChange: setExpanded,
+    // onGroupingChange: setGrouping
   });
 
   const applyFilters = (dataFilter: Record<string, any>) => {
