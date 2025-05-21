@@ -7,8 +7,8 @@ const pkgPath = path.join(__dirname, "package.json");
 const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
 
 if (mode === "dev") {
-  pkg.main = "src/index.ts";
-  pkg.types = "src/index.ts";
+  //   pkg.main = "src/index.ts";
+  //   pkg.types = "src/index.ts";
   pkg.exports = {
     "./server": "./src/server/index.js",
     "./client": "./src/client/index.jsx",
