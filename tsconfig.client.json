@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // "module": "CommonJS",
+    "module": "ESNext",
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src/client/**/*", "src/types/**/*"],
+  "exclude": ["src/server"],
+  "paths": {
+    "react-icons/*": ["../node_modules/react-icons/*"]
+  }
+}

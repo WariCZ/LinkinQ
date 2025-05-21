@@ -5,7 +5,7 @@ import { DateTime } from "luxon";
 import EventEmitter from "events";
 import { EntitySchema } from "./types";
 import { dbType, Sql } from "./sql";
-import { MAIN_GUID, MAIN_ID } from "../knex";
+import { MAIN_GUID, MAIN_ID, MAIN_TABLE_ALIAS } from "../knex";
 import { hashPassword } from "./utils";
 
 export type CodeType = {
@@ -29,6 +29,7 @@ export type TriggerItemInternalType = TriggerItemType & {
 
 export class Triggers {
   db: dbType;
+  dbCore: Knex<any, unknown[]>;
   path: string;
   definitions: Record<
     string,
@@ -46,6 +47,7 @@ export class Triggers {
   }) {
     this.eventsOnEntities = eventsOnEntities;
     this.db = (table: string) => db(table).setUser({ id: 1 });
+    this.dbCore = db;
 
     this.registerTriggers(db);
     this.startWorkflow = undefined;
@@ -280,7 +282,15 @@ export class Triggers {
     return data;
   };
 
-  processDataBefore = async ({ table, data }: { table: string; data: any }) => {
+  processDataBefore = async ({
+    table,
+    data,
+    db,
+  }: {
+    table: string;
+    data: any;
+    db: Knex;
+  }) => {
     if (data) {
       try {
         const fields = this.schema?.[table].fields;
@@ -294,9 +304,38 @@ export class Triggers {
             }
           }
         }
+
+        if (data.parent) {
+          const parent = await db(table)
+            .setUser({ id: 1 })
+            .select(["id", "root", "parent"])
+            .where("id", data.parent);
+          console.log(parent);
+          if (parent && parent[0]) {
+            if (parent[0].root) {
+              data.root = parent[0].root;
+            } else {
+              data.root = parent[0].id;
+            }
+          }
+        }
       } catch (e) {
         debugger;
       }
+    }
+  };
+
+  formatSeqId = function (data, field, seqformat) {
+    const pattern = /^(\w+)\{(\w+)\}(\d)(\d+)d$/;
+    const match = seqformat.match(pattern);
+
+    if (match) {
+      const [, prefix, f, variable, padding, type] = match;
+
+      const idStr = data[f].toString().padStart(padding, variable);
+      return `${prefix}${idStr}`;
+    } else {
+      return data[field];
     }
   };
 
@@ -305,16 +344,17 @@ export class Triggers {
     diffDataItem,
     operation,
     entityid,
+    afterData,
   }: {
     entity: string;
     diffDataItem: Object;
     operation?: "C" | "D" | "U" | "";
     entityid: number;
+    afterData?: Record<string, any>;
   }) => {
-    if (diffDataItem) {
-      try {
-        const fields = this.schema?.[entity].fields;
-
+    try {
+      const fields = this.schema?.[entity].fields;
+      if (diffDataItem) {
         for (const f of Object.keys(diffDataItem)) {
           if (fields[f].link && fields[f].link == "attachments") {
             const data = diffDataItem[f];
@@ -326,9 +366,33 @@ export class Triggers {
               .update({ entity: entity, entityid: entityid, field: f });
           }
         }
-      } catch (e) {
-        debugger;
+      } else {
+        if (
+          afterData &&
+          operation === "C" &&
+          this.schema?.[entity].sequencesFields
+        ) {
+          let set = [];
+          for (const f of this.schema?.[entity].sequencesFields) {
+            if (fields[f].seqformat) {
+              const seqId = this.formatSeqId(afterData, f, fields[f].seqformat);
+
+              set.push(`${f} = '${seqId}'`);
+            }
+          }
+
+          if (set.length)
+            await this.dbCore
+              .raw(
+                `UPDATE ${entity} set ${set.join(",")}  where id = ${
+                  afterData.id
+                }`
+              )
+              .setUser({ id: 1 });
+        }
       }
+    } catch (e) {
+      debugger;
     }
   };
 
@@ -343,7 +407,10 @@ export class Triggers {
         }
 
         if (["insert", "update", "del"].indexOf(runner.builder._method) > -1) {
-          const table = runner.builder._single.table;
+          let table = runner.builder._single.table;
+          if (typeof table == "object") {
+            table = table[Object.keys(table)[0]];
+          }
 
           if (!that.schema[table]) {
             return;
@@ -366,7 +433,7 @@ export class Triggers {
                 bindsLength - whereBindsLength
               );
 
-              beforeData = await db(table)
+              beforeData = await db({ [MAIN_TABLE_ALIAS]: table })
                 .setUser({ id: 1 })
                 .select("*")
                 .whereRaw(whereRaw, selectBinds);
@@ -397,7 +464,7 @@ export class Triggers {
             runner.builder._method == "del" ? "delete" : runner.builder._method;
           const data = runner.builder._single[runner.builder._method];
 
-          await that.processDataBefore({ table, data });
+          await that.processDataBefore({ table, data, db });
           if (
             that.definitions["before"] &&
             that.definitions["before"][method] &&
@@ -586,6 +653,7 @@ export class Triggers {
               operation,
               diffDataItem,
               entityid: beforeDataItem?.id || afterDataDataItem?.id,
+              afterData: afterDataDataItem,
             });
 
             if (that.schema[table].journal)

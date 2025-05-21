@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
+    "module": "CommonJS",
+    // "module": "ESNext",
     "target": "ES2020",
-    "module": "ESNext",
     "esModuleInterop": true,
     "alwaysStrict": true,
     "forceConsistentCasingInFileNames": true,
@@ -14,8 +15,6 @@
     "outDir": "dist",
     "strict": false,
     "skipLibCheck": true,
-    "jsx": "preserve",
-    "baseUrl": "."
-  },
-  "include": ["src/**/*"]
+    "jsx": "preserve"
+  }
 }

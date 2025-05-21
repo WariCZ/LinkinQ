@@ -26,6 +26,8 @@ import { QueryBuilder } from "./app/admin/queryBuilder";
 import { Notifications } from "./app/admin/notifications";
 import { Triggers } from "./app/admin/triggers";
 import { Examples } from "./app/examples";
+import { TreeExample } from "./app/examples/TreeExample";
+import { GroupExample } from "./app/examples/GroupExample";
 
 const PrivateLayout = (props: { admin?: boolean }) => {
   return (
@@ -74,6 +76,8 @@ const App: React.FC = () => {
             <Route path="tasks" element={<Tasks />} />
             <Route path="entity/:entity" element={<Pageflow />} />
             <Route path="examples" element={<Examples />} />
+            <Route path="treeExample" element={<TreeExample />} />
+            <Route path="groupExample" element={<GroupExample />} />
           </Route>
           {/* <Route path="/logout" element={<Logout />} /> */}
           <Route path="/admin/" element={<PrivateRoute admin={true} />}>

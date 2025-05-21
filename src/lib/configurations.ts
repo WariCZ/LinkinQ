@@ -1,32 +1,39 @@
-import { TriggerItemInternalType } from "../lib/entity/triggers";
+import { TriggerItemInternalType } from "./entity/triggers";
 import fs from "fs";
 import { DateTime } from "luxon";
 import path from "path";
-import { dirname } from "path";
 import { fileURLToPath, pathToFileURL } from "url";
 import { EntitySchema } from "./entity/types";
 import _ from "lodash";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { createRequire } from "module";
+const filename = __filename;
+const dirname = __dirname;
+// const filename = fileURLToPath(import.meta.url);
+// const dirname = path.dirname(filename);
 
-const DEFAULT_CONFIGURATION_PATH = "/src/configurations/";
+const DEFAULT_CONFIGURATION_PATH = "/configurations/";
 const CONFIGURATION_PATH_LINKINQ = path.join(
-  __dirname,
-  "../../",
+  dirname,
+  "../",
   DEFAULT_CONFIGURATION_PATH
 );
 const CONFIGURATION_PATH_APP = path.join(
   process.cwd(),
+  process.env.NODE_ENV == "production" ? "dist/" : "src/",
   DEFAULT_CONFIGURATION_PATH
 );
+
+console.log("CONFIGURATION_PATH_LINKINQ", CONFIGURATION_PATH_LINKINQ);
+console.log("CONFIGURATION_PATH_APP", CONFIGURATION_PATH_APP);
 
 const getPath = (basePath, filename) => path.join(basePath, filename);
 
 export const triggerFiles = async ({ fullPath, stats, data, key }) => {
   if (!key) key = "default";
   if (!data) data = [];
-  const { [key]: impFile } = await import(pathToFileURL(fullPath).href);
+  // const { [key]: impFile } = await import(pathToFileURL(fullPath).href);
 
+  let impFile = require(fullPath.replace("file:///", ""))[key];
   const impFileTmp = impFile.map((t) => ({
     ...t,
     updatetime: DateTime.fromJSDate(stats.mtime),
@@ -37,9 +44,24 @@ export const triggerFiles = async ({ fullPath, stats, data, key }) => {
 
 export const importFiles = async ({ fullPath, stats, data, key }) => {
   if (!key) key = "default";
-  let { [key]: impFile } = await import(pathToFileURL(fullPath).href);
+
+  let impFile;
+  // if (typeof require !== "undefined" && require.main) {
+  // CommonJS - načti přes require
+  impFile = require(fullPath.replace("file:///", ""))[key];
+  // } else {
+  //   // ESM - načti přes dynamický import
+  //   const filepath = pathToFileURL(fullPath).href;
+  //   impFile = await import(filepath);
+  //   impFile = { [key]: impFile };
+  //   console.log("import impFile", impFile);
+  // }
+
+  // const filepath = pathToFileURL(fullPath).href;
+  // let { [key]: impFile } = await import(filepath);
   if (typeof impFile == "function") {
     impFile = impFile({ env: process.env });
+    console.log("impFile", impFile);
   }
   data = _.mergeWith(data, impFile, (objValue, srcValue) => {
     if (Array.isArray(objValue)) {
@@ -60,7 +82,7 @@ const processFiles = async ({ fullPath, filename, stats, data }) => {
 
 export const dynamicImportFromFiles = async (
   pathFiles,
-  type,
+  typesFiles,
   cb,
   key?: string
 ) => {
@@ -68,12 +90,15 @@ export const dynamicImportFromFiles = async (
   const completePath = [];
   // Pokud je pathFiles string, převede ho na pole
   const paths = Array.isArray(pathFiles) ? pathFiles : [pathFiles];
+  const types = Array.isArray(typesFiles) ? typesFiles : [typesFiles];
 
   for (const dirPath of paths) {
     if (completePath.indexOf(dirPath) > -1) continue;
     if (fs.existsSync(dirPath) && fs.statSync(dirPath).isDirectory()) {
       for (const filename of fs.readdirSync(dirPath)) {
-        if (path.extname(filename) === type) {
+        console.log("filename", filename);
+        const ext = path.extname(filename);
+        if (types.includes(ext) && !filename.endsWith(".d.ts")) {
           let name = path.basename(filename);
           const fullPath = getPath(dirPath, name);
 
@@ -110,7 +135,7 @@ const getTriggers = async () => {
       path.join(CONFIGURATION_PATH_LINKINQ, folder),
       path.join(CONFIGURATION_PATH_APP, folder),
     ],
-    ".ts", //TODO: is production load JS
+    [".js", ".ts"],
     triggerFiles
   );
 
@@ -124,7 +149,7 @@ const getEntities = async () => {
       path.join(CONFIGURATION_PATH_LINKINQ, folder),
       path.join(CONFIGURATION_PATH_APP, folder),
     ],
-    ".ts", //TODO: is production load JS
+    [".js", ".ts"],
     importFiles
   );
   return entities;
@@ -137,7 +162,7 @@ const getDefaultData = async () => {
       path.join(CONFIGURATION_PATH_LINKINQ, folder),
       path.join(CONFIGURATION_PATH_APP, folder),
     ],
-    ".ts", //TODO: is production load JS
+    [".js", ".ts"],
     importFiles
   );
   return defaultData;
@@ -150,7 +175,7 @@ const getUpdateData = async () => {
       path.join(CONFIGURATION_PATH_LINKINQ, folder),
       path.join(CONFIGURATION_PATH_APP, folder),
     ],
-    ".ts", //TODO: is production load JS
+    [".js", ".ts"],
     importFiles,
     "updateData"
   );
@@ -164,6 +189,12 @@ const loadConfigurations = async () => {
     entities: await getEntities(),
     processes: await getprocesses(),
     triggers: await getTriggers(),
+
+    // updateData: {},
+    // defaultData: {},
+    // entities: {},
+    // processes: [],
+    // triggers: [],
   };
 };
 

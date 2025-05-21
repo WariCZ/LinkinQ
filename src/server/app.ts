@@ -30,19 +30,16 @@ import {
 import pageflowRouter from "../lib/entity/pageflow";
 import { loadConfigurations } from "../lib/configurations";
 import fs from "fs";
-import { dirname } from "path";
+import path from "path";
 import { fileURLToPath } from "url";
 import _ from "lodash";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+
+// const filename = fileURLToPath(import.meta.url);
+// const dirname = path.dirname(filename);
+const filename = __filename;
+const dirname = __dirname;
 
 dotenv.config();
-
-declare global {
-  var prodigi: {
-    entityModel: EntitySchema;
-  };
-}
 
 type LinkinqPlugin = { triggers: any[]; processes: any[] };
 
@@ -59,7 +56,7 @@ export class Linkinq {
 
   constructor(config?: LinkinqConfig) {
     this.viteRunning = false;
-    const configPath = __dirname + "/../package.json";
+    const configPath = dirname + "/../package.json";
     if (fs.existsSync(configPath)) {
       this.packageJson = JSON.parse(fs.readFileSync(configPath, "utf8"));
       var _version = this.packageJson["version"];
@@ -162,8 +159,8 @@ export class Linkinq {
       });
     } catch (err) {
       debugger;
-      console.error(err?.message || err);
-      throw err?.message || err;
+      console.error(err?.stack || err?.message || err);
+      throw err?.stack || err?.message || err;
     }
   }
 
@@ -224,12 +221,15 @@ export class Linkinq {
      */
     if (process.env.NODE_ENV === "development") {
       // only use in development
+      ViteExpress.config({});
     } else {
       app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
         logger.error(err);
         res.status(500).send("Server Error");
       });
-      ViteExpress.config({ mode: "production" });
+      ViteExpress.config({
+        mode: "production",
+      });
     }
 
     ViteExpress.listen(app, parseInt(process.env.PORT), () => {

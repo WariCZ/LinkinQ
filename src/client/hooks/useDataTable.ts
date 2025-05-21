@@ -11,6 +11,8 @@ function useDataTable<T, U>(
     fields?: string[];
     filter?: Object;
     limit?: number;
+    structure?: "topdown";
+    groupby?: string[];
     ordering?: {
       id: string;
       desc: boolean;
@@ -32,6 +34,7 @@ function useDataTable<T, U>(
   const [fieldsEntity, setFieldsEntity] = useState(param.fields || []);
   const [filter, setFilter] = useState(param.filter || {});
   const [ordering, setOrdering] = useState(param.ordering || []);
+  const [groupby, setGroupby] = useState(param.groupby || []);
   const [highlightedRow, setHighlightedRow] = useState<string[]>([]);
   const [entity, setEntity] = useState(param.entity);
   const [isFetchingNextPage, setIsFetchingNextPage] = useState(false);
@@ -59,14 +62,18 @@ function useDataTable<T, U>(
     fields,
     filter,
     ordering,
+    groupby,
     limit,
+    structure,
     offset,
   }: {
     entity: string;
     fields?: string;
     filter?: Record<string, any>;
     ordering?: string;
+    groupby?: string;
     limit?: number;
+    structure?: "topdown";
     offset?: number;
   }) =>
     httpRequest({
@@ -75,8 +82,10 @@ function useDataTable<T, U>(
       params: {
         __fields: fields ?? "*",
         __orderby: ordering,
+        __groupby: groupby,
         __limit: limit,
         __offset: offset,
+        __structure: structure,
         ...filter,
       },
     });
@@ -86,13 +95,17 @@ function useDataTable<T, U>(
     fields,
     filter,
     ordering,
+    groupby,
     limit,
+    structure,
     offset,
   }: {
     entity: string;
     fields?: string[];
     filter?: Object;
     limit?: number;
+    structure?: "topdown";
+    groupby?: string[];
     offset?: number;
     ordering?: {
       id: string;
@@ -106,7 +119,9 @@ function useDataTable<T, U>(
         fields: fields?.length ? fields.join(",") : "*",
         filter: filter || {},
         ordering: ordering?.map((o) => o.id + (o.desc ? "-" : "")).join(","),
+        groupby: groupby.join(","),
         limit: limit || DEFAULT_LIMIT,
+        structure: structure,
         offset: offset,
       });
       if (response) {
@@ -134,7 +149,9 @@ function useDataTable<T, U>(
     filter?: Object;
     entity?: string;
     limit?: number;
+    structure?: "topdown";
     offset?: number;
+    groupby?: string[];
     ordering?: {
       id: string;
       desc: boolean;
@@ -144,6 +161,7 @@ function useDataTable<T, U>(
     if (params?.fields) setFieldsEntity(params.fields);
     if (params?.filter) setFilter(params.filter);
     if (params?.ordering) setOrdering(params.ordering);
+    if (params?.groupby) setGroupby(params.groupby);
     if (params?.entity) setEntity(params.entity);
 
     return await fetchData({
@@ -151,7 +169,9 @@ function useDataTable<T, U>(
       fields: params?.fields || fieldsEntity,
       filter: params?.filter || filter,
       ordering: params?.ordering || ordering,
+      groupby: params?.groupby || groupby,
       limit: params?.limit || param.limit,
+      structure: params?.structure || param.structure,
       offset: params?.offset,
     });
   };
@@ -167,7 +187,9 @@ function useDataTable<T, U>(
       fields: fieldsEntity,
       filter,
       ordering,
+      groupby,
       limit: param.limit || DEFAULT_LIMIT,
+      structure: param.structure,
       offset,
     });
 

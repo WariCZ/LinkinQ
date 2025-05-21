@@ -8,7 +8,7 @@ import {
   CacheManager,
   ScriptHandler,
   Definition,
-} from "./";
+} from ".";
 
 import { ModelsDatastore, DataStore } from "./datastore";
 import { MyAppDelegate } from "./appDelegate";
@@ -17,13 +17,15 @@ import { MyAppDelegate } from "./appDelegate";
 // import { db } from "../db/knex";
 // import { up } from "../db/migration";
 import dotenv from "dotenv";
-import { dirname } from "path";
+import path from "path";
 import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const filename = __filename;
+const dirname = __dirname;
+// const filename = fileURLToPath(import.meta.url);
+// const dirname = path.dirname(filename);
 
 dotenv.config();
-const templatesPath = __dirname + "/emailTemplates/";
+const templatesPath = dirname + "/emailTemplates/";
 
 const getBPMNConfigurations = (definitions: any) => {
   return new Configuration({

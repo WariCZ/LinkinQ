@@ -134,6 +134,11 @@ export class EntityRoutes extends Entity {
                 ? req.query.__orderby.split(",")
                 : undefined;
 
+            const groupBy =
+              req.query.__groupby && typeof req.query.__groupby === "string"
+                ? req.query.__groupby.split(",")
+                : undefined;
+
             const limit = req.query.__limit
               ? parseInt(req.query.__limit as string)
               : undefined;
@@ -142,18 +147,31 @@ export class EntityRoutes extends Entity {
               ? parseInt(req.query.__offset as string)
               : undefined;
 
+            const structure = (
+              req.query.__structure ? req.query.__structure : undefined
+            ) as "topdown" | undefined;
+
+            // const structure = "topdown" as "topdown" | undefined;
+            if (!(!structure || structure === "topdown")) {
+              throw `Query with structure ${structure} is not supported `;
+            }
+
             const ret = await sql.select({
               entity: req.params.entity,
               fields,
               orderBy,
+              groupBy,
               limit,
               offset,
+              structure,
               where: _.omit(req.query as any, [
                 "entity",
                 "__fields",
                 "__orderby",
+                "__groupby",
                 "__limit",
                 "__offset",
+                "__structure",
               ]),
             });
 
