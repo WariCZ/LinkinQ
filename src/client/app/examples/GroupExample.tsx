@@ -19,11 +19,11 @@ export function GroupExample() {
   ] = useDataTable(
     {
       entity: "tasks",
-      fields: ["caption"],
+      fields: ["caption,assignee"],
       // ordering: [{ id: "createtime", desc: true }],
-      ordering: [{ id: "createdby.fullname", desc: true }],
-      structure: "topdown",
-      // groupby: ["kind", "createdby.fullname", "caption"],
+      ordering: [{ id: "assignee", desc: true }],
+      // structure: "topdown",
+      groupby: ["assignee"],
       //   filter: filters,
     },
     []
@@ -41,9 +41,7 @@ export function GroupExample() {
     "status",
   ];
 
-  const columns = [
-    ...fieldKeys
-  ];
+  const columns = [...fieldKeys];
 
   return (
     <div>
