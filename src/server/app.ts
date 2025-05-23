@@ -27,11 +27,11 @@ import {
   Logger,
 } from "../lib/bpmn-web";
 
-import pageflowRouter from "../lib/entity/pageflow";
 import { loadConfigurations } from "../lib/configurations";
 import fs from "fs";
 import path from "path";
 import _ from "lodash";
+import pageflowRouter from "../lib/pageflow";
 
 const dirname = __dirname;
 
@@ -152,6 +152,7 @@ export class Linkinq {
       this.setupExpress({
         schema,
         sqlAdmin,
+        configurations,
       });
     } catch (err) {
       debugger;
@@ -207,10 +208,18 @@ export class Linkinq {
       .send("Vite server failed to start within the expected time.");
   };
 
-  setupExpress({ schema, sqlAdmin }: { schema: EntitySchema; sqlAdmin: Sql }) {
+  setupExpress({
+    schema,
+    sqlAdmin,
+    configurations,
+  }: {
+    schema: EntitySchema;
+    sqlAdmin: Sql;
+    configurations: any;
+  }) {
     const app = this.app;
 
-    this.setupRoutes({ schema, sqlAdmin });
+    this.setupRoutes({ schema, sqlAdmin, configurations });
 
     const DEFAULT_VITE_PATH = "vite.config.ts";
     const VITE_PATH_LINKINQ = path.join(__dirname, "../../", DEFAULT_VITE_PATH);
@@ -245,7 +254,15 @@ export class Linkinq {
     return app;
   }
 
-  setupRoutes({ schema, sqlAdmin }: { schema: EntitySchema; sqlAdmin: Sql }) {
+  setupRoutes({
+    schema,
+    sqlAdmin,
+    configurations,
+  }: {
+    schema: EntitySchema;
+    sqlAdmin: Sql;
+    configurations: any;
+  }) {
     const app = this.app;
 
     if (process.env.NODE_ENV === "development") {
@@ -262,7 +279,8 @@ export class Linkinq {
     app.use("/api", authenticate, this.entity.config());
     app.use("/bpmnapi", authenticate, this.bpmnRoutes.config());
     app.use("/adapters", authenticate, this.ad.configRoutes());
-    app.use("/pageflow", authenticate, pageflowRouter);
+
+    app.use("/pageflow", authenticate, pageflowRouter(configurations.pageflow));
 
     app.get("/protected2", authenticate, (req: Request, res: Response) => {
       res.json({ message: "This is a protected route", user: req.user });

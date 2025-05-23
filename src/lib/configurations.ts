@@ -182,6 +182,19 @@ const getUpdateData = async () => {
   return defaultData;
 };
 
+const getPageflow = async () => {
+  const folder = "/pageflow/";
+  const defaultData: any = await dynamicImportFromFiles(
+    [
+      path.join(CONFIGURATION_PATH_LINKINQ, folder),
+      path.join(CONFIGURATION_PATH_APP, folder),
+    ],
+    [".js", ".ts"],
+    importFiles
+  );
+  return defaultData;
+};
+
 const loadConfigurations = async () => {
   return {
     updateData: await getUpdateData(),
@@ -189,6 +202,7 @@ const loadConfigurations = async () => {
     entities: await getEntities(),
     processes: await getprocesses(),
     triggers: await getTriggers(),
+    pageflow: await getPageflow(),
 
     // updateData: {},
     // defaultData: {},
