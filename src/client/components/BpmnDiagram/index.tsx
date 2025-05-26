@@ -21,7 +21,17 @@ const defaultDiagram = `
 </bpmn:definitions>
 `;
 
-const BpmnDiagram = ({ xml, onSave, editor }) => {
+const BpmnDiagram = ({
+  xml,
+  onSave,
+  handleShown,
+  editor,
+}: {
+  xml: string;
+  onSave?: (xml: string) => void;
+  handleShown?: (canvas: any, diagram: any) => void;
+  editor?: boolean;
+}) => {
   const containerRef = useRef(null);
   const diagramRef = useRef(null);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -57,6 +67,7 @@ const BpmnDiagram = ({ xml, onSave, editor }) => {
         .then(() => {
           const canvas = diagramRef.current.get("canvas");
           canvas.zoom("fit-viewport");
+          handleShown?.(canvas);
         })
         .catch((err) => {
           console.error("Chyba při importu diagramu:", err);
@@ -88,6 +99,7 @@ const BpmnDiagram = ({ xml, onSave, editor }) => {
         container: containerRef.current,
       });
 
+      debugger;
       // Načtení diagramu
       if (xml) {
         diagramRef.current
@@ -95,6 +107,7 @@ const BpmnDiagram = ({ xml, onSave, editor }) => {
           .then(() => {
             const canvas = diagramRef.current.get("canvas");
             canvas.zoom("fit-viewport");
+            handleShown?.(canvas, diagramRef.current);
           })
           .catch((err) => {
             console.error("Chyba při načítání diagramu:", err);
@@ -140,12 +153,14 @@ const BpmnDiagram = ({ xml, onSave, editor }) => {
 
   return (
     <div>
-      <div style={{ marginBottom: "1rem" }}>
-        <button onClick={handleAddTask}>➕ Přidat Task</button>
-        <button onClick={handleSave} style={{ marginLeft: "1rem" }}>
-          💾 Uložit XML
-        </button>
-      </div>
+      {editor ? (
+        <div style={{ marginBottom: "1rem" }}>
+          <button onClick={handleAddTask}>➕ Přidat Task</button>
+          <button onClick={handleSave} style={{ marginLeft: "1rem" }}>
+            💾 Uložit XML
+          </button>
+        </div>
+      ) : null}
       <div
         ref={containerRef}
         style={{ width: "100%", height: "600px", border: "1px solid #ccc" }}

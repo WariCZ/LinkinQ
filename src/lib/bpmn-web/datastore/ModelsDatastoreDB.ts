@@ -99,7 +99,7 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
       await this.saveModel(bpmnModelData, owner);
       return bpmnModelData;
     } catch (exc) {
-      console.log("error in save", exc);
+      console.log("error in save", exc?.stack || exc);
       throw exc;
     }
   }
@@ -198,7 +198,11 @@ class ModelsDatastoreDB extends ServerComponent implements IModelsDatastore {
 
     const parsed = parser.parse(model.source);
 
-    const process = parsed["bpmn:definitions"]["bpmn:process"];
+    const process =
+      (parsed["bpmn:definitions"] &&
+        parsed["bpmn:definitions"]["bpmn:process"]) ||
+      (parsed["bpmn2:definitions"] &&
+        parsed["bpmn2:definitions"]["bpmn2:process"]);
 
     const entity = process["@_linkinq:entity"];
     const filter =

@@ -52,7 +52,6 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "bpmn-js": "^18.5.0",
-    "bpmn-js-react": "^1.0.21",
     "bpmn-server": "^2.2.13",
     "camunda-bpmn-moddle": "^7.0.1",
     "cookie-parser": "^1.4.6",

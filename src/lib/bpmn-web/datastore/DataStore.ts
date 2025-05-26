@@ -129,22 +129,23 @@ class DataStore extends ServerComponent implements IDataStore {
     }
 
     if (!instance.saved) {
-      //
-      instance.items = JSON.stringify(instance.items);
-      instance.loops = JSON.stringify(instance.loops);
-      instance.tokens = JSON.stringify(instance.tokens);
-      instance.logs = JSON.stringify(instance.logs);
-      instance.data = JSON.stringify(instance.data);
-      instance.savePoints = JSON.stringify(instance.savePoints);
-
       instance.saved = new Date();
 
       instance.guid = instance.id;
       delete instance.id;
+
+      const insertInstance = { ...instance };
+      insertInstance.items = JSON.stringify(instance.items);
+      insertInstance.loops = JSON.stringify(instance.loops);
+      insertInstance.tokens = JSON.stringify(instance.tokens);
+      insertInstance.logs = JSON.stringify(instance.logs);
+      insertInstance.data = JSON.stringify(instance.data);
+      insertInstance.savePoints = JSON.stringify(instance.savePoints);
+
       const ic = await this.db(Instance_collection)
         .setUser({ id: 1 })
-        .insert(instance);
-      instance.id = instance.guid;
+        .insert(insertInstance);
+      instance.id = insertInstance.guid;
       instance.dbId = ic[0].id;
     } else {
       // saveObject.items = JSON.stringify(saveObject.items);
@@ -154,10 +155,15 @@ class DataStore extends ServerComponent implements IDataStore {
       // saveObject.data = JSON.stringify(saveObject.data);
       // saveObject.savePoints = JSON.stringify(saveObject.savePoints);
 
-      await this.db(Instance_collection)
+      const ret = await this.db(Instance_collection)
         .setUser({ id: 1 })
-        .where({ id: instance.id })
+        // .where({ id: instance.dbId })
+        .where({ guid: instance.guid })
         .update(saveObject);
+
+      if (ret.length == 0) {
+        throw "..DataStore: no update instance collection";
+      }
     }
 
     this.logger.log("..DataStore: saving Complete");

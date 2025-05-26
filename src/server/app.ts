@@ -121,24 +121,24 @@ export class Linkinq {
           }
 
           let caseId = Math.floor(Math.random() * 10000);
-          // let context = await bpmnAPI.engine.start(
-          //   mod.name,
-          //   { caseId: caseId++ },
-          //   { userName: "admin" } as any
-          // );
+          let context = await bpmnAPI.engine.start(
+            mod.name,
+            { caseId: caseId++ },
+            { userName: "admin" } as any
+          );
 
           const entityData = {};
-          const context = {
-            instance: { dbId: "1500b584-fa8a-4a3c-8fa4-92f9991db78b" },
-          };
-          // Object.keys(context.item.element.def.$attrs).forEach((attr) => {
-          //   if (attr.indexOf("linkinq:") > -1) {
-          //     entityData[attr.replace("linkinq:", "")] =
-          //       context.item.element.def.$attrs[attr];
-          //   }
-          // });
+          // const context = {
+          //   instance: { dbId: "1500b584-fa8a-4a3c-8fa4-92f9991db78b" },
+          // };
+          Object.keys(context.item.element.def.$attrs).forEach((attr) => {
+            if (attr.indexOf("linkinq:") > -1) {
+              entityData[attr.replace("linkinq:", "")] =
+                context.item.element.def.$attrs[attr];
+            }
+          });
           return {
-            // id: (context.instance as any).dbId,
+            id: (context.instance as any).dbId,
             data: entityData,
           };
         }
@@ -259,6 +259,7 @@ export class Linkinq {
     //   debugger;
     //   const definitions = this.bpmnServer.definitions;
     //   const xml = await definitions.getSource("Cash Request");
+    //
     //   console.log("xml", xml);
     // });
     app.use("/", authRoutes({ schema, sqlAdmin }));

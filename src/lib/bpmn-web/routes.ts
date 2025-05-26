@@ -79,12 +79,6 @@ export class BpmnRoutes {
             req.user
           );
 
-          let x = await this.getNodeInfo(
-            this.bpmnServer,
-            processName,
-            elementId
-          );
-
           let { node, fields } = await this.getNodeInfo(
             this.bpmnServer,
             processName,
