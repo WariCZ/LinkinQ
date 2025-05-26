@@ -19,11 +19,11 @@ export function GroupExample() {
   ] = useDataTable(
     {
       entity: "tasks",
-      fields: ["caption,assignee"],
+      fields: ["caption"],
       // ordering: [{ id: "createtime", desc: true }],
       ordering: [{ id: "assignee", desc: true }],
       // structure: "topdown",
-      groupby: ["assignee"],
+      groupby: ["assignee.fullname"],
       //   filter: filters,
     },
     []

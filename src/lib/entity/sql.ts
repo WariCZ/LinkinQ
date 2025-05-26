@@ -49,10 +49,12 @@ export class Sql {
   }) => {
     if (entity) {
       if (this.#schema[entity]) {
+        const fieldsArr = _.uniq([...(fields || ["*"]), ...(groupBy || [])]);
+
         const queries = getQueries({
           schema: this.#schema,
           entity,
-          fieldsArr: fields || ["*"],
+          fieldsArr: fieldsArr,
           where: where,
           user: this.user,
         });

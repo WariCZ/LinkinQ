@@ -601,12 +601,16 @@ export const getData = async ({
     }
 
     if (groupBy) {
-      // debugger;
-      // query.groupBy(groupBy);
-      groupBy.map((o) => {
-        query.orderBy(o);
+      groupBy.map((o, i) => {
+        getOrder({
+          entity,
+          orderField: o,
+          query,
+          schema,
+          i,
+        });
       });
-      query.select(groupBy);
+      // query.select(groupFields);
     }
 
     if (limit) {
@@ -770,7 +774,15 @@ function buildGroupBy(data, groupFields) {
   const map = new Map();
 
   for (const item of data) {
-    const key = groupFields.map((k) => item[k]).join("|");
+    const key = groupFields
+      .map((k) => {
+        if (k.indexOf(".") > -1) {
+          return _.get(item, k);
+        } else {
+          return item[k];
+        }
+      })
+      .join("|");
 
     if (!map.has(key)) {
       const group = {
