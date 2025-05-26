@@ -8,8 +8,6 @@ import React, {
 import {
   getCoreRowModel,
   getExpandedRowModel,
-  // getGroupedRowModel,
-  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import _ from "lodash";
@@ -40,6 +38,8 @@ interface TableProps<T> {
   fullTextSearchEnabled?: boolean;
   settingColumnsEnabled?: boolean;
   rowMenuEnabled?: boolean;
+  isGroupBy?: boolean;
+  isExpanded?: boolean;
 }
 
 const Table = <T, _>({
@@ -60,6 +60,8 @@ const Table = <T, _>({
   fullTextSearchEnabled,
   settingColumnsEnabled,
   rowMenuEnabled,
+  isGroupBy,
+  isExpanded,
 }: TableProps<T>) => {
   const schema = useStore((state) => state.schema);
   const columnSelectorRef = useRef<any>(null);
@@ -93,6 +95,7 @@ const Table = <T, _>({
     schema,
     entity,
     columnSizing,
+    isExpanded
   });
 
   const filteredData = useMemo(() => {
@@ -154,31 +157,31 @@ const Table = <T, _>({
       });
   }, [data, filters, fullTextSearch]);
 
-  // const [grouping, setGrouping] = useState(['status']);
   const { getRowModel, getHeaderGroups } = useReactTable({
     columns: translatedColumns,
     data: filteredData,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
+    // getSortedRowModel: getSortedRowModel(),
+    // ...(isGroupBy && groupBy ? { getGroupedRowModel: getGroupedRowModel() } : {}),
+    ...(isExpanded ? { getExpandedRowModel: getExpandedRowModel() } : {}),
+    getSubRows: (row) => row.children || [],
+    // isGroupBy ? row.original?.children ?? [] :
     onSortingChange: (o: any) => {
       setOrdering && setOrdering(o());
     },
-    // getGroupedRowModel: getGroupedRowModel(),
+    // ...(isGroupBy && groupBy ? { onGroupingChange: setGrouping } : {}),
+    ...(isExpanded ? { onExpandedChange: setExpanded } : {}),
     manualSorting: true,
     columnResizeMode: "onChange",
     enableColumnResizing: true,
-    getExpandedRowModel: getExpandedRowModel(),
-    getSubRows: (row) => row.children,
     state: {
-      expanded,
-      // grouping,
+      // ...(isGroupBy && groupBy ? { grouping } : {}),
+      ...(isExpanded ? { expanded } : {}),
       sorting: ordering?.map((o) => ({ ...o, desc: o.desc || false })),
       columnSizing: columnSizing,
     },
     columnResizeDirection: "rtl",
     onColumnSizingChange: handleColumnSizingChange,
-    onExpandedChange: setExpanded,
-    // onGroupingChange: setGrouping
   });
 
   const applyFilters = (dataFilter: Record<string, any>) => {
@@ -253,6 +256,8 @@ const Table = <T, _>({
             selectable={selectable}
             setSelectedColumns={setSelectedColumns}
             settingColumnsEnabled={settingColumnsEnabled}
+            isExpanded={isExpanded}
+            isGroupBy={isGroupBy}
           />
           <TableBody
             rows={getRowModel().rows}
@@ -267,6 +272,9 @@ const Table = <T, _>({
             hasMore={hasMore}
             selectable={selectable}
             rowMenuEnabled={rowMenuEnabled}
+            isGroupBy={isGroupBy}
+            isExpanded={isExpanded}
+            filteredData={filteredData}
           />
         </table>
       </div>

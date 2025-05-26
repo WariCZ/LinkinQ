@@ -11,6 +11,7 @@ interface UseTranslatedColumnsArgs {
   schema: any;
   entity: string;
   columnSizing: Record<string, number>;
+  isExpanded: boolean
 }
 
 export const useTranslatedColumns = ({
@@ -18,6 +19,7 @@ export const useTranslatedColumns = ({
   schema,
   entity,
   columnSizing,
+  isExpanded
 }: UseTranslatedColumnsArgs): AppColumnDef<any, any>[] => {
   const profileSettings = useStore(
     (state) => state.userConfigurations["profileSettings"]?.definition ?? {}
@@ -25,15 +27,19 @@ export const useTranslatedColumns = ({
   const dateFormat = profileSettings.dateFormat || "dd.MM.yyyy HH:mm:ss";
 
   return useMemo(() => {
-    return [
-      {
+    const expanderColumn = isExpanded
+      ? [{
         id: 'expander',
         accessorKey: 'expander',
         header: () => null,
         size: 30,
         minSize: 30,
         enableResizing: false,
-      },
+      }]
+      : [];
+
+    return [
+      ...expanderColumn,
       ...columns.map((c): AppColumnDef<any, any> => {
         if (typeof c !== "string" && c.cell) {
           return {
@@ -122,5 +128,5 @@ export const useTranslatedColumns = ({
         };
       }),
     ];
-  }, [columns, schema, entity, columnSizing, dateFormat]);
+  }, [columns, schema, entity, columnSizing, dateFormat, isExpanded]);
 };

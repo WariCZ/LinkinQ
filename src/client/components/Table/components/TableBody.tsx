@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 import { TableRow } from "./TableRow";
-import { Row, HeaderGroup } from "@tanstack/react-table";
+import { Row, HeaderGroup, useReactTable, getCoreRowModel } from "@tanstack/react-table";
 
 interface TableBodyProps<T> {
   rows: Row<any>[];
@@ -15,6 +15,9 @@ interface TableBodyProps<T> {
   hasMore?: boolean;
   selectable?: boolean,
   rowMenuEnabled?: boolean
+  isGroupBy?: boolean;
+  isExpanded?: boolean;
+  filteredData: any
 }
 
 export const TableBody = <T,>({
@@ -29,7 +32,10 @@ export const TableBody = <T,>({
   deleteRecord,
   hasMore,
   selectable,
-  rowMenuEnabled
+  rowMenuEnabled,
+  isGroupBy,
+  isExpanded,
+  filteredData
 }: TableBodyProps<T>) => {
   if (rows.length === 0 && !loading) {
     return (
@@ -46,8 +52,56 @@ export const TableBody = <T,>({
     );
   }
 
-
+  console.log("rows", rows)
   const renderRows = (rows: Row<any>[]) => {
+    if (isGroupBy && Array.isArray(filteredData)) {
+      return filteredData.flatMap((group: any, groupIndex: number) => {
+        const rendered: JSX.Element[] = [];
+  
+        // 🔹 Рендер строки-заголовка группы
+        rendered.push(
+          <tr
+            key={`group-${group.key}-${groupIndex}`}
+            className="bg-[#f3f4f6] text-sm text-gray-700 font-semibold uppercase border-t border-gray-300"
+          >
+            <td colSpan={translatedColumns.length + 2} className="px-4 py-2 tracking-wide">
+              <div className="flex items-center gap-2">
+                {group.key}
+              </div>
+            </td>
+          </tr>
+        );
+  
+        const childTable = useReactTable({
+          data: group.children,
+          columns: translatedColumns,
+          getCoreRowModel: getCoreRowModel(),
+        });
+  
+        const childRows = childTable.getRowModel().rows;
+  
+        rendered.push(
+          ...childRows.map((row: Row<any>, rowIndex: number) => (
+            <TableRow
+              key={row.id + "-" + rowIndex}
+              row={row}
+              i={rowIndex}
+              rowClick={rowClick}
+              selectedRows={selectedRows}
+              setSelectedRows={setSelectedRows}
+              highlightedRow={highlightedRow}
+              deleteRecord={deleteRecord}
+              selectable={selectable}
+              rowMenuEnabled={rowMenuEnabled}
+            />
+          ))
+        );
+  
+        return rendered;
+      });
+    }
+  
+    // 🔹 Обычный режим без группировки
     return rows.map((row, i) => (
       <TableRow
         key={row.id + "-" + i}
@@ -63,7 +117,6 @@ export const TableBody = <T,>({
       />
     ));
   };
-
   return (
     <tbody className="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
       {loading

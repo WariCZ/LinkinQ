@@ -23,7 +23,7 @@ export function GroupExample() {
       // ordering: [{ id: "createtime", desc: true }],
       ordering: [{ id: "createdby.fullname", desc: true }],
       structure: "topdown",
-      // groupby: ["kind", "createdby.fullname", "caption"],
+      // groupby: ["status"],
       //   filter: filters,
     },
     []
@@ -50,6 +50,8 @@ export function GroupExample() {
       <pre>{JSON.stringify(data, null, 2)}</pre>
       <Table
         selectable
+        // isGroupBy
+        isExpanded
         tableConfigKey="tasks"
         entity={"tasks"}
         data={data}

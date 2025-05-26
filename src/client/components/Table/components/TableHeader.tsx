@@ -22,6 +22,8 @@ interface TableHeaderProps<T> {
   entity?: string;
   selectable?: boolean;
   settingColumnsEnabled?: boolean;
+  isExpanded?: boolean
+  isGroupBy?: boolean
 }
 
 export const TableHeader = <T,>({
@@ -38,6 +40,8 @@ export const TableHeader = <T,>({
   entity,
   selectable,
   settingColumnsEnabled = true,
+  isExpanded,
+  isGroupBy
 }: TableHeaderProps<T>) => {
   const { openModal, closeModal } = useModalStore();
   return (
@@ -97,8 +101,8 @@ export const TableHeader = <T,>({
                         header.column.columnDef.header,
                         header.getContext()
                       )}
-                      {header.column.getIsSorted() === "asc" && <FaSortUp />}
-                      {header.column.getIsSorted() === "desc" && <FaSortDown />}
+                      {!isGroupBy && header.column.getIsSorted() === "asc" && <FaSortUp />}
+                      {!isGroupBy && header.column.getIsSorted() === "desc" && <FaSortDown />}
                     </div>
                   </div>
                 )}
