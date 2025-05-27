@@ -50,6 +50,11 @@ const entityFields: EntitySchema = {
         label: "Attachments",
         description: "Attachments",
       },
+      priority: {
+        type: "lov(tasksPriority)",
+        label: "Priority",
+        description: "Task priority",
+      }
     },
   },
 };

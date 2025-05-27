@@ -36,7 +36,7 @@ export const TableRow = <T,>({
   selectable,
   rowMenuEnabled = true
 }: TableRowProps<T>) => {
-  const guid = row.original.guid;
+  const guid = row.original?.guid;
   const isSelected = selectedRows.includes(guid);
   const isHighlighted = highlightedRow?.includes(guid);
 
@@ -68,7 +68,7 @@ export const TableRow = <T,>({
       ) : (
         <></>
       )}
-      {row.getVisibleCells().map((cell) => (
+      {row?.getVisibleCells().map((cell) => (
         <td
           key={cell.id}
           style={{ paddingLeft: `${row.depth * 20}px` }}

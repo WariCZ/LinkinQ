@@ -21,9 +21,12 @@ export function GroupExample() {
       entity: "tasks",
       fields: ["caption"],
       // ordering: [{ id: "createtime", desc: true }],
-      ordering: [{ id: "createdby.fullname", desc: true }],
+        // ordering: [{ id: "createdby.fullname", desc: true }],
       structure: "topdown",
-      // groupby: ["kind", "createdby.fullname", "caption"],
+      // groupby: ["status"],
+      ordering: [{ id: "assignee", desc: true }],
+      // structure: "topdown",
+      groupby: ["status"],
       //   filter: filters,
     },
     []
@@ -41,15 +44,15 @@ export function GroupExample() {
     "status",
   ];
 
-  const columns = [
-    ...fieldKeys
-  ];
+  const columns = [...fieldKeys];
 
   return (
     <div>
       <pre>{JSON.stringify(data, null, 2)}</pre>
       <Table
         selectable
+        isGroupBy
+        // isExpanded
         tableConfigKey="tasks"
         entity={"tasks"}
         data={data}
