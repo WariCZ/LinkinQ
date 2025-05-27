@@ -30,10 +30,14 @@ interface StoreState {
 
   appConfigurations: Record<string, any>;
   getAppConfigurations: () => Promise<void>;
+
+  pageflow: any;
+  getPageflow: () => Promise<void>;
 }
 
 const useStore = create<StoreState>((set, get) => ({
   schema: {},
+  pageflow: {},
   user: null,
   roles: [],
   loading: true,
@@ -58,6 +62,7 @@ const useStore = create<StoreState>((set, get) => ({
       await get().getSchema();
       await get().getUserConfigurations();
       await get().getAppConfigurations();
+      await get().getPageflow();
     } catch (error) {
       set({ user: null });
     } finally {
@@ -77,6 +82,23 @@ const useStore = create<StoreState>((set, get) => ({
       }
     } catch (error) {
       set({ user: null });
+    }
+  },
+  getPageflow: async () => {
+    try {
+      const response = await axios.get("/pageflow/config", {
+        withCredentials: true,
+      });
+      debugger;
+      if (response.data) {
+        set({ pageflow: response.data });
+      } else {
+        set({ pageflow: {} });
+      }
+    } catch (error) {
+      set({ pageflow: {} });
+    } finally {
+      set({ loading: false });
     }
   },
   getSchema: async () => {
