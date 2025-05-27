@@ -26,7 +26,7 @@ export function GroupExample() {
       // groupby: ["status"],
       ordering: [{ id: "assignee", desc: true }],
       // structure: "topdown",
-      groupby: ["assignee.fullname"],
+      groupby: ["status"],
       //   filter: filters,
     },
     []
@@ -51,8 +51,8 @@ export function GroupExample() {
       <pre>{JSON.stringify(data, null, 2)}</pre>
       <Table
         selectable
-        // isGroupBy
-        isExpanded
+        isGroupBy
+        // isExpanded
         tableConfigKey="tasks"
         entity={"tasks"}
         data={data}

@@ -110,36 +110,10 @@ export const TaskDetail = (props: TaskDetailProps) => {
                 className: "mb-2",
               },
               {
-                type: "select",
                 field: "priority",
+                type: "select",
                 label: "Priority",
-                className: "mb-2",
-                options: [
-                  {
-                    value: "none",
-                    label: "Bez priority",
-                  },
-                  {
-                    value: "low",
-                    label: "Nízká",
-                  },
-                  {
-                    value: "medium",
-                    label: "Střední",
-                  },
-                  {
-                    value: "high",
-                    label: "Vysoká",
-                  },
-                  {
-                    value: "very_high",
-                    label: "Velmi vysoká",
-                  },
-                  {
-                    value: "critical",
-                    label: "Kritická",
-                  },
-                ],
+                className: "mb-2 mt-2",
               },
             ],
           },
