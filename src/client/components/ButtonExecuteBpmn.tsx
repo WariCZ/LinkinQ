@@ -1,10 +1,10 @@
-import { BpmnJsReact, useBpmnJsReact } from "bpmn-js-react";
 import { useTranslation } from "react-i18next";
 import { useModalStore } from "./Modal/modalStore";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Dropdown } from "flowbite-react";
 import { MdOutlineSchema } from "react-icons/md";
+import BpmnDiagram from "./BpmnDiagram";
 
 const ButtonExecuteBpmn = ({
   status,
@@ -15,7 +15,7 @@ const ButtonExecuteBpmn = ({
   status?: string;
   wf: any;
   refresh: any;
-  showBtnSchema?: boolean
+  showBtnSchema?: boolean;
 }) => {
   const { t } = useTranslation();
   const executeItems = wf?.items?.filter((item) => item.status !== "end");
@@ -25,7 +25,9 @@ const ButtonExecuteBpmn = ({
   const [flows, setFlows] = useState([]);
 
   const getFlows = async () => {
-    if (executeItems[0] && executeItems[0].id) {
+    debugger;
+    if (executeItems && executeItems[0] && executeItems[0].id) {
+      debugger;
       const { data } = await axios.post("/bpmnapi/invokeHaveFields", {
         id: executeItems[0].id,
       });
@@ -34,9 +36,9 @@ const ButtonExecuteBpmn = ({
       setFlows([]);
     }
   };
-  useEffect(() => {
-    getFlows();
-  }, [status]);
+  // useEffect(() => {
+  //   getFlows();
+  // }, [status]);
 
   const invokeMove = async (d: any) => {
     await axios.post("/bpmnapi/invoke", {
@@ -50,20 +52,25 @@ const ButtonExecuteBpmn = ({
 
   return (
     <span className="flex items-center justify-end">
-      {showBtnSchema && <MdOutlineSchema
-        className="mx-1 cursor-pointer"
-        onClick={() =>
-          openModal(
-            <BPMNInstance name={wf.name} source={wf.source} items={wf.items} />
-          )
-        }
-      />
-      }
+      {showBtnSchema && (
+        <MdOutlineSchema
+          className="mx-1 cursor-pointer"
+          onClick={() =>
+            openModal(
+              <BPMNInstance
+                name={wf.name}
+                source={wf.source}
+                items={wf.items}
+              />
+            )
+          }
+        />
+      )}
       <Dropdown
         className="w-40"
         label={
           <span
-            // onClick={executeProcess}
+            onClick={getFlows}
             title="Execute"
             className="bg-green-500 text-white px-4 py-0 rounded hover:bg-green-600 cursor-pointer"
           >
@@ -105,15 +112,14 @@ const BPMNInstance = ({
   source: string;
   items: [];
 }) => {
-  const bpmnReactJs = useBpmnJsReact();
-
-  const handleShown = (viewer: any) => {
+  const handleShown = (canvas: any, diagram: any) => {
+    console.log(items);
     items?.map((item: any) => {
       if (item.status === "end") {
-        bpmnReactJs.addMarker(item.elementId, "Completed");
+        canvas.addMarker(item.elementId, "Completed");
       }
       if (item.status === "wait") {
-        bpmnReactJs.addMarker(item.elementId, "Pending");
+        canvas.addMarker(item.elementId, "Pending");
       }
     });
   };
@@ -121,12 +127,7 @@ const BPMNInstance = ({
   return (
     <div className="bpmnView">
       <div className="font-bold">{name}</div>
-      <BpmnJsReact
-        useBpmnJsReact={bpmnReactJs}
-        mode="edit"
-        xml={source}
-        onShown={handleShown}
-      />
+      <BpmnDiagram xml={source} handleShown={handleShown} />
     </div>
   );
 };

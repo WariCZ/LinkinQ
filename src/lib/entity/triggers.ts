@@ -527,13 +527,15 @@ export class Triggers {
                     table,
                     data: runner.builder._single.insert,
                   });
-                  runner.builder._single.insert.workflowInstance =
-                    workflowData.id;
+                  if (workflowData) {
+                    runner.builder._single.insert.workflowInstance =
+                      workflowData.id;
 
-                  runner.builder._single.insert = {
-                    ...runner.builder._single.insert,
-                    ...workflowData.data,
-                  };
+                    runner.builder._single.insert = {
+                      ...runner.builder._single.insert,
+                      ...workflowData.data,
+                    };
+                  }
                 }
               }
             }

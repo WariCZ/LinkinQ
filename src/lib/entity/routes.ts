@@ -203,7 +203,6 @@ export class EntityRoutes extends Entity {
       }
     });
 
-    //
     // INSERT
     router.post("/entity/:entity", async (req: Request, res: Response) => {
       try {
