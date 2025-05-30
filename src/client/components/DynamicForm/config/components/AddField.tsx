@@ -1,4 +1,4 @@
-import { useModalStore } from "../../../../../client/components/Modal/modalStore";
+import { useModalStore } from "../../../../components/Modal/modalStore";
 import { FieldType } from "../../../../../lib/entity/types";
 import { TextInput } from "flowbite-react";
 import { useState } from "react";

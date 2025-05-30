@@ -1,4 +1,4 @@
-import { httpRequest } from "../../../../client/services/httpBase";
+import { httpRequest } from "../../../services/httpBase";
 import _ from "lodash";
 import React, { useEffect, useState } from "react";
 import ReactSelect, { Props as ReactSelectProps } from "react-select";

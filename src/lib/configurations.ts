@@ -203,12 +203,6 @@ const loadConfigurations = async () => {
     processes: await getprocesses(),
     triggers: await getTriggers(),
     pageflow: await getPageflow(),
-
-    // updateData: {},
-    // defaultData: {},
-    // entities: {},
-    // processes: [],
-    // triggers: [],
   };
 };
 

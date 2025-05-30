@@ -8,8 +8,8 @@ import { useLocation } from "react-router-dom";
 import _ from "lodash";
 import { useTranslation } from "react-i18next";
 import { TaskDetail } from "./components/TaskDetail";
-import Table from "../../../client/components/Table";
-import useDataDetail from "../../../client/hooks/useDataDetail";
+import Table from "../../components/Table";
+import useDataDetail from "../../hooks/useDataDetail";
 import ButtonExecuteBpmn from "../../../../src/client/components/ButtonExecuteBpmn";
 
 const entity = "tasks";
@@ -21,7 +21,9 @@ export const Tasks = () => {
   const filters = location?.state?.filter;
   const header = location?.state?.header;
   const [guidDetail, setGuidDetail] = useState(null);
-  const [modalRequestedGuid, setModalRequestedGuid] = useState<string | null>(null);
+  const [modalRequestedGuid, setModalRequestedGuid] = useState<string | null>(
+    null
+  );
   const schema = useStore((state) => state.schema);
 
   const fieldKeys = [
@@ -35,15 +37,15 @@ export const Tasks = () => {
     "workflowInstance.items",
     ...(schema[entity]
       ? Object.keys(schema[entity].fields)
-        .filter((f) => !schema[entity].fields[f].system)
-        .map((f) => {
-          const link = schema[entity].fields[f].link;
-          return link
-            ? link === "users"
-              ? f + ".fullname"
-              : f + ".caption"
-            : f;
-        })
+          .filter((f) => !schema[entity].fields[f].system)
+          .map((f) => {
+            const link = schema[entity].fields[f].link;
+            return link
+              ? link === "users"
+                ? f + ".fullname"
+                : f + ".caption"
+              : f;
+          })
       : []),
     "status",
   ];
@@ -57,7 +59,13 @@ export const Tasks = () => {
   const [
     dataDetail,
     setDataDataDetail,
-    { loading: loadingDetail, setRecord, refreshDetail, multiUpdate, getSingleRecord },
+    {
+      loading: loadingDetail,
+      setRecord,
+      refreshDetail,
+      multiUpdate,
+      getSingleRecord,
+    },
   ] = useDataDetail(
     {
       entity: entity,
@@ -92,8 +100,8 @@ export const Tasks = () => {
             refresh={refreshDetail}
           />
         </td>
-      )
-    }
+      ),
+    },
   ];
 
   const [
@@ -148,7 +156,6 @@ export const Tasks = () => {
       setModalRequestedGuid(null);
     }
   }, [modalRequestedGuid, loadingDetail, dataDetail]);
-
 
   return (
     <div className="mx-3">

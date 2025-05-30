@@ -1,4 +1,4 @@
-import { useModalStore } from "../../../client/components/Modal/modalStore";
+import { useModalStore } from "../../components/Modal/modalStore";
 import { Button } from "flowbite-react";
 import React from "react";
 import { ManualTask } from "./components/ManualTask";

@@ -1,4 +1,4 @@
-import { FormFieldType } from "../../../client/types/DynamicForm/types";
+import { FormFieldType } from "../../types/DynamicForm/types";
 import { create } from "zustand";
 
 type FormConfigState = {

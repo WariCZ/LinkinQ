@@ -33,6 +33,7 @@ interface StoreState {
 
   pageflow: any;
   getPageflow: () => Promise<void>;
+  getPublicPageflow: () => Promise<void>;
 }
 
 const useStore = create<StoreState>((set, get) => ({
@@ -46,6 +47,7 @@ const useStore = create<StoreState>((set, get) => ({
   appConfigurations: {},
   setUser: (user) => set({ user }),
   logout: async () => {
+    await get().getPublicPageflow();
     await axios.post("/logout");
     set({ user: null });
   },
@@ -59,10 +61,6 @@ const useStore = create<StoreState>((set, get) => ({
     set({ loading: true });
     try {
       await get().checkAuth();
-      await get().getSchema();
-      await get().getUserConfigurations();
-      await get().getAppConfigurations();
-      await get().getPageflow();
     } catch (error) {
       set({ user: null });
     } finally {
@@ -77,19 +75,40 @@ const useStore = create<StoreState>((set, get) => ({
       });
       if (response.data.user) {
         set({ user: response.data.user });
+        await get().getPageflow();
+        await get().getSchema();
+        await get().getUserConfigurations();
+        await get().getAppConfigurations();
       } else {
         set({ user: null });
+        await get().getPublicPageflow();
       }
     } catch (error) {
       set({ user: null });
+      await get().getPublicPageflow();
+    }
+  },
+  getPublicPageflow: async () => {
+    try {
+      const response = await axios.get("/pageflow/public", {
+        withCredentials: true,
+      });
+      if (response.data) {
+        set({ pageflow: response.data });
+      } else {
+        set({ pageflow: {} });
+      }
+    } catch (error) {
+      set({ pageflow: {} });
+    } finally {
+      set({ loading: false });
     }
   },
   getPageflow: async () => {
     try {
-      const response = await axios.get("/pageflow/config", {
+      const response = await axios.get("/pageflow/complete", {
         withCredentials: true,
       });
-      debugger;
       if (response.data) {
         set({ pageflow: response.data });
       } else {

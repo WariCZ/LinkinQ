@@ -1,6 +1,6 @@
-import ButtonExecuteBpmn from "../../../../client/components/ButtonExecuteBpmn";
-import Form from "../../../../client/components/DynamicForm";
-import { ModalPropsType } from "../../../../client/types/common/ModalPropsType";
+import ButtonExecuteBpmn from "../../../components/ButtonExecuteBpmn";
+import Form from "../../../components/DynamicForm";
+import { ModalPropsType } from "../../../types/common/ModalPropsType";
 import { TextInput } from "flowbite-react";
 import { DateTime } from "luxon";
 
@@ -133,7 +133,7 @@ export const TaskDetail = (props: TaskDetailProps) => {
                     type: "richtext",
                     field: "description",
                     label: "Description",
-                    className: "mb-2"
+                    className: "mb-2",
                   },
                   {
                     type: "Section",
@@ -189,7 +189,7 @@ export const TaskDetail = (props: TaskDetailProps) => {
                     type: "attachment",
                     field: "attachments",
                     label: "Attachments",
-                    className: "mt-2"
+                    className: "mt-2",
                   },
                 ],
               },

@@ -1,5 +1,5 @@
-import { CollapsibleSection } from "../../../client/components/CollapsibleSection";
-import { FormField } from "../../../client/components/DynamicForm/fields/FormField";
+import { CollapsibleSection } from "../../components/CollapsibleSection";
+import { FormField } from "../../components/DynamicForm/fields/FormField";
 import { Button } from "flowbite-react";
 import { FaFolderOpen } from "react-icons/fa";
 

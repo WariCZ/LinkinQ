@@ -768,6 +768,8 @@ export class Entity {
 
     await this.triggers.initTriggers(this.schema, triggers);
 
+    await this.triggers.initTriggers(this.schema, triggers);
+
     await this.createData({
       data: defaultData,
       sqlAdmin,

@@ -1,28 +1,33 @@
-import { Login } from "../../client/app/login";
-import { RoutesConfig } from "../../client/generateRoutes";
+import { PageflowType } from "../../types/share";
 
-const routesConfig = {
-  login: {
-    path: "/login",
-    component: "Login",
-    public: true,
-  },
-  main: {
-    layoutProps: {},
-    children: {
-      // "/": { component: Dashboard },
-      // profile: { component: Profile },
-      // tasks: { component: Tasks },
-      // TestPageFlow: { component: TestPageFlow },
+const routesConfig: PageflowType = {
+  public: {
+    login: { componentPath: "../client/pages/login/", noLayout: true },
+    "/": {
+      to: "/login",
     },
   },
-  // admin: {
-  //   path: "/admin",
-  //   layoutProps: { admin: true },
-  //   children: {
-  //     journal: { component: Journal },
-  //   },
-  // },
+  "/": {
+    //  component: "Dashboard"
+    componentPath: "../client/pages/dashboard/",
+  },
+  admin: {
+    sidebar: "admin",
+    children: {
+      "": {
+        to: "/admin/journal",
+      },
+      journal: "../client/pages/admin/journal/",
+      workflow: "../client/pages/admin/workflow/",
+      serverScript: "../client/pages/admin/serverScript/",
+      entity: "../client/pages/admin/entity/",
+      triggers: "../client/pages/admin/triggers/",
+      querybuilder: "../client/pages/admin/querybuilder/",
+      notifications: "../client/pages/admin/notifications/",
+      adapters: "../client/pages/adapters/",
+    },
+  },
+  test: "../client/pages/test/",
 };
 
 export default routesConfig;

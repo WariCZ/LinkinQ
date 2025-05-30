@@ -179,28 +179,6 @@ export class Triggers {
       registeredGuids.push(trigger.guid);
     }
 
-    // nactu vsechny triggery z FS
-    // let triggersFS: TriggerItemInternalType[] = [];
-
-    // for (const filename of fs.readdirSync(this.path)) {
-    //   const path = require("path");
-    //   if (path.extname(filename) == ".ts") {
-    //     let name = path.basename(filename);
-
-    //     const stats = await fs.promises.stat(this.getPath(name));
-    //     const { default: triggers } = await import(this.getPath(name));
-
-    //     const triggersTmp: TriggerItemInternalType[] = triggers.map(
-    //       (t: TriggerItemInternalType) => ({
-    //         ...t,
-    //         updatetime: DateTime.fromJSDate(stats.mtime),
-    //       })
-    //     );
-
-    //     triggersFS = triggersFS.concat(triggersTmp);
-    //   }
-    // }
-
     for (const trigger of initTriggers) {
       this.prepareDefinition(trigger);
       const dbTrigger: any =

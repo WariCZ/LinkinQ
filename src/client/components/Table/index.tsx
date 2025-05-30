@@ -11,7 +11,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import _ from "lodash";
-import useStore from "../../../client/store";
+import useStore from "../../store";
 import { TableFieldType, TableOrdering } from "./types";
 import { useColumnStorage } from "./hooks/useColumnStorage";
 import { useTranslatedColumns } from "./hooks/useTranslatedColumns";
@@ -95,7 +95,7 @@ const Table = <T, _>({
     schema,
     entity,
     columnSizing,
-    isExpanded
+    isExpanded,
   });
 
   const filteredData = useMemo(() => {

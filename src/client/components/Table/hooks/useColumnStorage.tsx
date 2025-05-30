@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { useTableConfigStore } from "../_store";
 import { ColumnSizingState, OnChangeFn } from "@tanstack/react-table";
 import _ from "lodash";
-import useStore from "../../../../../src/client/store";
-import { useUserConfigurations } from "../../../../../src/client/hooks/useUserConfigurations";
+import useStore from "../../../store";
+import { useUserConfigurations } from "../../../hooks/useUserConfigurations";
 
 type ColumnConfig = {
   key: string;

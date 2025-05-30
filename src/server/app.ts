@@ -224,8 +224,8 @@ export class Linkinq {
 
     this.setupRoutes({ schema, sqlAdmin, configurations });
 
-    const DEFAULT_VITE_PATH = "vite.config.ts";
-    const VITE_PATH_LINKINQ = path.join(__dirname, "../../", DEFAULT_VITE_PATH);
+    // const DEFAULT_VITE_PATH = "vite.config.ts";
+    // const VITE_PATH_LINKINQ = path.join(__dirname, "../../", DEFAULT_VITE_PATH);
 
     /**
      * Error Handler.
@@ -233,7 +233,7 @@ export class Linkinq {
     if (process.env.NODE_ENV === "development") {
       // only use in development
       ViteExpress.config({
-        viteConfigFile: VITE_PATH_LINKINQ,
+        // viteConfigFile: VITE_PATH_LINKINQ,
       });
     } else {
       app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
@@ -242,7 +242,7 @@ export class Linkinq {
       });
       ViteExpress.config({
         mode: "production",
-        viteConfigFile: VITE_PATH_LINKINQ,
+        // viteConfigFile: VITE_PATH_LINKINQ,
       });
     }
 
@@ -280,11 +280,10 @@ export class Linkinq {
     //   console.log("xml", xml);
     // });
     app.use("/", authRoutes({ schema, sqlAdmin }));
+    app.use("/pageflow", pageflowRouter(configurations.pageflow));
     app.use("/api", authenticate, this.entity.config());
     app.use("/bpmnapi", authenticate, this.bpmnRoutes.config());
     app.use("/adapters", authenticate, this.ad.configRoutes());
-
-    app.use("/pageflow", authenticate, pageflowRouter(configurations.pageflow));
 
     app.get("/protected2", authenticate, (req: Request, res: Response) => {
       res.json({ message: "This is a protected route", user: req.user });
