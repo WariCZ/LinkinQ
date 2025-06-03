@@ -6,7 +6,7 @@ import { FaDownload, FaPlus } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { ConfigurableForm } from "./components/ConfigurableForm";
 
-export const Examples = () => {
+const Examples = () => {
   const { t } = useTranslation();
   const { openModal } = useModalStore();
   const entity = "tasks";
@@ -49,3 +49,5 @@ export const Examples = () => {
     </>
   );
 };
+
+export default Examples;

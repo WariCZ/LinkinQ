@@ -36,8 +36,8 @@ const PrivateLayout = (props: {
 
 const getComponent = ({ componentPath, pages }) => {
   let cPath;
-  if (componentPath.indexOf("../client") > -1) {
-    cPath = componentPath.replace("../client", ".");
+  if (componentPath.indexOf("client/") > -1) {
+    cPath = componentPath.replace("client/", "./");
   } else {
     cPath = componentPath;
   }
@@ -55,18 +55,21 @@ const getComponent = ({ componentPath, pages }) => {
 function generateRoutes({
   user,
   pageflow,
-  sidebar,
+  pages,
 }: {
   user: User;
-  pageflow: PageflowRecordClient;
-  sidebar?: string;
+  pageflow: any; //PageflowRecordClient;
+  pages: any;
 }): React.ReactNode[] {
   const routes: React.ReactNode[] = [];
 
-  // @ts-expect-error – TypeScript to neumí, ale Vite ano
-  const pagesImport = import.meta.glob("./pages/**/index.{jsx,tsx}");
+  const pagesImport = {
+    // @ts-expect-error – TypeScript to neumí, ale Vite ano
+    ...import.meta.glob("./pages/**/index.{jsx,tsx}"),
+    ...pages,
+  };
 
-  const pages = Object.fromEntries(
+  const pagesApp = Object.fromEntries(
     Object.entries(pagesImport).map(([key, value]) => {
       // Odstranit /index.tsx
       const newKey = key.replace(/index\.tsx$/i, "");
@@ -74,22 +77,15 @@ function generateRoutes({
     })
   );
 
-  for (const [key, pf] of Object.entries(pageflow)) {
-    const { path, componentPath, noLayout, children, to } = pf;
+  pageflow.map((pf) => {
+    const { path, componentPath, noLayout, to, sidebar } = pf as any;
 
     if (to) {
       routes.push(
         <Route key={path} path={path} element={<Navigate to={to} replace />} />
       );
-    } else if (children) {
-      const layoutPath = path || "";
-      routes.push(
-        <Route key={layoutPath} path={layoutPath}>
-          {generateRoutes({ user, pageflow: children, sidebar: pf.sidebar })}
-        </Route>
-      );
     } else {
-      const Component = getComponent({ componentPath, pages });
+      const Component = getComponent({ componentPath, pages: pagesApp });
       if (noLayout) {
         routes.push(<Route key={path} path={path} element={<Component />} />);
       } else {
@@ -106,8 +102,7 @@ function generateRoutes({
         );
       }
     }
-  }
-
+  });
   return routes;
 }
 

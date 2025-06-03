@@ -6,10 +6,10 @@ import ModalContainer from "./components/Modal/ModalContainer";
 import "react-tabs/style/react-tabs.css";
 import App from "./App";
 
-const createLinkinqClient = () => {
+const createLinkinqClient = ({ pages }) => {
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <>
-      <App />
+      <App pages={pages} />
       <ModalContainer />
     </>
   );

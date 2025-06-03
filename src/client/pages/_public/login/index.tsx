@@ -1,13 +1,14 @@
 import React from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import useStore from "../../store";
+import useStore from "../../../store";
 import { Button, Label, TextInput } from "flowbite-react";
 import { useForm } from "react-hook-form";
-import logo from "../../static/logo.png";
+import logo from "../../../static/logo.png";
 
-export const Login = () => {
+const Login = () => {
   const setUser = useStore((state) => state.setUser);
+  const getPageflow = useStore((state) => state.getPageflow);
   const navigate = useNavigate();
 
   const defaultValues = {
@@ -28,7 +29,8 @@ export const Login = () => {
         password: data.password,
       });
       if (response.data.message === "Login successful") {
-        setUser(data);
+        await setUser(data);
+        await getPageflow();
         navigate("/admin/protected");
       }
     } catch (error) {
@@ -100,3 +102,5 @@ export const Login = () => {
     </div>
   );
 };
+
+export default Login;

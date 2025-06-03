@@ -11,172 +11,304 @@ import { EntitySchema } from "./entity/types";
 import { dbType, Sql } from "./entity/sql";
 import { MAIN_GUID, MAIN_ID, MAIN_TABLE_ALIAS } from "./knex";
 import { hashPassword } from "./entity/utils";
+import { v5 } from "uuid";
 
 import { build } from "esbuild";
-import { Children } from "react";
+import { PageflowType } from "../types/share";
+const dirname = __dirname;
 
-// export class Pageflow {
-//   db: dbType;
-//   dbCore: Knex<any, unknown[]>;
-//   path: string;
-//   definitions: Record<
-//     string,
-//     Record<string, Record<string, Record<string, pageflowType>>>
-//   > = {};
-//   eventsOnEntities: EventEmitter;
-//   schema: EntitySchema = {};
-//   startWorkflow?: ({ table, data }: { table: string; data: any }) => void;
-//   constructor({
-//     db,
-//     eventsOnEntities,
-//   }: {
-//     db: Knex<any, unknown[]>;
-//     eventsOnEntities: EventEmitter;
-//   }) {
-//     this.eventsOnEntities = eventsOnEntities;
-//     this.db = (table: string) => db(table).setUser({ id: 1 });
-//     this.dbCore = db;
+export class Pageflow {
+  db: dbType;
+  dbCore: Knex<any, unknown[]>;
+  path: string;
+  definitions: Record<
+    string,
+    Record<string, Record<string, Record<string, PageflowType>>>
+  > = {};
+  schema: EntitySchema = {};
 
-//     this.registerTriggers(db);
-//     this.startWorkflow = undefined;
-//   }
+  linkinqLibInstalled = this.isLinkinqInstalled();
+  PAGES_PATH = "./client/pages/";
+  DNS_NAMESPACE = "6ba7b810-9dad-11d1-80b4-00c04fd430c8";
 
-//   get() {
-//     return this.definitions;
-//   }
-
-//     init = async (
-//       schema: EntitySchema,
-//       initTriggers: TriggerItemInternalType[]
-//     ) => {
-//       this.schema = schema;
-
-//       const dbTriggers: TriggerItemInternalType[] = await this.db("triggers")
-//         .setUser({ id: 1 })
-//         .select("*");
-
-//       const registeredGuids = [];
-//       // Projdu a pridam vse z DB
-//       for (const trigger of dbTriggers) {
-//         this.prepareDefinition(trigger);
-//         //
-//         trigger.code = new Function("return " + trigger.code)();
-
-//         this.definitions[trigger.type][trigger.method][trigger.entity][
-//           trigger.guid
-//         ] = trigger;
-
-//         registeredGuids.push(trigger.guid);
-//       }
-
-//       for (const trigger of initTriggers) {
-//         this.prepareDefinition(trigger);
-//         const dbTrigger: any =
-//           this.definitions[trigger.type][trigger.method][trigger.entity][
-//             trigger.guid
-//           ];
-
-//         const codeString = trigger.code.toString();
-//         if (dbTrigger) {
-//           //// trigger uz v DB existuje
-//           if (
-//             trigger.updatetime.toMillis() >
-//             DateTime.fromJSDate(dbTrigger.updatetime).toMillis()
-//           ) {
-//             await this.db("triggers")
-//               .setUser({ id: 1 })
-//               .where({ guid: trigger.guid })
-//               .update({ ...trigger, code: codeString });
-//             this.definitions[trigger.type][trigger.method][trigger.entity][
-//               trigger.guid
-//             ] = trigger;
-//           }
-//         } else {
-//           // trigger je novy
-//           this.definitions[trigger.type][trigger.method][trigger.entity][
-//             trigger.guid
-//           ] = trigger;
-//           await this.db("triggers")
-//             .setUser({ id: 1 })
-//             .insert({ ...trigger, code: codeString });
-//           registeredGuids.push(trigger.guid);
-//         }
-//       }
-
-//       console.log("this.definitions", this.definitions);
-//     };
-
-// }
-function prepareRoutes(routes, isPublic) {
-  const r = { ...routes };
-  if (!isPublic) {
-    delete r.public;
+  constructor({ db }: { db: Knex<any, unknown[]> }) {
+    this.db = (table: string) => db(table).setUser({ id: 1 });
+    this.dbCore = db;
   }
-  return _.mapValues(r, (route, key) => {
-    if (typeof route === "string") {
-      route = { componentPath: route };
+
+  get() {
+    return this.definitions;
+  }
+
+  isLinkinqInstalled() {
+    try {
+      // require.resolve("@physter/linkinq");
+      const res = fs.existsSync(
+        path.join(process.cwd(), "node_modules", "@physter/linkinq")
+      );
+      return res;
+      // return true;
+    } catch (err) {
+      return false;
     }
-    return {
-      ...route,
-      componentPath: route.componentPath
-        ? route.componentPath.replace(/\/index\.tsx$/i, "")
+  }
+
+  loadFiles(dir: any) {
+    let result: PageflowType = {};
+    const entries = fs.readdirSync(dir.path, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(dir.path, entry.name);
+      const indexFile = path.join(fullPath, "index.tsx");
+      const key = entry.name;
+      const isPublic = dir.urlPath.indexOf("public") > 0 ? true : false;
+      const urlPath = dir.urlPath;
+
+      if (fs.existsSync(indexFile)) {
+        const rel2 = path.relative(dir.dir, fullPath);
+        let rel = rel2.replace(/\\/g, "/");
+        rel = rel.endsWith("/") ? rel : rel + "/";
+
+        result[urlPath + "/" + key] = {
+          componentPath: rel,
+          source: dir.source,
+          urlPath: urlPath + "/" + key,
+          isPublic: isPublic,
+        };
+      }
+
+      if (entry.isDirectory()) {
+        const children = this.loadFiles({
+          path: fullPath,
+          source: dir.source,
+          dir: dir.dir,
+          urlPath: urlPath + "/" + key,
+        });
+
+        if (_.keys(children).length > 0) {
+          result = { ...result, ...children };
+        }
+      }
+    }
+
+    return result;
+  }
+
+  inheritKeys(routes) {
+    const keysToInherit = ["sidebar"];
+    const parentDataMap = {};
+    const updatedRoutes = {};
+
+    const sortedKeys = Object.keys(routes)
+      .sort()
+      .reduce((acc, key) => {
+        acc[key] = routes[key];
+        return acc;
+      }, {});
+
+    for (const key in sortedKeys) {
+      const route = { ...sortedKeys[key] };
+
+      // Ulož si klíče, které daná cesta má — použijeme jako možné rodiče
+      const inheritedData = {};
+      for (const k of keysToInherit) {
+        if (route[k] !== undefined) {
+          inheritedData[k] = route[k];
+        }
+      }
+      if (Object.keys(inheritedData).length > 0) {
+        parentDataMap[key] = inheritedData;
+      }
+
+      // Najdi nejbližšího předka, který má nějaké hodnoty k dědění
+      const parentKey = Object.keys(parentDataMap)
+        .filter((k) => key.startsWith(k) && k !== key)
+        .sort((a, b) => b.length - a.length)[0];
+
+      if (parentKey) {
+        for (const k of keysToInherit) {
+          if (
+            route[k] === undefined &&
+            parentDataMap[parentKey][k] !== undefined
+          ) {
+            route[k] = parentDataMap[parentKey][k];
+          }
+        }
+      }
+
+      updatedRoutes[key] = route;
+    }
+
+    return updatedRoutes;
+  }
+
+  init = async ({
+    schema,
+    pageflow,
+  }: {
+    schema: EntitySchema;
+    pageflow: PageflowType;
+  }) => {
+    this.schema = schema;
+    const folders = [
+      {
+        source: "linkinq",
+        path: path.join(__dirname, `../`, this.PAGES_PATH),
+        dir: path.join(__dirname, `../`),
+        urlPath: "",
+      },
+    ];
+    if (this.linkinqLibInstalled) {
+      folders.push({
+        source: "app",
+        path: path.join(process.cwd(), "/src/", this.PAGES_PATH),
+        dir: path.join(process.cwd(), "/src/"),
+        urlPath: "",
+      });
+    }
+
+    let initPageflow = {};
+    folders.map((f) => {
+      initPageflow = { ...initPageflow, ...this.loadFiles(f) };
+    });
+
+    for (const pfKey in pageflow) {
+      pageflow[pfKey].isPublic = pfKey.indexOf("public") > -1;
+      pageflow[pfKey].urlPath = pfKey;
+    }
+    initPageflow = _.merge(initPageflow, pageflow);
+
+    const initPageflowSorted = this.inheritKeys(initPageflow);
+
+    const dbPageflow: any[] = await this.db("pageflow")
+      .setUser({ id: 1 })
+      .select("*");
+
+    const existsGuids = [];
+    for (const pfKey in initPageflowSorted) {
+      const pf = initPageflowSorted[pfKey];
+
+      const uuid = v5(pfKey, this.DNS_NAMESPACE);
+      const dbPf = _.find(dbPageflow, { guid: uuid });
+
+      const data = {
+        caption: pf.urlPath,
+        componentPath: pf.componentPath,
+        source: pf.source,
+        isPublic: pf.isPublic,
+        to: pf.to,
+        noLayout: pf.noLayout,
+        sidebar: pf.sidebar,
+      };
+      if (dbPf) {
+        const t: any[] = await this.db("pageflow")
+          .setUser({ id: 1 })
+          .where({ guid: uuid })
+          .update(data);
+
+        if (t.length > 0) {
+          existsGuids.push(uuid);
+        }
+      } else {
+        const t2 = await this.db("pageflow")
+          .setUser({ id: 1 })
+          .insert({
+            ...data,
+            guid: uuid,
+          });
+        existsGuids.push(uuid);
+      }
+    }
+    const x = await this.db("pageflow")
+      .setUser({ id: 1 })
+      .del()
+      .whereNotIn("guid", existsGuids);
+  };
+
+  getRoutes(routes) {
+    return routes.map((r) => ({
+      path: r.caption.replace("_public/", "").replace(/\[(\w+)\]/g, ":$1"),
+      componentPath: r.componentPath
+        ? r.componentPath.replace("client/", "./")
         : null,
-      path: route.path ? `${route.path}` : `${key}`,
-      isPublic: isPublic,
-      children: route.children ? prepareRoutes(route.children, isPublic) : null,
-    };
-  });
-}
+      source: r.source,
+      noLayout: r.noLayout,
+      to: r.to,
+      sidebar: r.sidebar,
+    }));
+  }
+  pageflowRouter(): Router {
+    const router: Router = express.Router();
 
-function pageflowRouter(pageflow: any): Router {
-  const router: Router = express.Router();
+    router.get("/public", async (req: Request, res: Response) => {
+      const routes: any[] = await this.db("pageflow")
+        .setUser({ id: 1 })
+        .select([
+          "caption",
+          "componentPath",
+          "source",
+          "noLayout",
+          "to",
+          "sidebar",
+        ])
+        .where({ isPublic: true })
+        .orderBy("caption", "desc");
 
-  //
-  router.get("/public", (req: Request, res: Response) => {
-    res.json(prepareRoutes(pageflow.public, true));
-  });
+      res.json(this.getRoutes(routes));
+    });
 
-  router.get("/complete", authenticate, (req: Request, res: Response) => {
-    const routes = {
-      ...prepareRoutes(pageflow.public, true),
-      ...prepareRoutes(pageflow, false),
-    };
+    router.get(
+      "/complete",
+      authenticate,
+      async (req: Request, res: Response) => {
+        const routes: any[] = await this.db("pageflow")
+          .setUser({ id: 1 })
+          .select([
+            "caption",
+            "componentPath",
+            "source",
+            "noLayout",
+            "to",
+            "sidebar",
+          ])
+          .whereNot({ isPublic: true })
+          .orderBy("caption", "desc");
 
-    res.json(routes);
-  });
+        res.json(this.getRoutes(routes));
+      }
+    );
 
-  router.get(
-    "/dynamicComponent",
-    authenticate,
-    async (req: Request, res: Response) => {
-      const code = `
+    router.get(
+      "/dynamicComponent",
+      authenticate,
+      async (req: Request, res: Response) => {
+        const code = `
             import React, { useEffect, useState } from "react";
             export default function NewComponent() {
             return <div style={{ color: 'red' }}>Dynamicky vložená komponenta!</div>;
             }
         `;
-      const name = "xxx";
-      const inputFile = path.join("./dynamicComponent/source", `${name}.tsx`);
-      const outFile = path.join("dynamicComponent", "build", `${name}.js`);
+        const name = "xxx";
+        const inputFile = path.join("./dynamicComponent/source", `${name}.tsx`);
+        const outFile = path.join("dynamicComponent", "build", `${name}.js`);
 
-      await fs.writeFileSync(inputFile, code);
+        await fs.writeFileSync(inputFile, code);
 
-      await build({
-        entryPoints: [inputFile],
-        outfile: outFile,
-        bundle: true,
-        format: "esm",
-        platform: "browser",
-        jsx: "transform",
-        target: ["esnext"],
-      });
-      res.send({ status: "ok", path: `/dynamic/${name}.js` });
-    }
-  );
+        await build({
+          entryPoints: [inputFile],
+          outfile: outFile,
+          bundle: true,
+          format: "esm",
+          platform: "browser",
+          jsx: "transform",
+          target: ["esnext"],
+        });
+        res.send({ status: "ok", path: `/dynamic/${name}.js` });
+      }
+    );
 
-  router.use("/dynamic", express.static("dynamicComponent/build"));
+    router.use("/dynamic", express.static("dynamicComponent/build"));
 
-  return router;
+    return router;
+  }
 }
-
-export default pageflowRouter;

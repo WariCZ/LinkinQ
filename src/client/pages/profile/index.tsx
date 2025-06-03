@@ -1,9 +1,9 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import useStore from "../../../../src/client/store";
-import { useUserConfigurations } from "../../../../src/client/hooks/useUserConfigurations";
+import useStore from "../../store";
+import { useUserConfigurations } from "../../hooks/useUserConfigurations";
 import { Button } from "flowbite-react";
-import { AppSelect } from "../../../../src/client/components/common/AppSelect";
+import { AppSelect } from "../../components/common/AppSelect";
 
 const dateFormatOptions = [
   { value: "dd.MM.yyyy", label: "dd.MM.yyyy" },
@@ -15,7 +15,7 @@ const dateFormatOptions = [
   { value: "MM/dd/yyyy HH:mm", label: "MM/dd/yyyy HH:mm" },
 ];
 
-export const Profile = () => {
+const Profile = () => {
   const { i18n } = useTranslation();
   const userConfigurations = useStore((state) => state.userConfigurations);
   const profileSettings =
@@ -93,3 +93,5 @@ export const Profile = () => {
     </div>
   );
 };
+
+export default Profile;

@@ -14,7 +14,11 @@ export const HaveRole: React.FC<HaveRoleProps> = ({
 }) => {
   const user = useStore((state) => state.user);
 
-  const hasAccess = roles.some((role) => user.roles?.includes(role));
+  if (user) {
+    const hasAccess = roles.some((role) => user.roles?.includes(role));
 
-  return hasAccess ? <>{children}</> : <>{fallback}</>;
+    return hasAccess ? <>{children}</> : <>{fallback}</>;
+  } else {
+    return <>{fallback}</>;
+  }
 };

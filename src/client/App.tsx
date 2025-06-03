@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 
 import { generateRoutes } from "./routes";
 
-const App: React.FC = () => {
+const App = ({ pages }: any) => {
   const { i18n } = useTranslation();
   const user = useStore((state) => state.user);
   const loading = useStore((state) => state.loading);
@@ -57,7 +57,7 @@ const App: React.FC = () => {
           }
         >
           <Routes>
-            {generateRoutes({ user, pageflow: pageflow })}
+            {generateRoutes({ user, pageflow: pageflow, pages })}
             <Route
               key="not-found"
               path="*"

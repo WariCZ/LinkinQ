@@ -20,6 +20,7 @@ import logger from "../logger";
 import EventEmitter from "events";
 import { Sql } from "./sql";
 import { TriggerItemInternalType, Triggers } from "./triggers";
+import { Pageflow } from "../pageflow";
 import { debug } from "console";
 import { console } from "inspector";
 
@@ -30,6 +31,7 @@ export class Entity {
   schema: EntitySchema = {};
   eventsOnEntities: EventEmitter;
   triggers: Triggers;
+  pageflow: Pageflow;
 
   constructor() {
     this.db = knexDB();
@@ -37,6 +39,9 @@ export class Entity {
     this.triggers = new Triggers({
       db: this.db,
       eventsOnEntities: this.eventsOnEntities,
+    });
+    this.pageflow = new Pageflow({
+      db: this.db,
     });
   }
 
@@ -768,9 +773,7 @@ export class Entity {
 
     await this.triggers.initTriggers(this.schema, triggers);
 
-    await this.triggers.initTriggers(this.schema, triggers);
-
-    await this.createData({
+    await await this.createData({
       data: defaultData,
       sqlAdmin,
       updateData: updateData,
@@ -788,6 +791,11 @@ export class Entity {
 
     await wait(2000);
 
-    return { schema: this.schema, sqlAdmin, Sql, db: this.db };
+    return {
+      schema: this.schema,
+      sqlAdmin,
+      Sql,
+      db: this.db,
+    };
   }
 }

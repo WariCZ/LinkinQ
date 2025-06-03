@@ -31,7 +31,7 @@ import { loadConfigurations } from "../lib/configurations";
 import fs from "fs";
 import path from "path";
 import _ from "lodash";
-import pageflowRouter from "../lib/pageflow";
+import { Pageflow } from "../lib/pageflow";
 
 const dirname = __dirname;
 
@@ -49,6 +49,7 @@ export class Linkinq {
   packageJson;
   viteRunning: boolean;
   ad: Adapters;
+  pageflow: Pageflow;
 
   constructor(config?: LinkinqConfig) {
     this.viteRunning = false;
@@ -69,6 +70,10 @@ export class Linkinq {
       eventsOnEntities: this.entity.eventsOnEntities,
     });
 
+    this.pageflow = new Pageflow({
+      db: this.entity.db,
+    });
+
     this.ad.registerAdapter({ adapter: mailAdapter });
 
     console.log("After start adapter");
@@ -81,6 +86,11 @@ export class Linkinq {
       const { schema, sqlAdmin, db } = await this.entity.prepareSchema(
         configurations
       );
+
+      this.pageflow.init({
+        schema,
+        pageflow: configurations.pageflow,
+      });
 
       this.ad.loadAdapters(schema);
       const wflogger = new Logger({ toConsole: true });
@@ -280,7 +290,7 @@ export class Linkinq {
     //   console.log("xml", xml);
     // });
     app.use("/", authRoutes({ schema, sqlAdmin }));
-    app.use("/pageflow", pageflowRouter(configurations.pageflow));
+    app.use("/pageflow", this.pageflow.pageflowRouter());
     app.use("/api", authenticate, this.entity.config());
     app.use("/bpmnapi", authenticate, this.bpmnRoutes.config());
     app.use("/adapters", authenticate, this.ad.configRoutes());

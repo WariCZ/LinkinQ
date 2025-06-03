@@ -10,11 +10,11 @@ import { useTranslation } from "react-i18next";
 import { TaskDetail } from "./components/TaskDetail";
 import Table from "../../components/Table";
 import useDataDetail from "../../hooks/useDataDetail";
-import ButtonExecuteBpmn from "../../../../src/client/components/ButtonExecuteBpmn";
+import ButtonExecuteBpmn from "../../components/ButtonExecuteBpmn";
 
 const entity = "tasks";
 
-export const Tasks = () => {
+const Tasks = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const { openModal } = useModalStore();
@@ -205,3 +205,5 @@ export const Tasks = () => {
     </div>
   );
 };
+
+export default Tasks;

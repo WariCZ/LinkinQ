@@ -15,10 +15,28 @@ const entityFields: EntitySchema = {
         description: "Component path",
         isRequired: false,
       },
+      noLayout: {
+        type: "boolean",
+        label: "No layout",
+        description: "No layout",
+        isRequired: false,
+      },
       isPublic: {
         type: "boolean",
         label: "Is public",
         description: "Is public",
+        isRequired: false,
+      },
+      source: {
+        type: "text",
+        label: "Source",
+        description: "Source",
+        isRequired: false,
+      },
+      sidebar: {
+        type: "text",
+        label: "Sidebar",
+        description: "Sidebar",
         isRequired: false,
       },
     },
