@@ -5,6 +5,11 @@ import useStore from "../../../store";
 import { Button, Label, TextInput } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import logo from "../../../static/logo.png";
+import { PageflowItemType } from "../../../../types/share";
+
+export const configuration: PageflowItemType = {
+  noLayout: true,
+};
 
 const Login = () => {
   const setUser = useStore((state) => state.setUser);

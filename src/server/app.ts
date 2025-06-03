@@ -89,7 +89,6 @@ export class Linkinq {
 
       this.pageflow.init({
         schema,
-        pageflow: configurations.pageflow,
       });
 
       this.ad.loadAdapters(schema);

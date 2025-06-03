@@ -15,6 +15,7 @@ import { v5 } from "uuid";
 
 import { build } from "esbuild";
 import { PageflowType } from "../types/share";
+import { extractPageflowFile } from "./utils/extractPageflowFile";
 const dirname = __dirname;
 
 export class Pageflow {
@@ -53,28 +54,64 @@ export class Pageflow {
     }
   }
 
+  getPageflowData = ({ indexFile, fullPath, dir, urlPath }) => {
+    const isPublic = fullPath.indexOf("_public") > 0 ? true : false;
+    const pageflowFile = extractPageflowFile(indexFile);
+    // console.log(key, pageflowFile);
+
+    if (pageflowFile.hasDefaultExport) {
+      const rel2 = path.relative(dir.dir, fullPath);
+      let rel = rel2.replace(/\\/g, "/");
+      rel = rel.endsWith("/") ? rel : rel + "/";
+
+      // result[urlPath + "/" + key] =
+      return {
+        componentPath: rel,
+        source: dir.source,
+        urlPath: urlPath, //urlPath + "/" + key,
+        isPublic: isPublic,
+        ...(pageflowFile.configuration || {}),
+      };
+    } else {
+      if (pageflowFile.configuration) {
+        // result[urlPath + "/" + key] =
+        return {
+          source: dir.source,
+          urlPath: urlPath, //urlPath + "/" + key,
+          isPublic: isPublic,
+          ...(pageflowFile.configuration || {}),
+        };
+      }
+    }
+  };
+
   loadFiles(dir: any) {
     let result: PageflowType = {};
+
+    if (fs.existsSync(path.join(dir.path, "index.tsx")) && !dir.urlPath) {
+      result[dir.urlPath + "/"] = this.getPageflowData({
+        dir,
+        fullPath: dir.path,
+        indexFile: path.join(dir.path, "index.tsx"),
+        urlPath: dir.urlPath + "/",
+      });
+    }
+
     const entries = fs.readdirSync(dir.path, { withFileTypes: true });
 
     for (const entry of entries) {
       const fullPath = path.join(dir.path, entry.name);
       const indexFile = path.join(fullPath, "index.tsx");
       const key = entry.name;
-      const isPublic = dir.urlPath.indexOf("public") > 0 ? true : false;
       const urlPath = dir.urlPath;
 
       if (fs.existsSync(indexFile)) {
-        const rel2 = path.relative(dir.dir, fullPath);
-        let rel = rel2.replace(/\\/g, "/");
-        rel = rel.endsWith("/") ? rel : rel + "/";
-
-        result[urlPath + "/" + key] = {
-          componentPath: rel,
-          source: dir.source,
+        result[urlPath + "/" + key] = this.getPageflowData({
+          dir,
+          fullPath,
+          indexFile,
           urlPath: urlPath + "/" + key,
-          isPublic: isPublic,
-        };
+        });
       }
 
       if (entry.isDirectory()) {
@@ -142,13 +179,7 @@ export class Pageflow {
     return updatedRoutes;
   }
 
-  init = async ({
-    schema,
-    pageflow,
-  }: {
-    schema: EntitySchema;
-    pageflow: PageflowType;
-  }) => {
+  init = async ({ schema }: { schema: EntitySchema }) => {
     this.schema = schema;
     const folders = [
       {
@@ -172,11 +203,11 @@ export class Pageflow {
       initPageflow = { ...initPageflow, ...this.loadFiles(f) };
     });
 
-    for (const pfKey in pageflow) {
-      pageflow[pfKey].isPublic = pfKey.indexOf("public") > -1;
-      pageflow[pfKey].urlPath = pfKey;
-    }
-    initPageflow = _.merge(initPageflow, pageflow);
+    // for (const pfKey in pageflow) {
+    //   pageflow[pfKey].isPublic = pfKey.indexOf("public") > -1;
+    //   pageflow[pfKey].urlPath = pfKey;
+    // }
+    // initPageflow = _.merge(initPageflow, pageflow);
 
     const initPageflowSorted = this.inheritKeys(initPageflow);
 
@@ -192,6 +223,7 @@ export class Pageflow {
       const dbPf = _.find(dbPageflow, { guid: uuid });
 
       const data = {
+        kind: pf.entity ? 2 : 1,
         caption: pf.urlPath,
         componentPath: pf.componentPath,
         source: pf.source,
@@ -227,7 +259,7 @@ export class Pageflow {
 
   getRoutes(routes) {
     return routes.map((r) => ({
-      path: r.caption.replace("_public/", "").replace(/\[(\w+)\]/g, ":$1"),
+      path: r.caption.replace("/_public", "").replace(/\[(\w+)\]/g, ":$1"),
       componentPath: r.componentPath
         ? r.componentPath.replace("client/", "./")
         : null,

@@ -7,7 +7,6 @@ export type PageflowItemType = {
   to?: string;
   componentPath?: string;
   source?: string;
-  children?: PageflowRecord;
   noLayout?: boolean;
   sidebar?: string;
 };
