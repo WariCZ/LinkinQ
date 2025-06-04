@@ -89,6 +89,7 @@ export class Linkinq {
 
       this.pageflow.init({
         schema,
+        sqlAdmin,
       });
 
       this.ad.loadAdapters(schema);

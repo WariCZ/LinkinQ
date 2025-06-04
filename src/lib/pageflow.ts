@@ -21,6 +21,7 @@ const dirname = __dirname;
 export class Pageflow {
   db: dbType;
   dbCore: Knex<any, unknown[]>;
+  sqlAdmin: Sql;
   path: string;
   definitions: Record<
     string,
@@ -179,8 +180,16 @@ export class Pageflow {
     return updatedRoutes;
   }
 
-  init = async ({ schema }: { schema: EntitySchema }) => {
+  init = async ({
+    schema,
+    sqlAdmin,
+  }: {
+    schema: EntitySchema;
+    sqlAdmin: Sql;
+  }) => {
     this.schema = schema;
+    this.sqlAdmin = sqlAdmin;
+
     const folders = [
       {
         source: "linkinq",
@@ -231,6 +240,8 @@ export class Pageflow {
         to: pf.to,
         noLayout: pf.noLayout,
         sidebar: pf.sidebar,
+        entity: pf.entity,
+        filter: pf.filter,
       };
       if (dbPf) {
         const t: any[] = await this.db("pageflow")
@@ -258,33 +269,52 @@ export class Pageflow {
   };
 
   getRoutes(routes) {
-    return routes.map((r) => ({
-      path: r.caption.replace("/_public", "").replace(/\[(\w+)\]/g, ":$1"),
-      componentPath: r.componentPath
-        ? r.componentPath.replace("client/", "./")
-        : null,
-      source: r.source,
-      noLayout: r.noLayout,
-      to: r.to,
-      sidebar: r.sidebar,
-    }));
+    return routes.map((r) => {
+      if (r.kind == 1)
+        return {
+          path: r.caption.replace("/_public", "").replace(/\[(\w+)\]/g, ":$1"),
+          componentPath: r.componentPath
+            ? r.componentPath.replace("client/", "./")
+            : null,
+          source: r.source,
+          noLayout: r.noLayout,
+          to: r.to,
+          sidebar: r.sidebar,
+          kind: r.kind,
+        };
+
+      return {
+        source: r.source,
+        noLayout: r.noLayout,
+        sidebar: r.sidebar,
+        entity: r.entity,
+        filter: r.filter,
+        kind: r.kind,
+      };
+    });
   }
   pageflowRouter(): Router {
     const router: Router = express.Router();
 
     router.get("/public", async (req: Request, res: Response) => {
-      const routes: any[] = await this.db("pageflow")
-        .setUser({ id: 1 })
-        .select([
+      const routes = await this.sqlAdmin.select({
+        entity: "pageflow",
+        fields: [
           "caption",
           "componentPath",
           "source",
           "noLayout",
           "to",
           "sidebar",
-        ])
-        .where({ isPublic: true })
-        .orderBy("caption", "desc");
+          "entity",
+          "filter",
+          "kind",
+        ],
+        where: {
+          isPublic: true,
+        },
+        orderBy: ["caption-"],
+      });
 
       res.json(this.getRoutes(routes));
     });
@@ -293,18 +323,24 @@ export class Pageflow {
       "/complete",
       authenticate,
       async (req: Request, res: Response) => {
-        const routes: any[] = await this.db("pageflow")
-          .setUser({ id: 1 })
-          .select([
+        const routes = await this.sqlAdmin.select({
+          entity: "pageflow",
+          fields: [
             "caption",
             "componentPath",
             "source",
             "noLayout",
             "to",
             "sidebar",
-          ])
-          .whereNot({ isPublic: true })
-          .orderBy("caption", "desc");
+            "entity",
+            "filter",
+            "kind",
+          ],
+          where: {
+            "$neq;isPublic": true,
+          },
+          orderBy: ["caption-"],
+        });
 
         res.json(this.getRoutes(routes));
       }

@@ -1,17 +1,17 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useStore from "../../../store";
 
 const EntitaPage = () => {
   const { entita, guid } = useParams();
   const navigate = useNavigate();
-  useStore();
+  const schema = useStore((state) => state.schema);
+  const pageflow = useStore((state) => state.pageflow);
+  const [DynamicComponent, setDynamicComponent] = useState(null);
+  debugger;
 
   useEffect(() => {
-    // Zde ověř, zda entita existuje
-    // const exists = checkEntitaExists(entita); // Nahraď vlastním ověřením
-    const exists = true;
-    if (!exists) {
+    if (!schema[entita]) {
       navigate("/", { replace: true });
     }
   }, [entita, navigate]);

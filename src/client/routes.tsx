@@ -78,7 +78,9 @@ function generateRoutes({
   );
 
   pageflow.map((pf) => {
-    const { path, componentPath, noLayout, to, sidebar } = pf as any;
+    const { path, componentPath, noLayout, to, sidebar, kind } = pf as any;
+
+    if (kind != 1) return;
 
     if (to) {
       routes.push(

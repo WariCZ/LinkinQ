@@ -3,6 +3,7 @@ import axios from "axios";
 import { User } from "../../lib/auth";
 import { EntitySchema, FieldType } from "../../lib/entity/types";
 import { AppToastType } from "../components/Toast";
+import _ from "lodash";
 
 type GuiEntitySchema = Record<string, FieldType>;
 interface StoreState {
@@ -32,6 +33,7 @@ interface StoreState {
   getAppConfigurations: () => Promise<void>;
 
   pageflow: any;
+  pageflowEntity: any;
   getPageflow: () => Promise<void>;
   getPublicPageflow: () => Promise<void>;
 }
@@ -39,6 +41,7 @@ interface StoreState {
 const useStore = create<StoreState>((set, get) => ({
   schema: {},
   pageflow: {},
+  pageflowEntity: {},
   user: null,
   roles: [],
   loading: true,
@@ -111,6 +114,12 @@ const useStore = create<StoreState>((set, get) => ({
       });
       if (response.data) {
         set({ pageflow: response.data });
+        const x = _.find(response.data, { kind: 2 });
+        debugger;
+        for (const ent in response.data) {
+          debugger;
+        }
+        set({ pageflowEntity: response.data });
       } else {
         set({ pageflow: {} });
       }
