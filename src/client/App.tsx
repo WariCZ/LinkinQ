@@ -11,16 +11,22 @@ import { Flowbite, Spinner } from "flowbite-react";
 import { customTheme } from "./flowbite";
 
 import { useTranslation } from "react-i18next";
-
 import { generateRoutes } from "./routes";
 
-const App = ({ pages }: any) => {
+const App = ({ pages, localizations }: any) => {
   const { i18n } = useTranslation();
   const user = useStore((state) => state.user);
   const loading = useStore((state) => state.loading);
   const firstLoad = useStore((state) => state.firstLoad);
   const userConfigurations = useStore((state) => state.userConfigurations);
   const pageflow = useStore((state) => state.pageflow);
+  const setPages = useStore((state) => state.setPages);
+
+  const pagesImport = {
+    // @ts-expect-error
+    ...import.meta.glob("./pages/**/index.{jsx,tsx}"),
+    ...pages,
+  };
 
   useEffect(() => {
     firstLoad();
@@ -35,6 +41,8 @@ const App = ({ pages }: any) => {
       ) {
         i18n.changeLanguage(profileSettings.language);
       }
+
+      setPages(pagesImport);
     }
   }, [loading, userConfigurations, i18n]);
 
@@ -57,7 +65,7 @@ const App = ({ pages }: any) => {
           }
         >
           <Routes>
-            {generateRoutes({ user, pageflow: pageflow, pages })}
+            {generateRoutes({ user, pageflow: pageflow, pages: pagesImport })}
             <Route
               key="not-found"
               path="*"

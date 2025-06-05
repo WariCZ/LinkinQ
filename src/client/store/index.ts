@@ -36,9 +36,13 @@ interface StoreState {
   pageflowEntity: any;
   getPageflow: () => Promise<void>;
   getPublicPageflow: () => Promise<void>;
+
+  pages: any;
+  setPages: (pages: any) => void;
 }
 
 const useStore = create<StoreState>((set, get) => ({
+  pages: {},
   schema: {},
   pageflow: {},
   pageflowEntity: {},
@@ -48,6 +52,9 @@ const useStore = create<StoreState>((set, get) => ({
   sidebar: false,
   userConfigurations: {},
   appConfigurations: {},
+  setPages(pages) {
+    set({ pages: pages });
+  },
   setUser: (user) => set({ user }),
   logout: async () => {
     await get().getPublicPageflow();
@@ -114,17 +121,23 @@ const useStore = create<StoreState>((set, get) => ({
       });
       if (response.data) {
         set({ pageflow: response.data });
-        const x = _.find(response.data, { kind: 2 });
-        debugger;
-        for (const ent in response.data) {
-          debugger;
-        }
-        set({ pageflowEntity: response.data });
+
+        const pageflowEntity = _.filter(response.data, { kind: "2" }).map(
+          (d) => {
+            return {
+              ...d,
+              filterFields: _.keys(d.filter),
+            };
+          }
+        );
+        set({ pageflowEntity: pageflowEntity });
       } else {
         set({ pageflow: {} });
+        set({ pageflowEntity: {} });
       }
     } catch (error) {
       set({ pageflow: {} });
+      set({ pageflowEntity: {} });
     } finally {
       set({ loading: false });
     }

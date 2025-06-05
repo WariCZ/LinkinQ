@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useStore from "../../store";
 
-const EntitaPage = () => {
+const Page = () => {
   const { entita } = useParams();
   const navigate = useNavigate();
   const schema = useStore((state) => state.schema);
@@ -16,4 +16,4 @@ const EntitaPage = () => {
   return <div>Entita: {entita}</div>;
 };
 
-export default EntitaPage;
+export default Page;

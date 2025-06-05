@@ -1,3 +1,6 @@
 import { createLinkinqClient } from ".";
 
-createLinkinqClient();
+createLinkinqClient({
+  pages: {},
+  localizations: {},
+});

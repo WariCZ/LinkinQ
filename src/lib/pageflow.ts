@@ -284,6 +284,9 @@ export class Pageflow {
         };
 
       return {
+        componentPath: r.componentPath
+          ? r.componentPath.replace("client/", "./")
+          : null,
         source: r.source,
         noLayout: r.noLayout,
         sidebar: r.sidebar,
