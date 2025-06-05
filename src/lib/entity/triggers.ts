@@ -35,17 +35,17 @@ export class Triggers {
     string,
     Record<string, Record<string, Record<string, TriggerItemInternalType>>>
   > = {};
-  eventsOnEntities: EventEmitter;
+  eventsOnEntity: EventEmitter;
   schema: EntitySchema = {};
   startWorkflow?: ({ table, data }: { table: string; data: any }) => void;
   constructor({
     db,
-    eventsOnEntities,
+    eventsOnEntity,
   }: {
     db: Knex<any, unknown[]>;
-    eventsOnEntities: EventEmitter;
+    eventsOnEntity: EventEmitter;
   }) {
-    this.eventsOnEntities = eventsOnEntities;
+    this.eventsOnEntity = eventsOnEntity;
     this.db = (table: string) => db(table).setUser({ id: 1 });
     this.dbCore = db;
 
@@ -676,7 +676,7 @@ export class Triggers {
               }
             }
 
-            that.eventsOnEntities.emit("afterTrigger", {
+            that.eventsOnEntity.emit("afterTrigger", {
               afterData: afterDataDataItem,
               diffData: diffDataItem,
               beforeData: afterDataDataItem,

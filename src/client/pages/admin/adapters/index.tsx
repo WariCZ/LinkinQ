@@ -16,7 +16,7 @@ const Adapters = () => {
     undefined as { guid: string } | undefined
   );
   const [searchValue, setSearchValue] = useState("");
-  const [tableEntities, setTableEntities] = useState([] as string[]);
+  const [tableEntity, setTableEntity] = useState([] as string[]);
   const { openModal } = useModalStore();
 
   const [data, setData] = useDataTable(
@@ -28,12 +28,12 @@ const Adapters = () => {
   );
 
   useEffect(() => {
-    setTableEntities(entities);
+    setTableEntity(entities);
   }, [entities]);
 
   const searchEntity = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
-    setTableEntities(entities.filter((m) => m.indexOf(e.target.value) > -1));
+    setTableEntity(entities.filter((m) => m.indexOf(e.target.value) > -1));
   };
 
   return (
@@ -42,7 +42,7 @@ const Adapters = () => {
         <span className="font-bold">Adapters</span>
         {/* <HiRefresh
           className="inline-block mx-3 cursor-pointer"
-          // onClick={() => getEntities(true)}
+          // onClick={() => getEntity(true)}
         /> */}
       </div>
       <div className="flex items-start h-full">

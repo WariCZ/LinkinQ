@@ -29,16 +29,16 @@ export class Entity {
   MAIN_ID: string = "id";
   GUID_ID: string = "guid";
   schema: EntitySchema = {};
-  eventsOnEntities: EventEmitter;
+  eventsOnEntity: EventEmitter;
   triggers: Triggers;
   pageflow: Pageflow;
 
   constructor() {
     this.db = knexDB();
-    this.eventsOnEntities = new EventEmitter();
+    this.eventsOnEntity = new EventEmitter();
     this.triggers = new Triggers({
       db: this.db,
-      eventsOnEntities: this.eventsOnEntities,
+      eventsOnEntity: this.eventsOnEntity,
     });
     this.pageflow = new Pageflow({
       db: this.db,
@@ -564,7 +564,7 @@ export class Entity {
   }
 
   processDataObjects(input) {
-    const orderEntities = [
+    const orderEntity = [
       "users",
       "userroles",
       "lov",
@@ -583,7 +583,7 @@ export class Entity {
     const result = [];
 
     // Nejprve hodnoty podle poradi
-    for (const key of orderEntities) {
+    for (const key of orderEntity) {
       if (key in input) {
         result.push({ entity: key, data: input[key] });
       }
@@ -591,7 +591,7 @@ export class Entity {
 
     // Pak zbytek, který v poradi není
     for (const key in input) {
-      if (!orderEntities.includes(key)) {
+      if (!orderEntity.includes(key)) {
         result.push({ entity: key, data: input[key] });
       }
     }
@@ -723,7 +723,7 @@ export class Entity {
   }
 
   async prepareSchema(
-    { triggers, entities, defaultData, updateData }: any /*{
+    { triggers, entity, defaultData, updateData }: any /*{
     triggers: TriggerItemInternalType[];
     schemaDefinition: EntitySchema;
   }*/
@@ -738,9 +738,9 @@ export class Entity {
     });
     // this.registerTriggers();
 
-    // const schemaDefinition = defaultEntities();
+    // const schemaDefinition = defaultEntity();
 
-    const entityDef = addDefaultFields(entities);
+    const entityDef = addDefaultFields(entity);
 
     // Dohledani tabulek a slopupcu ktere jsou ve Schematu a pridam je do DB
     const actualDBSchema = await this.getTablesAndColumns(entityDef);
@@ -779,7 +779,7 @@ export class Entity {
       updateData: updateData,
     });
 
-    for (const tableName in entities) {
+    for (const tableName in entity) {
       if (fieldsAdd[tableName]?.foreignKeys) {
         await this.createForeignKeys({
           table: tableName,

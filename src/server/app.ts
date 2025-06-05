@@ -37,9 +37,9 @@ const dirname = __dirname;
 
 dotenv.config();
 
-type LinkinqPlugin = { triggers: any[]; processes: any[] };
+type LinkinqPlugin = {};
 
-type LinkinqConfig = { plugins: LinkinqPlugin[] };
+type LinkinqConfig = { modules: any[] };
 
 export class Linkinq {
   app: Express;
@@ -67,7 +67,7 @@ export class Linkinq {
     console.log("Before start adapter");
     this.ad = new Adapters({
       db: this.entity.db,
-      eventsOnEntities: this.entity.eventsOnEntities,
+      eventsOnEntity: this.entity.eventsOnEntity,
     });
 
     this.pageflow = new Pageflow({
@@ -79,7 +79,7 @@ export class Linkinq {
     console.log("After start adapter");
   }
 
-  async initApp() {
+  async initApp(modules) {
     try {
       const configurations = await loadConfigurations();
 

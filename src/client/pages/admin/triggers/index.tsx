@@ -62,9 +62,9 @@ const Triggers = () => {
     // Rekonstrukce stromu
     return Object.entries(tree).map(([type, methods]) => ({
       name: type,
-      children: Object.entries(methods).map(([method, entities]) => ({
+      children: Object.entries(methods).map(([method, entity]) => ({
         name: method,
-        children: Object.values(entities),
+        children: Object.values(entity),
       })),
     }));
   }

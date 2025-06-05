@@ -11,17 +11,17 @@ const Entity = () => {
   const schema = useStore((state) => state.schema);
   const entities: string[] = useMemo(() => Object.keys(schema), [schema]);
   const [searchValue, setSearchValue] = useState("");
-  const [tableEntities, setTableEntities] = useState([] as string[]);
+  const [tableEntity, setTableEntity] = useState([] as string[]);
   const [selectedEntity, setSelectedEntity] = useState(entities[0] || "");
   const { openModal } = useModalStore();
 
   useEffect(() => {
-    setTableEntities(entities);
+    setTableEntity(entities);
   }, [entities]);
 
   const searchEntity = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
-    setTableEntities(entities.filter((m) => m.indexOf(e.target.value) > -1));
+    setTableEntity(entities.filter((m) => m.indexOf(e.target.value) > -1));
   };
 
   return (
@@ -33,7 +33,7 @@ const Entity = () => {
         <div className="w-1/3 max-w-sm min-w-[240px] px-3 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
           <div className="pt-1 flex justify-between items-center my-1">
             <div>
-              <span className="font-bold pr-1">Entities</span>
+              <span className="font-bold pr-1">Entity</span>
               <span className="float-end">({entities.length})</span>
             </div>
             <AppButton
@@ -55,7 +55,7 @@ const Entity = () => {
           </div>
           <div>
             <ul>
-              {tableEntities.map((m) => (
+              {tableEntity.map((m) => (
                 <li
                   key={m}
                   onClick={() => setSelectedEntity(m)}

@@ -4,4 +4,5 @@ export { v4 as uuid } from "uuid";
 export { Linkinq } from "./app";
 export { EntitySchema } from "../lib/entity/types";
 
+export { loadConfigurations } from "../lib/configurations";
 export { flowbite };

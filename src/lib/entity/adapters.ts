@@ -10,24 +10,24 @@ import { CallActivity } from "bpmn-server";
 
 export class Adapters {
   db: Knex<any, unknown[]>;
-  eventsOnEntities: EventEmitter;
+  eventsOnEntity: EventEmitter;
   adapters: Record<string, any>;
   schema: EntitySchema;
   sqlAdmin: Sql;
 
   constructor({
     db,
-    eventsOnEntities,
+    eventsOnEntity,
   }: {
     db: Knex<any, unknown[]>;
-    eventsOnEntities: EventEmitter;
+    eventsOnEntity: EventEmitter;
   }) {
-    this.eventsOnEntities = eventsOnEntities;
+    this.eventsOnEntity = eventsOnEntity;
     this.db = db;
     this.adapters = {};
     this.sqlAdmin;
 
-    this.eventsOnEntities.on("afterTrigger", (msg) => {
+    this.eventsOnEntity.on("afterTrigger", (msg) => {
       const data = { ...msg.before, ...msg.beforeData };
       this.findNotifications({
         data,
