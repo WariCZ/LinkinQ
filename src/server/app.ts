@@ -42,6 +42,7 @@ type LinkinqPlugin = {};
 type LinkinqConfig = { modules: any[] };
 
 export class Linkinq {
+  modules: any[];
   app: Express;
   entity: EntityRoutes;
   bpmnRoutes: any;
@@ -52,6 +53,7 @@ export class Linkinq {
   pageflow: Pageflow;
 
   constructor(config?: LinkinqConfig) {
+    this.modules = config.modules || [];
     this.viteRunning = false;
     const configPath = dirname + "/../package.json";
     if (fs.existsSync(configPath)) {
@@ -79,9 +81,20 @@ export class Linkinq {
     console.log("After start adapter");
   }
 
-  async initApp(modules) {
+  arrayMerge(objValue, srcValue) {
+    if (Array.isArray(objValue) && srcValue) {
+      return objValue.concat(srcValue);
+    }
+  }
+
+  async initApp() {
     try {
-      const configurations = await loadConfigurations();
+      const modules = [];
+      for (const module of this.modules) {
+        const m = await module();
+        modules.push(m);
+      }
+      let configurations = await loadConfigurations(modules);
 
       const { schema, sqlAdmin, db } = await this.entity.prepareSchema(
         configurations
@@ -90,6 +103,7 @@ export class Linkinq {
       this.pageflow.init({
         schema,
         sqlAdmin,
+        modules,
       });
 
       this.ad.loadAdapters(schema);

@@ -1,4 +1,5 @@
 import i18n from "i18next";
+import _ from "lodash";
 import { initReactI18next } from "react-i18next";
 
 export const initLocalization = async ({ localizations }) => {
@@ -35,9 +36,8 @@ export const getNamespacedResources = async (
   const resources: Record<string, any> = {};
 
   for (const path in modules) {
-    debugger;
     const json = await modules[path]();
-    const cleanPath = path.replace(/^\/?i18n\/|\.json$/g, ""); // např. 'cs/common.json' → 'cs/common'
+    const cleanPath = path.replace(/(?:^|\/|.\/)i18n\/|\.json$/g, ""); // např. 'cs/common.json' → 'cs/common'
 
     const parts = cleanPath.split("/"); // např. ['cs', 'common'] nebo ['cs', 'dashboard', 'dashboard']
 
@@ -63,10 +63,11 @@ export const getNamespacedResources = async (
 
     const translationData = json.default ?? json;
 
-    resources[lang][namespace] = {
-      ...resources[lang][namespace],
-      ...translationData,
-    };
+    resources[lang][namespace] = _.merge(
+      {},
+      resources[lang][namespace],
+      translationData
+    );
   }
 
   return resources;

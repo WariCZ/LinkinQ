@@ -57,6 +57,7 @@ const Page = () => {
     if (!schema[entity]) {
       // debugger;
       navigate("/", { replace: true });
+      return;
     }
 
     const pageflows = _.filter(pageflowEntity, { entity: entity });

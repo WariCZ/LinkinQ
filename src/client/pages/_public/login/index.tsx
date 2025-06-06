@@ -36,7 +36,7 @@ const Login = () => {
       if (response.data.message === "Login successful") {
         await setUser(data);
         await getPageflow();
-        navigate("/admin/protected");
+        navigate("/");
       }
     } catch (error) {
       console.error("Login failed", error);

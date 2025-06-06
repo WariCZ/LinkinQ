@@ -183,9 +183,11 @@ export class Pageflow {
   init = async ({
     schema,
     sqlAdmin,
+    modules,
   }: {
     schema: EntitySchema;
     sqlAdmin: Sql;
+    modules: any[];
   }) => {
     this.schema = schema;
     this.sqlAdmin = sqlAdmin;
@@ -198,6 +200,16 @@ export class Pageflow {
         urlPath: "",
       },
     ];
+
+    modules?.map((m) => {
+      folders.push({
+        source: m.moduleName,
+        path: path.join(m.modulePath, "../", this.PAGES_PATH),
+        dir: path.join(m.modulePath, "../"),
+        urlPath: "",
+      });
+    });
+
     if (this.linkinqLibInstalled) {
       folders.push({
         source: "app",
@@ -211,12 +223,6 @@ export class Pageflow {
     folders.map((f) => {
       initPageflow = { ...initPageflow, ...this.loadFiles(f) };
     });
-
-    // for (const pfKey in pageflow) {
-    //   pageflow[pfKey].isPublic = pfKey.indexOf("public") > -1;
-    //   pageflow[pfKey].urlPath = pfKey;
-    // }
-    // initPageflow = _.merge(initPageflow, pageflow);
 
     const initPageflowSorted = this.inheritKeys(initPageflow);
 
