@@ -89,11 +89,14 @@ export class Pageflow {
   loadFiles(dir: any) {
     let result: PageflowType = {};
 
-    if (fs.existsSync(path.join(dir.path, "index.tsx")) && !dir.urlPath) {
+    const filename =
+      process.env.NODE_ENV == "production" ? "index.jsx" : "index.tsx";
+
+    if (fs.existsSync(path.join(dir.path, filename)) && !dir.urlPath) {
       result[dir.urlPath + "/"] = this.getPageflowData({
         dir,
         fullPath: dir.path,
-        indexFile: path.join(dir.path, "index.tsx"),
+        indexFile: path.join(dir.path, filename),
         urlPath: dir.urlPath + "/",
       });
     }
@@ -102,7 +105,7 @@ export class Pageflow {
 
     for (const entry of entries) {
       const fullPath = path.join(dir.path, entry.name);
-      const indexFile = path.join(fullPath, "index.tsx");
+      const indexFile = path.join(fullPath, filename);
       const key = entry.name;
       const urlPath = dir.urlPath;
 

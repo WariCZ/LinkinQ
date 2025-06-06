@@ -65,8 +65,8 @@ function generateRoutes({
 
   const pagesApp = Object.fromEntries(
     Object.entries(pages).map(([key, value]) => {
-      // Odstranit /index.tsx
-      const newKey = key.replace(/index\.tsx$/i, "");
+      // Odstranit /index.tsx | index.jsx
+      const newKey = key.replace(/index\.(t|j)sx$/i, "");
       return [newKey, value];
     })
   );

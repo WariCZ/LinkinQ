@@ -32,7 +32,7 @@ const Page = () => {
           _.isMatchWith(response.data[0], item.filter, customComparator)
         );
         const Component = lazy(async () => {
-          const page = pages[filtered[0].componentPath + "index.tsx"];
+          const page = pages[filtered[0].componentPath + "index.tsx"]; //TODO: jeste pro JSX
           if (!page)
             throw new Error(
               `Path "${filtered[0].componentPath}" not found in glob.`
