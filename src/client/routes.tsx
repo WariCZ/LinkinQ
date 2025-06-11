@@ -63,13 +63,6 @@ function generateRoutes({
 }): React.ReactNode[] {
   const routes: React.ReactNode[] = [];
 
-  const pagesApp = Object.fromEntries(
-    Object.entries(pages).map(([key, value]) => {
-      // Odstranit /index.tsx | index.jsx
-      const newKey = key.replace(/index\.(t|j)sx$/i, "");
-      return [newKey, value];
-    })
-  );
   pageflow.map((pf) => {
     const { path, componentPath, noLayout, to, sidebar, kind } = pf as any;
 
@@ -80,7 +73,7 @@ function generateRoutes({
         <Route key={path} path={path} element={<Navigate to={to} />} />
       );
     } else {
-      const Component = getComponent({ componentPath, pages: pagesApp });
+      const Component = getComponent({ componentPath, pages });
       if (noLayout) {
         routes.push(<Route key={path} path={path} element={<Component />} />);
       } else {

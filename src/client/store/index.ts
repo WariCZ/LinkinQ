@@ -53,7 +53,7 @@ const useStore = create<StoreState>((set, get) => ({
   userConfigurations: {},
   appConfigurations: {},
   setPages(pages) {
-    set({ pages: pages });
+    set({ pages });
   },
   setUser: (user) => set({ user }),
   logout: async () => {

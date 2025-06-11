@@ -4,12 +4,13 @@ import { initReactI18next } from "react-i18next";
 
 export const initLocalization = async ({ localizations }) => {
   // @ts-expect-error
-  const modules = import.meta.glob("/i18n/**/*.json");
+  const modules = import.meta.glob("./i18n/**/*.json");
 
-  const mergedResources = {
-    ...(await getNamespacedResources(modules)),
-    ...(await getNamespacedResources(localizations || {})),
-  };
+  const mergedResources = _.merge(
+    {},
+    await getNamespacedResources(modules),
+    await getNamespacedResources(localizations || {})
+  );
 
   i18n.use(initReactI18next).init({
     debug: true,

@@ -8,7 +8,7 @@ import { Avatar, Dropdown, Navbar } from "flowbite-react";
 // import Link from "next/link";
 // import useLocalStorage from "../../lib/useLocalStorage";
 import { HiMenuAlt1, HiX } from "react-icons/hi";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 // import { sidebarContext } from "../sidebarProvider";
 // import NotificationButton from "../notifications/notificationButton";
 
@@ -88,6 +88,9 @@ const UserAvatar = () => {
 
 export const DashboardHeader = function () {
   const { t } = useTranslation();
+  const location = useLocation();
+  const path = location.pathname;
+  const isAdminPages = path.split("/")[1] === "admin";
 
   const sidebar = useStore((state) => state.sidebar);
   const setSidebar = useStore((state) => state.setSidebar);
@@ -120,11 +123,11 @@ export const DashboardHeader = function () {
                   <Link to="/">
                     <img alt="Linkinq" src={logo} style={{ height: "25px" }} />
                   </Link>
-                  <HaveRole roles={["linkinq.admin"]}>
+                  {isAdminPages ? (
                     <span className="font-bold px-2 mt-0 text-2xl">
                       {t("header.administration")}
                     </span>
-                  </HaveRole>
+                  ) : null}
                 </Navbar.Brand>
               </div>
 

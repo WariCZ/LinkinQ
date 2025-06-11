@@ -27,7 +27,7 @@ const createLinkinqClient = async ({
       ...moduleConf.localizations,
     };
   });
-  debugger;
+
   await initLocalization({
     localizations: { ...modulesLocalizations, ...localizations },
   });

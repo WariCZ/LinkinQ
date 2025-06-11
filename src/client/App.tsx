@@ -28,6 +28,14 @@ const App = ({ pages, localizations }: any) => {
     ...pages,
   };
 
+  const pagesApp = Object.fromEntries(
+    Object.entries(pagesImport).map(([key, value]) => {
+      // Odstranit /index.tsx | index.jsx
+      const newKey = key.replace(/index\.(t|j)sx$/i, "");
+      return [newKey, value];
+    })
+  );
+
   useEffect(() => {
     firstLoad();
   }, [firstLoad]);
@@ -41,8 +49,7 @@ const App = ({ pages, localizations }: any) => {
       ) {
         i18n.changeLanguage(profileSettings.language);
       }
-
-      setPages(pagesImport);
+      setPages(pagesApp);
     }
   }, [loading, userConfigurations, i18n]);
 
@@ -65,7 +72,7 @@ const App = ({ pages, localizations }: any) => {
           }
         >
           <Routes>
-            {generateRoutes({ user, pageflow: pageflow, pages: pagesImport })}
+            {generateRoutes({ user, pageflow: pageflow, pages: pagesApp })}
             <Route
               key="not-found"
               path="*"
