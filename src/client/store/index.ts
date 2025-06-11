@@ -3,6 +3,7 @@ import axios from "axios";
 import { User } from "../../lib/auth";
 import { EntitySchema, FieldType } from "../../lib/entity/types";
 import { AppToastType } from "../components/Toast";
+import _ from "lodash";
 
 type GuiEntitySchema = Record<string, FieldType>;
 interface StoreState {
@@ -30,18 +31,33 @@ interface StoreState {
 
   appConfigurations: Record<string, any>;
   getAppConfigurations: () => Promise<void>;
+
+  pageflow: any;
+  pageflowEntity: any;
+  getPageflow: () => Promise<void>;
+  getPublicPageflow: () => Promise<void>;
+
+  pages: any;
+  setPages: (pages: any) => void;
 }
 
 const useStore = create<StoreState>((set, get) => ({
+  pages: {},
   schema: {},
+  pageflow: {},
+  pageflowEntity: {},
   user: null,
   roles: [],
   loading: true,
   sidebar: false,
   userConfigurations: {},
   appConfigurations: {},
+  setPages(pages) {
+    set({ pages });
+  },
   setUser: (user) => set({ user }),
   logout: async () => {
+    await get().getPublicPageflow();
     await axios.post("/logout");
     set({ user: null });
   },
@@ -55,9 +71,6 @@ const useStore = create<StoreState>((set, get) => ({
     set({ loading: true });
     try {
       await get().checkAuth();
-      await get().getSchema();
-      await get().getUserConfigurations();
-      await get().getAppConfigurations();
     } catch (error) {
       set({ user: null });
     } finally {
@@ -72,11 +85,61 @@ const useStore = create<StoreState>((set, get) => ({
       });
       if (response.data.user) {
         set({ user: response.data.user });
+        await get().getPageflow();
+        await get().getSchema();
+        await get().getUserConfigurations();
+        await get().getAppConfigurations();
       } else {
         set({ user: null });
+        await get().getPublicPageflow();
       }
     } catch (error) {
       set({ user: null });
+      await get().getPublicPageflow();
+    }
+  },
+  getPublicPageflow: async () => {
+    try {
+      const response = await axios.get("/pageflow/public", {
+        withCredentials: true,
+      });
+      if (response.data) {
+        set({ pageflow: response.data });
+      } else {
+        set({ pageflow: {} });
+      }
+    } catch (error) {
+      set({ pageflow: {} });
+    } finally {
+      set({ loading: false });
+    }
+  },
+  getPageflow: async () => {
+    try {
+      const response = await axios.get("/pageflow/complete", {
+        withCredentials: true,
+      });
+      if (response.data) {
+        set({ pageflow: response.data });
+
+        const pageflowEntity = _.filter(response.data, { kind: "2" }).map(
+          (d) => {
+            return {
+              ...d,
+              filterFields: _.keys(d.filter),
+            };
+          }
+        );
+        set({ pageflowEntity: pageflowEntity });
+      } else {
+        set({ pageflow: {} });
+        set({ pageflowEntity: {} });
+      }
+    } catch (error) {
+      set({ pageflow: {} });
+      set({ pageflowEntity: {} });
+    } finally {
+      set({ loading: false });
     }
   },
   getSchema: async () => {

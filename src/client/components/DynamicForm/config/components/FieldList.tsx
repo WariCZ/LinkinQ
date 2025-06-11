@@ -18,7 +18,7 @@ import { FaTrashAlt, FaCog } from "react-icons/fa";
 import {
   FormFieldType,
   SectionType,
-} from "../../../../../client/types/DynamicForm/types";
+} from "../../../../types/DynamicForm/types";
 import { useFormConfigStore } from "../../_store";
 
 type FieldListProps = {

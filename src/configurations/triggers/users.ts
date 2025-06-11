@@ -9,7 +9,7 @@ const triggers: TriggerItemType[] = [
     active: true,
     method: "insert",
     code: function ({ data }) {
-      data.caption = data.fullname;
+      data.caption = data.fullname + "kuk";
     },
   },
   // {

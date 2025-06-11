@@ -2,14 +2,8 @@ import { TriggerItemInternalType } from "./entity/triggers";
 import fs from "fs";
 import { DateTime } from "luxon";
 import path from "path";
-import { fileURLToPath, pathToFileURL } from "url";
-import { EntitySchema } from "./entity/types";
 import _ from "lodash";
-import { createRequire } from "module";
-const filename = __filename;
 const dirname = __dirname;
-// const filename = fileURLToPath(import.meta.url);
-// const dirname = path.dirname(filename);
 
 const DEFAULT_CONFIGURATION_PATH = "/configurations/";
 const CONFIGURATION_PATH_LINKINQ = path.join(
@@ -23,15 +17,11 @@ const CONFIGURATION_PATH_APP = path.join(
   DEFAULT_CONFIGURATION_PATH
 );
 
-console.log("CONFIGURATION_PATH_LINKINQ", CONFIGURATION_PATH_LINKINQ);
-console.log("CONFIGURATION_PATH_APP", CONFIGURATION_PATH_APP);
-
 const getPath = (basePath, filename) => path.join(basePath, filename);
 
 export const triggerFiles = async ({ fullPath, stats, data, key }) => {
   if (!key) key = "default";
   if (!data) data = [];
-  // const { [key]: impFile } = await import(pathToFileURL(fullPath).href);
 
   let impFile = require(fullPath.replace("file:///", ""))[key];
   const impFileTmp = impFile.map((t) => ({
@@ -46,19 +36,9 @@ export const importFiles = async ({ fullPath, stats, data, key }) => {
   if (!key) key = "default";
 
   let impFile;
-  // if (typeof require !== "undefined" && require.main) {
-  // CommonJS - načti přes require
-  impFile = require(fullPath.replace("file:///", ""))[key];
-  // } else {
-  //   // ESM - načti přes dynamický import
-  //   const filepath = pathToFileURL(fullPath).href;
-  //   impFile = await import(filepath);
-  //   impFile = { [key]: impFile };
-  //   console.log("import impFile", impFile);
-  // }
 
-  // const filepath = pathToFileURL(fullPath).href;
-  // let { [key]: impFile } = await import(filepath);
+  impFile = require(fullPath.replace("file:///", ""))[key];
+
   if (typeof impFile == "function") {
     impFile = impFile({ env: process.env });
     console.log("impFile", impFile);
@@ -112,14 +92,11 @@ export const dynamicImportFromFiles = async (
   return files;
 };
 
-const getprocesses = async () => {
+const getprocesses = async (pathFiles) => {
   const folder = "/processes/";
-
+  const importPath = pathFiles.map((p) => path.join(p, folder));
   const processes: TriggerItemInternalType[] = await dynamicImportFromFiles(
-    [
-      path.join(CONFIGURATION_PATH_LINKINQ, folder),
-      path.join(CONFIGURATION_PATH_APP, folder),
-    ],
+    importPath,
     ".bpmn",
     processFiles
   );
@@ -127,14 +104,12 @@ const getprocesses = async () => {
   return processes;
 };
 
-const getTriggers = async () => {
+const getTriggers = async (pathFiles) => {
   const folder = "/triggers/";
+  const importPath = pathFiles.map((p) => path.join(p, folder));
 
   const triggers: TriggerItemInternalType[] = await dynamicImportFromFiles(
-    [
-      path.join(CONFIGURATION_PATH_LINKINQ, folder),
-      path.join(CONFIGURATION_PATH_APP, folder),
-    ],
+    importPath,
     [".js", ".ts"],
     triggerFiles
   );
@@ -142,39 +117,33 @@ const getTriggers = async () => {
   return triggers;
 };
 
-const getEntities = async () => {
-  const folder = "/entities/";
-  const entities: any = await dynamicImportFromFiles(
-    [
-      path.join(CONFIGURATION_PATH_LINKINQ, folder),
-      path.join(CONFIGURATION_PATH_APP, folder),
-    ],
+const getEntity = async (pathFiles) => {
+  const folder = "/entity/";
+  const importPath = pathFiles.map((p) => path.join(p, folder));
+  const entity: any = await dynamicImportFromFiles(
+    importPath,
     [".js", ".ts"],
     importFiles
   );
-  return entities;
+  return entity;
 };
 
-const getDefaultData = async () => {
+const getDefaultData = async (pathFiles) => {
   const folder = "/data/";
+  const importPath = pathFiles.map((p) => path.join(p, folder));
   const defaultData: any = await dynamicImportFromFiles(
-    [
-      path.join(CONFIGURATION_PATH_LINKINQ, folder),
-      path.join(CONFIGURATION_PATH_APP, folder),
-    ],
+    importPath,
     [".js", ".ts"],
     importFiles
   );
   return defaultData;
 };
 
-const getUpdateData = async () => {
+const getUpdateData = async (pathFiles) => {
   const folder = "/data/";
+  const importPath = pathFiles.map((p) => path.join(p, folder));
   const defaultData: any = await dynamicImportFromFiles(
-    [
-      path.join(CONFIGURATION_PATH_LINKINQ, folder),
-      path.join(CONFIGURATION_PATH_APP, folder),
-    ],
+    importPath,
     [".js", ".ts"],
     importFiles,
     "updateData"
@@ -182,19 +151,25 @@ const getUpdateData = async () => {
   return defaultData;
 };
 
-const loadConfigurations = async () => {
-  return {
-    updateData: await getUpdateData(),
-    defaultData: await getDefaultData(),
-    entities: await getEntities(),
-    processes: await getprocesses(),
-    triggers: await getTriggers(),
+const loadConfigurations = async (modules?: any[]) => {
+  const loadFiles = [
+    CONFIGURATION_PATH_LINKINQ,
+    ...(modules?.map((m) => m.modulePath) || []),
+    CONFIGURATION_PATH_APP,
+  ];
 
-    // updateData: {},
-    // defaultData: {},
-    // entities: {},
-    // processes: [],
-    // triggers: [],
+  // const importPath = pathFiles
+  //   ? path.join(pathFiles, folder)
+  //   : [
+  //       path.join(CONFIGURATION_PATH_LINKINQ, folder),
+  //       path.join(CONFIGURATION_PATH_APP, folder),
+  //     ];
+  return {
+    updateData: await getUpdateData(loadFiles),
+    defaultData: await getDefaultData(loadFiles),
+    entity: await getEntity(loadFiles),
+    processes: await getprocesses(loadFiles),
+    triggers: await getTriggers(loadFiles),
   };
 };
 

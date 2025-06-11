@@ -1,4 +1,4 @@
-import { defaultFields, workflowFields } from "./defaultEntities";
+import { defaultFields, workflowFields } from "./defaultEntity";
 import {
   DBSchema,
   DbSchemaType,

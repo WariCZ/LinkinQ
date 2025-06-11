@@ -1,10 +1,7 @@
 import { Button } from "flowbite-react";
 import { useModalStore } from "../../Modal/modalStore";
 import { AddField } from "../config/components/AddField";
-import {
-  FormFieldType,
-  SectionType,
-} from "../../../../client/types/DynamicForm/types";
+import { FormFieldType, SectionType } from "../../../types/DynamicForm/types";
 import { FieldPrimitiveType, FieldType } from "../../../../lib/entity/types";
 import { useFormConfigStore } from "../_store";
 

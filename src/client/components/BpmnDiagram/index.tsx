@@ -43,7 +43,6 @@ const BpmnDiagram = ({
 
   useEffect(() => {
     if (editor) {
-      debugger;
       diagramRef.current = new BpmnModeler({
         container: containerRef.current,
         moddleExtensions: {
@@ -67,7 +66,7 @@ const BpmnDiagram = ({
         .then(() => {
           const canvas = diagramRef.current.get("canvas");
           canvas.zoom("fit-viewport");
-          handleShown?.(canvas);
+          handleShown?.(canvas, diagramRef.current);
         })
         .catch((err) => {
           console.error("Chyba při importu diagramu:", err);

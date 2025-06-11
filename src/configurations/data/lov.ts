@@ -44,6 +44,18 @@ const defaultData = ({ env }) => ({
       value: 2,
       lov: "tasksPriority",
     },
+    {
+      guid: uuid(),
+      caption: "Pages",
+      value: 1,
+      lov: "pageflowKind",
+    },
+    {
+      guid: uuid(),
+      caption: "Entity",
+      value: 2,
+      lov: "pageflowKind",
+    },
   ],
 });
 

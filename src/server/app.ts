@@ -27,21 +27,22 @@ import {
   Logger,
 } from "../lib/bpmn-web";
 
-import pageflowRouter from "../lib/entity/pageflow";
 import { loadConfigurations } from "../lib/configurations";
 import fs from "fs";
 import path from "path";
 import _ from "lodash";
+import { Pageflow } from "../lib/pageflow";
 
 const dirname = __dirname;
 
 dotenv.config();
 
-type LinkinqPlugin = { triggers: any[]; processes: any[] };
+type LinkinqPlugin = {};
 
-type LinkinqConfig = { plugins: LinkinqPlugin[] };
+type LinkinqConfig = { modules: any[] };
 
 export class Linkinq {
+  modules: any[];
   app: Express;
   entity: EntityRoutes;
   bpmnRoutes: any;
@@ -49,8 +50,10 @@ export class Linkinq {
   packageJson;
   viteRunning: boolean;
   ad: Adapters;
+  pageflow: Pageflow;
 
   constructor(config?: LinkinqConfig) {
+    this.modules = config.modules || [];
     this.viteRunning = false;
     const configPath = dirname + "/../package.json";
     if (fs.existsSync(configPath)) {
@@ -66,7 +69,11 @@ export class Linkinq {
     console.log("Before start adapter");
     this.ad = new Adapters({
       db: this.entity.db,
-      eventsOnEntities: this.entity.eventsOnEntities,
+      eventsOnEntity: this.entity.eventsOnEntity,
+    });
+
+    this.pageflow = new Pageflow({
+      db: this.entity.db,
     });
 
     this.ad.registerAdapter({ adapter: mailAdapter });
@@ -74,13 +81,30 @@ export class Linkinq {
     console.log("After start adapter");
   }
 
+  arrayMerge(objValue, srcValue) {
+    if (Array.isArray(objValue) && srcValue) {
+      return objValue.concat(srcValue);
+    }
+  }
+
   async initApp() {
     try {
-      const configurations = await loadConfigurations();
+      const modules = [];
+      for (const module of this.modules) {
+        const m = await module();
+        modules.push(m);
+      }
+      let configurations = await loadConfigurations(modules);
 
       const { schema, sqlAdmin, db } = await this.entity.prepareSchema(
         configurations
       );
+
+      this.pageflow.init({
+        schema,
+        sqlAdmin,
+        modules,
+      });
 
       this.ad.loadAdapters(schema);
       const wflogger = new Logger({ toConsole: true });
@@ -155,6 +179,7 @@ export class Linkinq {
       this.setupExpress({
         schema,
         sqlAdmin,
+        configurations,
       });
     } catch (err) {
       debugger;
@@ -210,13 +235,21 @@ export class Linkinq {
       .send("Vite server failed to start within the expected time.");
   };
 
-  setupExpress({ schema, sqlAdmin }: { schema: EntitySchema; sqlAdmin: Sql }) {
+  setupExpress({
+    schema,
+    sqlAdmin,
+    configurations,
+  }: {
+    schema: EntitySchema;
+    sqlAdmin: Sql;
+    configurations: any;
+  }) {
     const app = this.app;
 
-    this.setupRoutes({ schema, sqlAdmin });
+    this.setupRoutes({ schema, sqlAdmin, configurations });
 
-    const DEFAULT_VITE_PATH = "vite.config.ts";
-    const VITE_PATH_LINKINQ = path.join(__dirname, "../../", DEFAULT_VITE_PATH);
+    // const DEFAULT_VITE_PATH = "vite.config.ts";
+    // const VITE_PATH_LINKINQ = path.join(__dirname, "../../", DEFAULT_VITE_PATH);
 
     /**
      * Error Handler.
@@ -224,7 +257,7 @@ export class Linkinq {
     if (process.env.NODE_ENV === "development") {
       // only use in development
       ViteExpress.config({
-        viteConfigFile: VITE_PATH_LINKINQ,
+        // viteConfigFile: VITE_PATH_LINKINQ,
       });
     } else {
       app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
@@ -233,7 +266,7 @@ export class Linkinq {
       });
       ViteExpress.config({
         mode: "production",
-        viteConfigFile: VITE_PATH_LINKINQ,
+        // viteConfigFile: VITE_PATH_LINKINQ,
       });
     }
 
@@ -248,7 +281,15 @@ export class Linkinq {
     return app;
   }
 
-  setupRoutes({ schema, sqlAdmin }: { schema: EntitySchema; sqlAdmin: Sql }) {
+  setupRoutes({
+    schema,
+    sqlAdmin,
+    configurations,
+  }: {
+    schema: EntitySchema;
+    sqlAdmin: Sql;
+    configurations: any;
+  }) {
     const app = this.app;
 
     if (process.env.NODE_ENV === "development") {
@@ -263,10 +304,10 @@ export class Linkinq {
     //   console.log("xml", xml);
     // });
     app.use("/", authRoutes({ schema, sqlAdmin }));
+    app.use("/pageflow", this.pageflow.pageflowRouter());
     app.use("/api", authenticate, this.entity.config());
     app.use("/bpmnapi", authenticate, this.bpmnRoutes.config());
     app.use("/adapters", authenticate, this.ad.configRoutes());
-    app.use("/pageflow", authenticate, pageflowRouter);
 
     app.get("/protected2", authenticate, (req: Request, res: Response) => {
       res.json({ message: "This is a protected route", user: req.user });

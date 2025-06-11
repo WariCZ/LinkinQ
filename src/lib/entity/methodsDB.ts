@@ -38,6 +38,9 @@ export const whereQueries = ({
     .map((f) => {
       let onlyIds = false;
 
+      // remove operators
+      f = f.replace(/\$(\w+);(\w+)/gm, "$2");
+
       const isNlink =
         f &&
         modelFields.fields &&
@@ -194,7 +197,7 @@ export const getQueries = ({
             }
           }
         }
-        if ((f && f.indexOf(".") > -1) || isLink) {
+        if ((f && f.indexOf(".") > -1) || (isLink && f !== "kind")) {
           const fSplit = f && f.indexOf(".") == -1 ? [f, "guid"] : f.split(".");
           const field = fSplit[0];
           const fieldNext = fSplit.shift();
@@ -296,18 +299,7 @@ export const addWhere = async ({
 
     for (let field in where) {
       let val;
-      // const isLink =
-      //   schema[entity].fields[field].link &&
-      //   !schema[entity].fields[field].nlinkTable;
 
-      // if (
-      //   field.indexOf(".") == -1 &&
-      //   isLink &&
-      //   typeof where[field] === "string"
-      // ) {
-      //   debugger;
-      //   field = field + ".guid";
-      // }
       if (field.indexOf(".") > -1) {
         const fieldWhere = field.split(".")[0];
         const fieldsArr = field.split(".");
@@ -456,33 +448,78 @@ const getPermissionsSelect = ({
   return permissionsFilters;
 };
 
+const addWhereCondition = ({ condition, builder }) => {
+  Object.entries(condition).forEach(([key, value]) => {
+    let operator;
+    if (key.match(/(\$\w+;)(\w+)/gm)) {
+      operator = key.replace(/(\$\w+;)(\w+)/gm, "$1");
+      key = key.replace(/(\$\w+;)(\w+)/gm, "$2");
+    }
+
+    if (operator) {
+      if (operator == "$neq;") {
+        if (Array.isArray(value)) {
+          builder.whereNotIn(`${MAIN_TABLE_ALIAS}.${key}`, value);
+        } else {
+          builder.whereNot(`${MAIN_TABLE_ALIAS}.${key}`, value);
+        }
+      } else if (operator == "$lk;") {
+        if (Array.isArray(value)) {
+          throw `${operator} is not supported for array`;
+        } else {
+          builder.where(`${MAIN_TABLE_ALIAS}.${key}`, "like", `%${value}%`);
+        }
+      } else if (operator == "$gt;") {
+        if (Array.isArray(value)) {
+          throw `${operator} is not supported for array`;
+        } else {
+          builder.where(`${MAIN_TABLE_ALIAS}.${key}`, ">", value);
+        }
+      } else if (operator == "$gte;") {
+        if (Array.isArray(value)) {
+          throw `${operator} is not supported for array`;
+        } else {
+          builder.where(`${MAIN_TABLE_ALIAS}.${key}`, ">=", value);
+        }
+      } else if (operator == "$lt;") {
+        if (Array.isArray(value)) {
+          throw `${operator} is not supported for array`;
+        } else {
+          builder.where(`${MAIN_TABLE_ALIAS}.${key}`, "<", value);
+        }
+      } else if (operator == "$lte;") {
+        if (Array.isArray(value)) {
+          throw `${operator} is not supported for array`;
+        } else {
+          builder.where(`${MAIN_TABLE_ALIAS}.${key}`, "<=", value);
+        }
+      } else if (operator == "$eq;") {
+        if (Array.isArray(value)) {
+          builder.whereIn(`${MAIN_TABLE_ALIAS}.${key}`, value);
+        } else {
+          builder.where(`${MAIN_TABLE_ALIAS}.${key}`, value);
+        }
+      } else {
+        throw `${operator} is not supported`;
+      }
+    } else {
+      if (Array.isArray(value)) {
+        builder.whereIn(`${MAIN_TABLE_ALIAS}.${key}`, value);
+      } else {
+        builder.where(`${MAIN_TABLE_ALIAS}.${key}`, value);
+      }
+    }
+  });
+};
 const addWhereToQuery = ({ query, conditions }: any) => {
-  // Projdeme každou položku v poli `conditions`
   conditions?.forEach((condition: any, index: number) => {
-    // První podmínku přidáme pomocí `where`, aby se započala správná struktura dotazu
     if (index === 0) {
       query.where((builder: any) => {
-        // Projdeme všechny klíče a hodnoty v podmínce
-        Object.entries(condition).forEach(([key, value]) => {
-          if (Array.isArray(value)) {
-            // Použijeme `whereIn` pro hodnoty typu pole
-            builder.whereIn(`${MAIN_TABLE_ALIAS}.${key}`, value);
-          } else {
-            // Použijeme `where` pro jednotlivé hodnoty
-            builder.where(`${MAIN_TABLE_ALIAS}.${key}`, value);
-          }
-        });
+        addWhereCondition({ builder, condition });
       });
     } else {
-      // Další podmínky přidáme pomocí `orWhere`
       query.orWhere((builder: any) => {
-        Object.entries(condition).forEach(([key, value]) => {
-          if (Array.isArray(value)) {
-            builder.whereIn(key, value);
-          } else {
-            builder.where(key, value);
-          }
-        });
+        addWhereCondition({ builder, condition });
       });
     }
   });

@@ -35,17 +35,17 @@ export class Triggers {
     string,
     Record<string, Record<string, Record<string, TriggerItemInternalType>>>
   > = {};
-  eventsOnEntities: EventEmitter;
+  eventsOnEntity: EventEmitter;
   schema: EntitySchema = {};
   startWorkflow?: ({ table, data }: { table: string; data: any }) => void;
   constructor({
     db,
-    eventsOnEntities,
+    eventsOnEntity,
   }: {
     db: Knex<any, unknown[]>;
-    eventsOnEntities: EventEmitter;
+    eventsOnEntity: EventEmitter;
   }) {
-    this.eventsOnEntities = eventsOnEntities;
+    this.eventsOnEntity = eventsOnEntity;
     this.db = (table: string) => db(table).setUser({ id: 1 });
     this.dbCore = db;
 
@@ -178,28 +178,6 @@ export class Triggers {
 
       registeredGuids.push(trigger.guid);
     }
-
-    // nactu vsechny triggery z FS
-    // let triggersFS: TriggerItemInternalType[] = [];
-
-    // for (const filename of fs.readdirSync(this.path)) {
-    //   const path = require("path");
-    //   if (path.extname(filename) == ".ts") {
-    //     let name = path.basename(filename);
-
-    //     const stats = await fs.promises.stat(this.getPath(name));
-    //     const { default: triggers } = await import(this.getPath(name));
-
-    //     const triggersTmp: TriggerItemInternalType[] = triggers.map(
-    //       (t: TriggerItemInternalType) => ({
-    //         ...t,
-    //         updatetime: DateTime.fromJSDate(stats.mtime),
-    //       })
-    //     );
-
-    //     triggersFS = triggersFS.concat(triggersTmp);
-    //   }
-    // }
 
     for (const trigger of initTriggers) {
       this.prepareDefinition(trigger);
@@ -698,7 +676,7 @@ export class Triggers {
               }
             }
 
-            that.eventsOnEntities.emit("afterTrigger", {
+            that.eventsOnEntity.emit("afterTrigger", {
               afterData: afterDataDataItem,
               diffData: diffDataItem,
               beforeData: afterDataDataItem,

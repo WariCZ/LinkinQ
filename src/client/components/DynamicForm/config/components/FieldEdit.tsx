@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { Checkbox, Label, TextInput } from "flowbite-react";
-import { FormFieldType } from "../../../../../client/types/DynamicForm/types";
+import { FormFieldType } from "../../../../types/DynamicForm/types";
 import { useEffect } from "react";
 
 const EDITABLE_FIELDS: (keyof FormFieldType)[] = [

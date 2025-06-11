@@ -1,0 +1,46 @@
+{
+  "add": "Add",
+  "header": {
+    "profile": "Profile",
+    "administration": "Administration",
+    "signout": "Sign out"
+  },
+  "page": {
+    "tasks": "All tasks"
+  },
+  "sidebar": {
+    "home": "Home",
+    "tasks": {
+      "parent": "Tasks",
+      "all": "All tasks",
+      "my": "My tasks",
+      "new": "New tasks",
+      "attn": "Tasks attn"
+    },
+    "examples": "Examples"
+  },
+  "modal.close": "Close",
+  "modal.save": "Save",
+  "table": {
+    "searchPlaceholder": "Search columns...",
+    "selectAll": "Select All",
+    "reset": "Reset",
+    "selectedColumns": "Selected Columns"
+  },
+  "labels": {
+    "apply": "Apply",
+    "addManualTask": "Add Manual Task",
+    "information": "Information",
+    "file": "File",
+    "history": "History",
+    "prices": "Prices",
+    "indication": "Indication",
+    "fullTextSearch": "Fulltext search",
+    "reset": "Reset",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "selectRange": "Select a range",
+    "from": "From",
+    "to": "To"
+  }
+}

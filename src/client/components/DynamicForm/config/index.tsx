@@ -1,4 +1,4 @@
-import { SectionType } from "../../../../client/types/DynamicForm/types";
+import { SectionType } from "../../../types/DynamicForm/types";
 import { FieldType } from "../../../../lib/entity/types";
 import { Button } from "flowbite-react";
 import { useModalStore } from "../../Modal/modalStore";

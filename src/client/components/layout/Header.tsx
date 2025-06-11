@@ -2,23 +2,20 @@ import useStore from "../../store";
 // import { useSidebarContext } from "@/context/SidebarContext";
 // import { isSmallScreen } from "@/helpers/is-small-screen";
 // import Search from "../search/search";
-import {
-  Avatar,
-  Dropdown,
-  Navbar,
-} from "flowbite-react";
+import { Avatar, Dropdown, Navbar } from "flowbite-react";
 // import { useSession, signOut } from "next-auth/react";
 // import Image from "next/image";
 // import Link from "next/link";
 // import useLocalStorage from "../../lib/useLocalStorage";
 import { HiMenuAlt1, HiX } from "react-icons/hi";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 // import { sidebarContext } from "../sidebarProvider";
 // import NotificationButton from "../notifications/notificationButton";
 
 import logo from "../../static/logo.png";
 import { useTranslation } from "react-i18next";
 import { ThemeSwitcher } from "../ThemeSwitcher";
+import { HaveRole } from "../HaveRoles";
 // const logo = require("../../static/logo.png");
 
 const isSmallScreen = () => {
@@ -89,8 +86,11 @@ const UserAvatar = () => {
   );
 };
 
-export const DashboardHeader = function (props: { admin?: boolean }) {
+export const DashboardHeader = function () {
   const { t } = useTranslation();
+  const location = useLocation();
+  const path = location.pathname;
+  const isAdminPages = path.split("/")[1] === "admin";
 
   const sidebar = useStore((state) => state.sidebar);
   const setSidebar = useStore((state) => state.setSidebar);
@@ -123,7 +123,7 @@ export const DashboardHeader = function (props: { admin?: boolean }) {
                   <Link to="/">
                     <img alt="Linkinq" src={logo} style={{ height: "25px" }} />
                   </Link>
-                  {props.admin ? (
+                  {isAdminPages ? (
                     <span className="font-bold px-2 mt-0 text-2xl">
                       {t("header.administration")}
                     </span>

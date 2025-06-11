@@ -4,14 +4,14 @@ import _ from "lodash";
 import { AppColumnDef } from "../types";
 import { getLabel } from "../utils";
 import { Node } from "slate";
-import useStore from "../../../../../src/client/store";
+import useStore from "../../../store";
 
 interface UseTranslatedColumnsArgs {
   columns: any[];
   schema: any;
   entity: string;
   columnSizing: Record<string, number>;
-  isExpanded: boolean
+  isExpanded: boolean;
 }
 
 export const useTranslatedColumns = ({
@@ -19,7 +19,7 @@ export const useTranslatedColumns = ({
   schema,
   entity,
   columnSizing,
-  isExpanded
+  isExpanded,
 }: UseTranslatedColumnsArgs): AppColumnDef<any, any>[] => {
   const profileSettings = useStore(
     (state) => state.userConfigurations["profileSettings"]?.definition ?? {}
@@ -28,14 +28,16 @@ export const useTranslatedColumns = ({
 
   return useMemo(() => {
     const expanderColumn = isExpanded
-      ? [{
-        id: 'expander',
-        accessorKey: 'expander',
-        header: () => null,
-        size: 30,
-        minSize: 30,
-        enableResizing: false,
-      }]
+      ? [
+          {
+            id: "expander",
+            accessorKey: "expander",
+            header: () => null,
+            size: 30,
+            minSize: 30,
+            enableResizing: false,
+          },
+        ]
       : [];
 
     return [
