@@ -12,13 +12,13 @@ import Modeler from "bpmn-js/lib/Modeler";
 import Viewer from "bpmn-js";
 import { defaultDiagram } from "./defaultDiagram";
 import { ModdleElement, Shape } from "bpmn-js/lib/model/Types";
-import "bpmn-js/dist/assets/diagram-js.css";
-import "bpmn-js/dist/assets/bpmn-font/css/bpmn.css";
 import { AppButton } from "../common/AppButton";
 import { FaDownload, FaPlus, FaSave } from "react-icons/fa";
-import { EntitySchema } from "../../../lib/entity/types";
+import { EntitySchema, FieldPrimitiveType } from "../../../lib/entity/types";
 import { FormFieldType } from "../../types/DynamicForm/types";
 import useStore from "../../store";
+import "bpmn-js/dist/assets/diagram-js.css";
+import "bpmn-js/dist/assets/bpmn-font/css/bpmn.css";
 
 type BpmnCanvas = ReturnType<Modeler["get"]>;
 type BpmnDiagram = Modeler | Viewer;
@@ -29,6 +29,20 @@ interface BpmnDiagramProps {
   editor?: boolean;
 }
 
+function mapFieldPrimitiveToFormType(
+  type: FieldPrimitiveType
+): FormFieldType["type"] {
+  if (type.startsWith("link(")) return "select";
+  if (type.startsWith("nlink(")) return "select";
+  if (type.startsWith("lov")) return "select";
+  if (type === "boolean") return "checkbox";
+  if (type === "integer" || type === "bigint") return "number";
+  if (type === "datetime") return "datetime";
+  if (type === "password") return "password";
+  if (type === "richtext") return "text";
+  return "text";
+}
+
 export function transformAttributesToFormFields(
   attributes: Record<string, string>,
   schema: EntitySchema,
@@ -36,12 +50,13 @@ export function transformAttributesToFormFields(
 ): FormFieldType[] {
   return Object.entries(attributes).map(([key, value]) => {
     const meta = schema?.[entity]?.fields?.[key];
-    console.log("meta", meta)
     const base: FormFieldType = {
-      type: meta?.type?.startsWith("nlink(") ? "select" : "text",
+      ...meta,
+      type: mapFieldPrimitiveToFormType(meta?.type),
       field: key,
       label: meta?.label ?? key,
       default: value,
+      required: false,
     };
     return base;
   });
@@ -237,75 +252,6 @@ const BpmnDiagram = ({
     }
   };
 
-  const handleAttributeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-
-    const updated = {
-      ...attributes,
-      [name]: value,
-    };
-
-    setAttributes(updated);
-
-    if (selectedTask && diagramRef.current) {
-      const modeling = diagramRef.current.get("modeling");
-      const element = selectedTask;
-
-      const currentAttrs = element.businessObject.$attrs || {};
-
-      const newAttrs = { ...currentAttrs };
-
-      if (name === "formKey") {
-        if (value) {
-          newAttrs["camunda:formKey"] = value;
-        } else {
-          delete newAttrs["camunda:formKey"];
-        }
-      } else {
-        const fullKey = `linkinq:${name}`;
-        if (value) {
-          newAttrs[fullKey] = value;
-        } else {
-          delete newAttrs[fullKey];
-        }
-      }
-
-      modeling.updateProperties(element, { ...newAttrs });
-    }
-  };
-
-  // const handleAttributeChange = ({ data }: { data: Record<string, any> }) => {
-  //   setAttributes(data);
-
-  //   console.log("data", data)
-  //   if (selectedTask && diagramRef.current) {
-  //     const modeling = diagramRef.current.get("modeling");
-  //     const element = selectedTask;
-
-  //     const currentAttrs = element.businessObject.$attrs || {};
-  //     const newAttrs = { ...currentAttrs };
-
-  //     Object.entries(data).forEach(([key, value]) => {
-  //       if (key === "formKey") {
-  //         if (value) {
-  //           newAttrs["camunda:formKey"] = value;
-  //         } else {
-  //           delete newAttrs["camunda:formKey"];
-  //         }
-  //       } else {
-  //         const fullKey = `linkinq:${key}`;
-  //         if (value) {
-  //           newAttrs[fullKey] = value;
-  //         } else {
-  //           delete newAttrs[fullKey];
-  //         }
-  //       }
-  //     });
-
-  //     modeling.updateProperties(element, newAttrs);
-  //   }
-  // };
-
   const handleExport = async () => {
     try {
       if (!diagramRef.current) return;
@@ -325,6 +271,55 @@ const BpmnDiagram = ({
     }
   };
 
+  const handleAttributesChange = (data: Record<string, any>) => {
+    setAttributes((prev) => {
+      const merged = { ...prev, ...data };
+
+      if (selectedTask && diagramRef.current) {
+        const modeling = diagramRef.current.get("modeling");
+        const currentAttrs = selectedTask.businessObject.$attrs || {};
+        const newAttrs = { ...currentAttrs };
+
+        for (const [name, value] of Object.entries(data)) {
+          const key =
+            name === "formKey" ? "camunda:formKey" : `linkinq:${name}`;
+          if (value !== undefined && value !== "") {
+            newAttrs[key] = value;
+          } else {
+            delete newAttrs[key];
+          }
+        }
+
+        modeling.updateProperties(selectedTask, newAttrs);
+      }
+
+      return merged;
+    });
+  };
+
+  const removeAttribute = (fieldKey: string) => {
+    if (!selectedTask || !diagramRef.current) return;
+
+    const modeling = diagramRef.current.get("modeling");
+    const bo = selectedTask.businessObject;
+
+    const fullKey =
+      fieldKey === "formKey" ? "camunda:formKey" : `linkinq:${fieldKey}`;
+
+    if (bo.$attrs && bo.$attrs[fullKey]) {
+      delete bo.$attrs[fullKey];
+    }
+
+    modeling.updateProperties(selectedTask, {
+      [fullKey]: undefined,
+    });
+
+    setAttributes((prev) => {
+      const updated = { ...prev };
+      delete updated[fieldKey];
+      return updated;
+    });
+  };
   return (
     <div>
       {editor ? (
@@ -397,58 +392,18 @@ const BpmnDiagram = ({
       {selectedTask && (
         <AttributesSettings
           entity={settings.entity}
-          // attributes={attributes}
-          // setAttributes={setAttributes}
+          attributes={attributes}
+          setAttributes={setAttributes}
           fields={transformAttributesToFormFields(
             attributes,
             schema as unknown as EntitySchema,
             settings.entity
           )}
-          onChange={handleAttributeChange}
+          onChange={handleAttributesChange}
           selectedTask={selectedTask}
+          removeAttribute={removeAttribute}
         />
       )}
-
-      {/* 
-      {selectedTask && (
-        <div style={{ marginTop: "1rem" }}>
-          <h3>Editace atributů pro Task: {selectedTask.id}</h3>
-
-          <label>
-            Status:
-            <input
-              type="text"
-              name="status"
-              value={attributes.status}
-              onChange={handleAttributeChange}
-            />
-          </label>
-          <br />
-          <label>
-            Assignee:
-            <input
-              type="text"
-              name="assignee"
-              value={attributes.assignee}
-              onChange={handleAttributeChange}
-            />
-          </label>
-          <br />
-          <label>
-            Form Key:
-            <input
-              type="text"
-              name="formKey"
-              value={attributes.formKey}
-              onChange={handleAttributeChange}
-            />
-          </label>
-          <br />
-          {/* <button onClick={handleSaveAttributes} style={{ marginTop: "1rem" }}>
-            Uložit atributy
-          </button> 
-        </div>
-      )} */}
     </div>
   );
 };

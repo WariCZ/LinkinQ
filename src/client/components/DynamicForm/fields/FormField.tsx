@@ -21,7 +21,6 @@ export const FormField = ({
   control: Control<FieldValues, any>;
   readOnly?: boolean;
 }) => {
-
   const isDisabled = formField?.disabled || formField?.readOnly || readOnly;
 
   if (!formField?.type) {
@@ -35,7 +34,9 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={`${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+          className={`${formField.className || ""}${
+            formField.colSpan ? `col-span-${formField.colSpan}` : ""
+          }`}
         >
           <Label htmlFor={formField.field}>
             {formField.label}
@@ -44,7 +45,6 @@ export const FormField = ({
           <Controller
             name={formField.field}
             control={control}
-            defaultValue={formField.default || ""}
             rules={{
               required: formField.required ? "Required" : false,
               validate: formField.validate,
@@ -59,6 +59,7 @@ export const FormField = ({
                   readOnly={readOnly}
                   required={formField.required}
                   className="w-full"
+                  value={formField.default || formField.value}
                 />
                 {fieldState.error && (
                   <p className="text-red-600 text-sm mt-1 absolute right-0">
@@ -74,7 +75,13 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={`flex gap-2 flex-row-reverse justify-end items-center ${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : "flex gap-2 flex-row-reverse justify-end items-center"}`}
+          className={`flex gap-2 flex-row-reverse justify-end items-center ${
+            formField.className || ""
+          }${
+            formField.colSpan
+              ? `col-span-${formField.colSpan}`
+              : "flex gap-2 flex-row-reverse justify-end items-center"
+          }`}
         >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           {formField.required && <span className="text-red-600 px-1">*</span>}
@@ -109,7 +116,9 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={`select ${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+          className={`select ${formField.className || ""}${
+            formField.colSpan ? `col-span-${formField.colSpan}` : ""
+          }`}
         >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           {formField.required && <span className="text-red-600 px-1">*</span>}
@@ -122,7 +131,12 @@ export const FormField = ({
             }}
             render={({ field, fieldState }) => (
               <>
-                <Select {...field} {...formField} readOnly={isDisabled} />
+                <Select
+                  {...field}
+                  {...formField}
+                  readOnly={isDisabled}
+                  value={formField.default ? formField.default : field.value}
+                />
                 {fieldState.error && (
                   <p className="text-red-600 text-sm mt-1">
                     {fieldState.error.message}
@@ -137,7 +151,9 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={`${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+          className={`${formField.className || ""}${
+            formField.colSpan ? `col-span-${formField.colSpan}` : ""
+          }`}
         >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
@@ -172,7 +188,9 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={`${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+          className={`${formField.className || ""}${
+            formField.colSpan ? `col-span-${formField.colSpan}` : ""
+          }`}
         >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
@@ -199,7 +217,9 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={`flex flex-col gap-2 ${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+          className={`flex flex-col gap-2 ${formField.className || ""}${
+            formField.colSpan ? `col-span-${formField.colSpan}` : ""
+          }`}
         >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           {formField.required && <span className="text-red-600 px-1">*</span>}
@@ -214,7 +234,7 @@ export const FormField = ({
               <>
                 <SlateEditor
                   field={field}
-                  value={field.value}
+                  value={formField.default || field.value}
                   onChange={field.onChange}
                   placeholder="Enter text..."
                   readOnly={readOnly}
@@ -231,7 +251,7 @@ export const FormField = ({
       );
     case "switch":
       return (
-        <div className="my-2 flex items-center gap-2 bg-white rounded-md">
+        <div className="my-2 flex items-center gap-2 bg-white p-2 rounded-md">
           {formField.required && <span className="text-red-600 px-1">*</span>}
           <Controller
             name={formField.field}
@@ -251,10 +271,14 @@ export const FormField = ({
                     disabled={isDisabled}
                   />
                   <div
-                    className={`w-12 h-6 rounded-full transition-colors ${field.value ? "bg-cyan-700" : "bg-gray-300"}`}
+                    className={`w-12 h-6 rounded-full transition-colors ${
+                      field.value ? "bg-cyan-700" : "bg-gray-300"
+                    }`}
                   >
                     <div
-                      className={`w-6 h-6 bg-white rounded-full transform ${field.value ? "translate-x-6" : ""} transition-transform`}
+                      className={`w-6 h-6 bg-white rounded-full transform ${
+                        field.value ? "translate-x-6" : ""
+                      } transition-transform`}
                     ></div>
                   </div>
                 </label>
@@ -273,7 +297,9 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={`${formField.className || ""} ${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+          className={`${formField.className || ""} ${
+            formField.colSpan ? `col-span-${formField.colSpan}` : ""
+          }`}
         >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
@@ -297,7 +323,9 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={`${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+          className={`${formField.className || ""}${
+            formField.colSpan ? `col-span-${formField.colSpan}` : ""
+          }`}
         >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller
@@ -356,7 +384,9 @@ export const FormField = ({
       return (
         <div
           key={formField.field}
-          className={`${formField.className || ""}${formField.colSpan ? `col-span-${formField.colSpan}` : ""}`}
+          className={`${formField.className || ""}${
+            formField.colSpan ? `col-span-${formField.colSpan}` : ""
+          }`}
         >
           <Label htmlFor={formField.field}>{formField.label}</Label>
           <Controller

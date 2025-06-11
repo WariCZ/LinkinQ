@@ -50,6 +50,12 @@ export const TaskDetail = (props: TaskDetailProps) => {
         className="px-0"
         formFields={[
           {
+            field: "priority",
+            type: "select",
+            label: "Priority",
+            className: "mb-2 mt-2",
+          },
+          {
             type: "Section",
             className: "px-4 pt-4 items-center bg-gray-100",
             columns: 1,
