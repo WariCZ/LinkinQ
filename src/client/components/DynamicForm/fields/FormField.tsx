@@ -231,7 +231,7 @@ export const FormField = ({
       );
     case "switch":
       return (
-        <div className="my-2 flex items-center gap-2 bg-white p-2 rounded-md">
+        <div className="my-2 flex items-center gap-2 bg-white rounded-md">
           {formField.required && <span className="text-red-600 px-1">*</span>}
           <Controller
             name={formField.field}

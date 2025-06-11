@@ -25,13 +25,13 @@ export const Workflow = () => {
     [] as WorkflowType[]
   );
 
-
   useEffect(() => {
     setTableWorkflows(workflows);
   }, [workflows]);
 
   const saveXml = async (xml: string) => {
     await setRecord({ guid: selectedWorkflow.guid, source: xml });
+    await refresh();
   };
 
   const searchWorkflow = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,7 +54,6 @@ export const Workflow = () => {
       </div>
       <div className="flex items-start h-full justify-between">
         <div className="w-1/3 max-w-sm min-w-[240px] px-3 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
-
           <div className="pt-1 flex justify-between items-center my-1">
             <div>
               <span className="font-bold pr-1">Workflows</span>
@@ -63,7 +62,9 @@ export const Workflow = () => {
             <AppButton
               icon={<FaPlus />}
               onClick={() => {
-                openModal(<AddWorkflow refresh={refresh} />, { title: "Add new workflow" });
+                openModal(<AddWorkflow refresh={refresh} />, {
+                  title: "Add new workflow",
+                });
               }}
             >
               Add
@@ -73,22 +74,21 @@ export const Workflow = () => {
             value={searchValue}
             onChange={searchWorkflow}
             className="w-full"
-            placeholder="Hledat..."
+            placeholder="Search..."
           />
-          <div>
-            <ul>
-              {tableWorkflows.map((m, i) => (
-                <li
-                  key={m.name + i}
-                  onClick={() => setSelectedWorkflow(m)}
-                  className={`${selectedWorkflow.name === m.name ? "font-bold" : ""
-                    } cursor-pointer`}
-                >
-                  {m.name}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ul className="mt-2">
+            {tableWorkflows.map((workflows: WorkflowType, i: number) => (
+              <li
+                key={workflows.name + i}
+                onClick={() => setSelectedWorkflow(workflows)}
+                className={`${
+                  selectedWorkflow.name === workflows.name ? "font-bold" : ""
+                } cursor-pointer`}
+              >
+                {workflows.name}
+              </li>
+            ))}
+          </ul>
         </div>
         <div className="p-2 w-full">
           <div className="w-full">

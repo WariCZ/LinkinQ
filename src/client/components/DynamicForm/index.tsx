@@ -32,7 +32,7 @@ interface DynamicFormProps {
   children?: React.ReactElement;
   readOnly?: boolean;
   className?: string;
-  tableConfigKey?: string
+  tableConfigKey?: string;
 }
 
 const getFieldsForForm = (
@@ -107,11 +107,15 @@ const DynamicForm = ({
   readOnly,
   isConfigurable = false,
   className,
-  tableConfigKey
+  tableConfigKey,
 }: DynamicFormProps) => {
   const schema = useStore((state) => state.schema);
 
-  const { activeFields } = useFormConfigManager(tableConfigKey, formFields, isConfigurable);
+  const { activeFields } = useFormConfigManager(
+    tableConfigKey,
+    formFields,
+    isConfigurable
+  );
 
   // const activeFields = isConfigurable ? localFields : formFields;
 
@@ -185,9 +189,19 @@ const DynamicForm = ({
     );
   };
 
+  // useEffect(() => {
+  //   onChange && onChange({ data: watchAllFields });
+  // }, [watchAllFields]);
+
   useEffect(() => {
-    onChange && onChange({ data: watchAllFields });
-  }, [watchAllFields]);
+    if (!onChange) return;
+
+    const subscription = form.watch((value) => {
+      onChange({ data: value });
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, onChange]);
 
   const formSubmit = (formdata: any) => {
     const changedData: any = findChanges(formdata, data);
@@ -210,7 +224,12 @@ const DynamicForm = ({
 
   return (
     <>
-      {isConfigurable && <FormConfiguratorModal fields={fields} tableConfigKey={tableConfigKey} />}
+      {isConfigurable && (
+        <FormConfiguratorModal
+          fields={fields}
+          tableConfigKey={tableConfigKey}
+        />
+      )}
       <FormProvider {...form}>
         <form
           ref={formRef}

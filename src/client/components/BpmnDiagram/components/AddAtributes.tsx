@@ -1,23 +1,29 @@
 import { Button } from "flowbite-react";
 import { useModalStore } from "../../Modal/modalStore";
-import { AddField } from "../config/components/AddField";
-import { FormFieldType, SectionType } from "../../../types/DynamicForm/types";
+import {
+  FormFieldType,
+  SectionType,
+} from "../../../../client/types/DynamicForm/types";
 import { FieldPrimitiveType, FieldType } from "../../../../lib/entity/types";
-import { useFormConfigStore } from "../_store";
+import { AddField } from "../../DynamicForm/config/components/AddField";
+import { useState } from "react";
 
-type AddFieldModalProps = {
+type AddAttributesModalProps = {
   fields: FieldType[];
+  usedFields?: Set<string>;
+  onAdd?: (field: FormFieldType[]) => void;
 };
 
-export const AddFieldModal = ({ fields }: AddFieldModalProps) => {
-  const { editingFields, setEditingFields } = useFormConfigStore();
+export const AddAttributesModal = ({
+  fields,
+  onAdd,
+}: AddAttributesModalProps) => {
   const { openModal, closeModal } = useModalStore();
-
+  const [attributes, setAttributes] = useState<FormFieldType[] | []>([]);
   function mapFieldPrimitiveToFormType(
     type: FieldPrimitiveType
   ): FormFieldType["type"] {
     if (type.startsWith("link(")) return "select";
-    if (type.startsWith("nlink(")) return "select";
     if (type === "boolean") return "checkbox";
     if (type === "integer" || type === "bigint") return "number";
     if (type === "datetime") return "datetime";
@@ -43,7 +49,7 @@ export const AddFieldModal = ({ fields }: AddFieldModalProps) => {
                 visible: true,
               } as FormFieldType;
 
-              const updated = [...editingFields];
+              const updated = [...attributes];
 
               let lastSection = [...updated]
                 .reverse()
@@ -63,7 +69,11 @@ export const AddFieldModal = ({ fields }: AddFieldModalProps) => {
 
               lastSection.fields.push(newField);
 
-              setEditingFields([...updated]);
+              const result = [...updated];
+              setAttributes(result);
+
+              if (onAdd) onAdd(result);
+
               closeModal();
             }}
           />,

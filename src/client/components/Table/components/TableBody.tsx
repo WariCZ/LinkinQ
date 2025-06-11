@@ -52,13 +52,11 @@ export const TableBody = <T,>({
     );
   }
 
-  console.log("rows", rows)
   const renderRows = (rows: Row<any>[]) => {
     if (isGroupBy && Array.isArray(filteredData)) {
       return filteredData.flatMap((group: any, groupIndex: number) => {
         const rendered: JSX.Element[] = [];
-  
-        // 🔹 Рендер строки-заголовка группы
+
         rendered.push(
           <tr
             key={`group-${group.key}-${groupIndex}`}
@@ -100,8 +98,7 @@ export const TableBody = <T,>({
         return rendered;
       });
     }
-  
-    // 🔹 Обычный режим без группировки
+
     return rows.map((row, i) => (
       <TableRow
         key={row.id + "-" + i}

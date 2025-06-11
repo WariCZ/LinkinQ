@@ -77,7 +77,7 @@ export const AddField = ({ fields, onAdd, usedFields }: AddFieldProps) => {
         className="w-full"
         placeholder="Search..."
       />
-      {availableFields.map((field, index) => (
+      {availableFields.map((field) => (
         <button
           key={field.name}
           className="border rounded px-3 py-2 hover:bg-blue-50 text-left w-full"
