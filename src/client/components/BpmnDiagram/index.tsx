@@ -3,6 +3,10 @@ import BpmnViewer from "bpmn-js";
 import BpmnModeler from "bpmn-js/lib/Modeler";
 import ContextPadProvider from "./customContextPadProvider";
 import CustomCamundaModdle from "camunda-bpmn-moddle/resources/camunda";
+import { useModalStore } from "../Modal/modalStore";
+import { SettingsWorkflow } from "./components/SettingsWorkflow";
+import { IoSettingsOutline } from "react-icons/io5";
+import { Button } from "flowbite-react";
 
 const defaultDiagram = `
 <?xml version="1.0" encoding="UTF-8"?>
@@ -41,12 +45,20 @@ const BpmnDiagram = ({
     formKey: "",
   });
 
+  const [settings, setSettings] = useState({
+    filter: "",
+    default: false,
+  });
+
+  const { openModal } = useModalStore();
+
   useEffect(() => {
     if (editor) {
       diagramRef.current = new BpmnModeler({
         container: containerRef.current,
         moddleExtensions: {
           camunda: CustomCamundaModdle,
+          linkinq: {},
         },
         additionalModules: [
           // Odstraníme paletu
@@ -67,6 +79,19 @@ const BpmnDiagram = ({
           const canvas = diagramRef.current.get("canvas");
           canvas.zoom("fit-viewport");
           handleShown?.(canvas, diagramRef.current);
+
+          const elementRegistry = diagramRef.current.get("elementRegistry");
+          const processElement = elementRegistry.get("Process_1");
+
+          if (processElement) {
+            const attrs = processElement.businessObject.$attrs || {};
+
+            console.log("attrs", attrs);
+            setSettings({
+              filter: attrs["linkinq:filter"] || "",
+              default: attrs["linkinq:default"] === "true",
+            });
+          }
         })
         .catch((err) => {
           console.error("Chyba při importu diagramu:", err);
@@ -98,7 +123,6 @@ const BpmnDiagram = ({
         container: containerRef.current,
       });
 
-      debugger;
       // Načtení diagramu
       if (xml) {
         diagramRef.current
@@ -135,7 +159,18 @@ const BpmnDiagram = ({
 
   const handleSave = async () => {
     try {
-      debugger;
+      const modeling = diagramRef.current.get("modeling");
+      const elementRegistry = diagramRef.current.get("elementRegistry");
+
+      const processElement = elementRegistry.get("Process_1");
+
+      if (processElement) {
+        modeling.updateProperties(processElement, {
+          "linkinq:filter": settings.filter || "",
+          "linkinq:default": settings.default ? "true" : "false",
+        });
+      }
+
       const { xml } = await diagramRef.current.saveXML({ format: true });
       onSave?.(xml);
     } catch (err) {
@@ -150,14 +185,53 @@ const BpmnDiagram = ({
     });
   };
 
+  console.log("settings", settings);
   return (
     <div>
       {editor ? (
         <div style={{ marginBottom: "1rem" }}>
-          <button onClick={handleAddTask}>➕ Přidat Task</button>
-          <button onClick={handleSave} style={{ marginLeft: "1rem" }}>
-            💾 Uložit XML
-          </button>
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              <button onClick={handleAddTask}>➕ Přidat Task</button>
+              <button onClick={handleSave} style={{ marginLeft: "1rem" }}>
+                💾 Uložit XML
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    const { xml } = await diagramRef.current.saveXML({
+                      format: true,
+                    });
+                    const blob = new Blob([xml], { type: "application/xml" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "diagram.bpmn";
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  } catch (err) {
+                    console.error("Export error:", err);
+                  }
+                }}
+              >
+                ⬇️ Export BPMN
+              </button>
+            </div>
+            <Button
+              color={"light"}
+              onClick={() => {
+                openModal(
+                  <SettingsWorkflow
+                    setSettings={setSettings}
+                    defaultValues={settings}
+                  />,
+                  { title: "Settings workflow" }
+                );
+              }}
+            >
+              <IoSettingsOutline />
+            </Button>
+          </div>
         </div>
       ) : null}
       <div

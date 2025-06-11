@@ -1,21 +1,20 @@
-import Form from "../../../components/DynamicForm";
-import { ModalPropsType } from "../../../types/common/ModalPropsType";
-import { useModalStore } from "../../../components/Modal/modalStore";
-import useDataDetail from "../../../hooks/useDataDetail";
-import useDataTable from "../../../hooks/useDataTable";
-import { Button, TextInput } from "flowbite-react";
-import { useMemo, useState } from "react";
+import { useModalStore } from "../../../../client/components/Modal/modalStore";
+import useDataTable from "../../../../client/hooks/useDataTable";
+import { TextInput } from "flowbite-react";
+import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { AddWorkflow } from "./components/AddWorkflow";
-import BpmnDiagram from "../../../components/BpmnDiagram/";
+import BpmnDiagram from "../../../../client/components/BpmnDiagram/";
+import { AppButton } from "../../../components/common/AppButton";
+import { IoReload } from "react-icons/io5";
 
 type WorkflowType = { name: string; source: string; guid: string };
 
-const Workflow = () => {
+export const Workflow = () => {
   // const workflows: string[] = useMemo(() => [], []);
   const [searchValue, setSearchValue] = useState("");
   const [selectedWorkflow, setSelectedWorkflow] = useState({} as WorkflowType);
-  const [tableWorkflows, setTableWorkflows] = useState([] as string[]);
+  const [tableWorkflows, setTableWorkflows] = useState<WorkflowType[] | []>([]);
   const { openModal } = useModalStore();
 
   const [workflows, setWorkflows, { refresh, setRecord }] = useDataTable(
@@ -25,77 +24,65 @@ const Workflow = () => {
     },
     [] as WorkflowType[]
   );
-  const searchWorkflow = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(e.target.value);
-    // setTableWorkflows(workflows.filter((m) => m.indexOf(e.target.value) > -1));
-  };
 
-  const handleShown = (viewer: any) => {
-    // bpmnReactJs.addMarker("Activity_03i6maz", "moje");
-  };
-  const saveXml = async (xml) => {
-    // const result = await bpmnReactJs.saveXml();
-    debugger;
-    // console.log(result?.xml);
-    // console.log(selectedWorkflow);
+
+  useEffect(() => {
+    setTableWorkflows(workflows);
+  }, [workflows]);
+
+  const saveXml = async (xml: string) => {
     await setRecord({ guid: selectedWorkflow.guid, source: xml });
-    console.log("Saved");
   };
 
-  // const test = (a, b, c) => {
-  //   debugger;
-  // };
+  const searchWorkflow = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchTerm = e.target.value.toLowerCase();
+    setSearchValue(e.target.value);
+    setTableWorkflows(
+      workflows.filter((workflow: WorkflowType) =>
+        workflow?.name?.toLowerCase().includes(searchTerm)
+      )
+    );
+  };
+
   return (
     <div className="h-full">
-      <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
+      <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 flex justify-between items-center">
         <span className="font-bold">Workflow models</span>
+        <AppButton icon={<IoReload />} onClick={() => refresh()}>
+          Reload
+        </AppButton>
       </div>
-      <div className="flex items-start h-full">
-        <div className="px-3 w-48 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
-          <div className="py-1"></div>
-          <div className="pt-1">
-            <div
-              onClick={() => {
-                refresh();
-              }}
-            >
-              refresh
-            </div>
-            <Button
-              className="h-full"
-              onClick={() => {
-                openModal(<AddWorkflow refresh={refresh} />);
-              }}
-            >
-              <span className="top-0 flex items-center left-4">
-                <FaPlus className="h-3 w-3 mr-2" />
-                <span>Add</span>
-              </span>
-            </Button>
-          </div>
+      <div className="flex items-start h-full justify-between">
+        <div className="w-1/3 max-w-sm min-w-[240px] px-3 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
 
-          <div className="pt-1">
-            <span className="font-bold">Workflows</span>
-            <span className="float-end">{workflows?.length}</span>
+          <div className="pt-1 flex justify-between items-center my-1">
+            <div>
+              <span className="font-bold pr-1">Workflows</span>
+              <span className="float-end">({workflows?.length})</span>
+            </div>
+            <AppButton
+              icon={<FaPlus />}
+              onClick={() => {
+                openModal(<AddWorkflow refresh={refresh} />, { title: "Add new workflow" });
+              }}
+            >
+              Add
+            </AppButton>
           </div>
-          {/* <div className="pt-1">
-            <TextInput
-              style={{ maxHeight: 18 }}
-              value={searchValue}
-              onChange={searchWorkflow}
-              className="w-full"
-              placeholder="Hledat..."
-            />
-          </div> */}
+          <TextInput
+            value={searchValue}
+            onChange={searchWorkflow}
+            className="w-full"
+            placeholder="Hledat..."
+          />
           <div>
             <ul>
-              {workflows.map((m, i) => (
+              {tableWorkflows.map((m, i) => (
                 <li
                   key={m.name + i}
                   onClick={() => setSelectedWorkflow(m)}
-                  className={`${
-                    selectedWorkflow.name === m.name ? "font-bold" : ""
-                  } cursor-pointer`}
+                  className={`${selectedWorkflow.name === m.name ? "font-bold" : ""
+                    } cursor-pointer`}
                 >
                   {m.name}
                 </li>
@@ -105,24 +92,16 @@ const Workflow = () => {
         </div>
         <div className="p-2 w-full">
           <div className="w-full">
-            {selectedWorkflow ? (
-              <>
-                {/* <Button
-                  className="h-full"
-                  onClick={() => {
-                    saveXml();
-                  }}
-                >
-                  Save
-                </Button> */}
-                <BpmnDiagram
-                  editor={true}
-                  xml={selectedWorkflow.source}
-                  onSave={saveXml}
-                ></BpmnDiagram>
-              </>
+            {selectedWorkflow.guid ? (
+              <BpmnDiagram
+                editor={true}
+                xml={selectedWorkflow.source}
+                onSave={saveXml}
+              />
             ) : (
-              <span>Vyberte worflow</span>
+              <div className="flex items-center justify-center h-full w-full">
+                <span className="text-gray-500 text-lg">Select workflow</span>
+              </div>
             )}
           </div>
         </div>

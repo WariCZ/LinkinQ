@@ -12,6 +12,7 @@
   <bpmn:process id="Process_1"
     linkinq:entity="tasks"
     linkinq:filter="{&quot;kind&quot;: 1}"
+    linkinq:default="true"
     isExecutable="false">
     <bpmn:startEvent id="StartEvent_1">
       <bpmn:outgoing>Flow_0bzpzvg</bpmn:outgoing>
