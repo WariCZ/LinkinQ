@@ -109,7 +109,15 @@ export class EntityRoutes extends Entity {
       res.setHeader("Content-Encoding", "none");
 
       this.eventsOnEntity.on("afterTrigger", (msg) => {
-        res.write(`data: ${JSON.stringify(msg)}\n\n`);
+        if (["wf_locks", "wf_instances"].indexOf(msg.entity) == -1) {
+          res.write(
+            `data: ${JSON.stringify({
+              entity: msg.entity,
+              method: msg.method,
+              guid: msg.afterData.guid,
+            })}\n\n`
+          );
+        }
       });
 
       // Vyčistění interval po ukončení spojení

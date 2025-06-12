@@ -46,7 +46,7 @@ function useDataTable<T, U>(
     eventSource.onmessage = (event) => {
       const newEvent = JSON.parse(event.data);
       if (newEvent?.afterData?.guid)
-        actualizeData({ guid: newEvent.afterData.guid });
+      if (newEvent?.guid) actualizeData({ guid: newEvent.guid });
     };
 
     eventSource.onerror = () => {

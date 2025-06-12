@@ -63,7 +63,6 @@ function generateRoutes({
 }): React.ReactNode[] {
   const routes: React.ReactNode[] = [];
 
-  debugger;
   pageflow.map((pf) => {
     const { path, componentPath, noLayout, to, sidebar, kind } = pf as any;
 

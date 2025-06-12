@@ -559,7 +559,11 @@ export class Triggers {
         if (["insert", "update", "del"].indexOf(runner.builder._method) > -1) {
           // debugger;
           // console.log("after", afterData, beforeData);
-          const table = runner.builder._single.table;
+          let table = runner.builder._single.table;
+          if (typeof table == "object") {
+            table = table[Object.keys(table)[0]];
+          }
+
           if (!that.schema[table]) {
             return;
           }
