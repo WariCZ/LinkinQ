@@ -89,49 +89,52 @@ export class Pageflow {
   loadFiles(dir: any) {
     let result: PageflowType = {};
 
-    const filename =
-      process.env.NODE_ENV == "production" ? "index.jsx" : "index.tsx";
+    const filenames =
+      process.env.NODE_ENV == "production"
+        ? ["index.jsx", "index.tsx"]
+        : ["index.tsx"];
 
-    if (fs.existsSync(path.join(dir.path, filename)) && !dir.urlPath) {
-      result[dir.urlPath + "/"] = this.getPageflowData({
-        dir,
-        fullPath: dir.path,
-        indexFile: path.join(dir.path, filename),
-        urlPath: dir.urlPath + "/",
-      });
-    }
-
-    const entries = fs.readdirSync(dir.path, { withFileTypes: true });
-
-    for (const entry of entries) {
-      const fullPath = path.join(dir.path, entry.name);
-      const indexFile = path.join(fullPath, filename);
-      const key = entry.name;
-      const urlPath = dir.urlPath;
-
-      if (fs.existsSync(indexFile)) {
-        result[urlPath + "/" + key] = this.getPageflowData({
+    for (const filename of filenames) {
+      if (fs.existsSync(path.join(dir.path, filename)) && !dir.urlPath) {
+        result[dir.urlPath + "/"] = this.getPageflowData({
           dir,
-          fullPath,
-          indexFile,
-          urlPath: urlPath + "/" + key,
+          fullPath: dir.path,
+          indexFile: path.join(dir.path, filename),
+          urlPath: dir.urlPath + "/",
         });
       }
 
-      if (entry.isDirectory()) {
-        const children = this.loadFiles({
-          path: fullPath,
-          source: dir.source,
-          dir: dir.dir,
-          urlPath: urlPath + "/" + key,
-        });
+      const entries = fs.readdirSync(dir.path, { withFileTypes: true });
 
-        if (_.keys(children).length > 0) {
-          result = { ...result, ...children };
+      for (const entry of entries) {
+        const fullPath = path.join(dir.path, entry.name);
+        const indexFile = path.join(fullPath, filename);
+        const key = entry.name;
+        const urlPath = dir.urlPath;
+
+        if (fs.existsSync(indexFile)) {
+          result[urlPath + "/" + key] = this.getPageflowData({
+            dir,
+            fullPath,
+            indexFile,
+            urlPath: urlPath + "/" + key,
+          });
+        }
+
+        if (entry.isDirectory()) {
+          const children = this.loadFiles({
+            path: fullPath,
+            source: dir.source,
+            dir: dir.dir,
+            urlPath: urlPath + "/" + key,
+          });
+
+          if (_.keys(children).length > 0) {
+            result = { ...result, ...children };
+          }
         }
       }
     }
-
     return result;
   }
 
@@ -197,7 +200,7 @@ export class Pageflow {
 
     const folders = [
       {
-        source: "linkinq",
+        source: "Linkinq",
         path: path.join(__dirname, `../`, this.PAGES_PATH),
         dir: path.join(__dirname, `../`),
         urlPath: "",
@@ -215,7 +218,7 @@ export class Pageflow {
 
     if (this.linkinqLibInstalled) {
       folders.push({
-        source: "app",
+        source: "App",
         path: path.join(process.cwd(), "/src/", this.PAGES_PATH),
         dir: path.join(process.cwd(), "/src/"),
         urlPath: "",

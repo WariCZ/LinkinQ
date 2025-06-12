@@ -8,6 +8,8 @@ import { DateTime } from "luxon";
 import { Sql } from "./sql";
 import { addDefaultFields } from "./utils";
 import multer from "multer";
+import path from "path";
+import fs from "fs";
 
 export type ServerSideOutputType = {
   time: string;
@@ -467,6 +469,46 @@ export class EntityRoutes extends Entity {
         }
       }
     );
+
+    router.get("/appVersion", async (req: Request, res: Response) => {
+      try {
+        if (req.user) {
+          const packageJson = path.join(process.cwd(), "package.json");
+          const pkg = JSON.parse(fs.readFileSync(packageJson, "utf8"));
+
+          const modules = Object.fromEntries(
+            Object.keys(pkg.dependencies)
+              .filter((d) => {
+                return d.indexOf("@physter/") > -1;
+              })
+              .map((d) => {
+                const packageJson = path.join(
+                  process.cwd(),
+                  "node_modules",
+                  d,
+                  "package.json"
+                );
+
+                const pkg = JSON.parse(fs.readFileSync(packageJson, "utf8"));
+
+                return [d.replace("@physter/", ""), pkg.version];
+              })
+          );
+
+          return res.json({
+            app: pkg.version,
+            modules,
+          });
+        } else {
+          res.sendStatus(401);
+        }
+      } catch (error: any) {
+        debugger;
+        console.error("Error fetching data from external API:", error?.stack);
+        res.status(500).send("Error fetching data from external API");
+      }
+    });
+
     return router;
   }
 }

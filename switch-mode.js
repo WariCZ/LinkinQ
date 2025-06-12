@@ -2,13 +2,11 @@ const fs = require("fs");
 const path = require("path");
 
 const mode = process.argv[2]; // "dev" nebo "prod"
-const pkgPath = path.join(__dirname, "package.json");
+const pkgPath = path.join(__dirname, "./package.json");
 
 const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
 
 if (mode === "dev") {
-  //   pkg.main = "src/index.ts";
-  //   pkg.types = "src/index.ts";
   pkg.exports = {
     "./server": "./src/server/index.js",
     "./client": "./src/client/index.jsx",
@@ -20,8 +18,6 @@ if (mode === "dev") {
     },
   };
 } else if (mode === "prod") {
-  pkg.main = "dist/index.js";
-  pkg.types = "dist/index.d.ts";
   pkg.exports = {
     "./server": "./dist/server/index.js",
     "./client": "./dist/client/index.jsx",
@@ -38,4 +34,4 @@ if (mode === "dev") {
 }
 
 fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
-console.log(`✅ Přepnuto na ${mode} režim.`);
+console.log(`✅ ${pkg.name} - Přepnuto na ${mode} režim.`);
