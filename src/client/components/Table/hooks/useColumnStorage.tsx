@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import { useTableConfigStore } from "../_store";
-import { ColumnSizingState, OnChangeFn } from "@tanstack/react-table";
+import { useEffect, useMemo, useState } from "react";
 import _ from "lodash";
 import useStore from "../../../store";
 import { useUserConfigurations } from "../../../hooks/useUserConfigurations";
+import { useTableConfigStore } from "../_store";
 
 type ColumnConfig = {
   key: string;
@@ -19,37 +18,35 @@ export const useColumnStorage = (
   const { setTableConfig } = useTableConfigStore();
 
   const configFromStore = userConfigurations[tableKey]?.definition?.config;
-  const [config, setConfig] = useState<ColumnConfig[]>([]);
-  const [initialConfig, setInitialConfig] = useState<ColumnConfig[]>([]);
-  const [tempSizing, setTempSizing] = useState<Record<string, number>>({});
+
+  const initial = useMemo<ColumnConfig[]>(() => {
+    if (configFromStore && Array.isArray(configFromStore)) {
+      return configFromStore;
+    } else {
+      return defaultColumns.map((key) => ({ key, width: 200 }));
+    }
+  }, [configFromStore, defaultColumns]);
+
+  const [config, setConfig] = useState<ColumnConfig[]>(initial);
+  const [initialConfig, setInitialConfig] = useState<ColumnConfig[]>(initial);
+  const [tempSizing, setTempSizing] = useState<Record<string, number>>(
+    Object.fromEntries(initial.map((c) => [c.key, c.width ?? 200]))
+  );
 
   useEffect(() => {
-    const loaded: ColumnConfig[] =
-      configFromStore ?? defaultColumns.map((key) => ({ key, width: 200 }));
-
-    setConfig(loaded);
-    setInitialConfig(loaded);
-    setTempSizing(
-      Object.fromEntries(loaded.map((c) => [c.key, c.width ?? 200]))
-    );
-    setTableConfig(tableKey, loaded);
-  }, [configFromStore, tableKey]);
-
-  useEffect(() => {
-    if (config.length === 0) return;
     if (_.isEqual(config, initialConfig)) return;
 
-    const saveConfig = async () => {
+    const save = async () => {
       await saveUserConfiguration(tableKey, { config });
       setInitialConfig(config);
     };
 
-    saveConfig();
+    save();
     setTableConfig(tableKey, config);
   }, [config]);
 
   useEffect(() => {
-    const save = () => {
+    const handle = () => {
       setConfig((prev) =>
         prev.map((c) => ({
           ...c,
@@ -58,35 +55,36 @@ export const useColumnStorage = (
       );
     };
 
-    window.addEventListener("mouseup", save);
-    window.addEventListener("touchend", save);
-
+    window.addEventListener("mouseup", handle);
+    window.addEventListener("touchend", handle);
     return () => {
-      window.removeEventListener("mouseup", save);
-      window.removeEventListener("touchend", save);
+      window.removeEventListener("mouseup", handle);
+      window.removeEventListener("touchend", handle);
     };
   }, [tempSizing]);
 
   const selectedColumns = config.map((c) => c.key);
 
-  const handleColumnSizingChange: OnChangeFn<ColumnSizingState> = (updater) => {
+  const handleColumnSizingChange = (updater) => {
     const next = typeof updater === "function" ? updater(tempSizing) : updater;
     setTempSizing(next);
   };
 
-  const setColumns = (keys: string[]) => {
-    setConfig(
-      keys.map((k) => {
-        const existing = config.find((c) => c.key === k);
-        return existing || { key: k, width: 200 };
-      })
-    );
+  const setSelectedColumns = (keys: string[]) => {
+    const updated = keys.map((k) => {
+      const existing = config.find((c) => c.key === k);
+      return existing || { key: k, width: 200 };
+    });
+    setConfig(updated);
   };
+
+  console.log("initial", initial)
+  console.log("selectedColumns", selectedColumns)
 
   return {
     selectedColumns,
     columnSizing: tempSizing,
-    setSelectedColumns: setColumns,
+    setSelectedColumns,
     handleColumnSizingChange,
   };
 };

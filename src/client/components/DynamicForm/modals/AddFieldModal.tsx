@@ -1,9 +1,9 @@
 import { Button } from "flowbite-react";
 import { useModalStore } from "../../Modal/modalStore";
-import { AddField } from "../config/components/AddField";
 import { FormFieldType, SectionType } from "../../../types/DynamicForm/types";
 import { FieldPrimitiveType, FieldType } from "../../../../lib/entity/types";
 import { useFormConfigStore } from "../_store";
+import { FieldSelector } from "../../FieldSelector";
 
 type AddFieldModalProps = {
   fields: FieldType[];
@@ -31,7 +31,7 @@ export const AddFieldModal = ({ fields }: AddFieldModalProps) => {
       color="alternative"
       onClick={() =>
         openModal(
-          <AddField
+          <FieldSelector
             fields={fields}
             onAdd={(field) => {
               const newField = {

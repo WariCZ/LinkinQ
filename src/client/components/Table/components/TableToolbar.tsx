@@ -21,7 +21,7 @@ interface TableToolbarProps {
   setSelectedRows?: Dispatch<SetStateAction<string[]>>;
   deleteSelected?: () => void;
   multiUpdate?: (guids: string[], data: Partial<any>) => Promise<void>;
-  fullTextSearchEnabled?: boolean
+  fullTextSearchEnabled?: boolean;
 }
 
 export const TableToolbar = ({
@@ -34,7 +34,7 @@ export const TableToolbar = ({
   selectedRows,
   deleteSelected,
   multiUpdate,
-  fullTextSearchEnabled = true
+  fullTextSearchEnabled = true,
 }: TableToolbarProps) => {
   const { t } = useTranslation();
   const { openModal, closeModal } = useModalStore();
@@ -150,10 +150,11 @@ export const TableToolbar = ({
     <>
       <div className="flex justify-between mb-2">
         <div
-          className={`flex items-center gap-3 transition-opacity duration-200 ${selectedRows.length > 0
-            ? "opacity-100"
-            : "opacity-0 pointer-events-none"
-            }`}
+          className={`flex items-center gap-3 transition-opacity duration-200 ${
+            selectedRows.length > 0
+              ? "opacity-100"
+              : "opacity-0 pointer-events-none"
+          }`}
         >
           <Button onClick={deleteSelected} color="light">
             <div className="flex gap-2 items-center">
@@ -196,7 +197,7 @@ export const TableToolbar = ({
           </Button>
         )}
       </div>
-      {fullTextSearchEnabled &&
+      {fullTextSearchEnabled && (
         <div className="flex justify-between py-3 items-center border-t">
           <TextInput
             id="base"
@@ -210,7 +211,8 @@ export const TableToolbar = ({
               applyFullTextSeacrh(value);
             }}
           />
-        </div>}
+        </div>
+      )}
     </>
   );
 };

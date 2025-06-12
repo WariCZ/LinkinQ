@@ -5,10 +5,12 @@ export const useFilterFields = (
   columns: AppColumnDef<any, any>[]
 ): FormFieldType[] => {
   return columns
-    .map((col): FormFieldType | FormFieldType[] => {
-      const field = col.accessorKey as string;
-      const type = col.meta?.type;
-      const label = typeof col.header === "string" && col.header;
+    .map((col): FormFieldType | null => {
+      const field = col.accessorKey;
+      const type = col.meta?.type ?? "text";
+      const label = typeof col.header === "string" ? col.header : String(field);
+
+      if (typeof field !== "string") return null;
 
       switch (true) {
         case ["text", "uuid", "richtext", "jsonb", "password", "blob"].includes(
@@ -58,5 +60,5 @@ export const useFilterFields = (
           };
       }
     })
-    .flat();
+    .filter((x): x is FormFieldType => !!x); // remove nulls
 };

@@ -1,3 +1,5 @@
+import { FieldType } from "../lib/entity/types";
+
 export const exportFile = ({
   blob,
   filename,
@@ -26,3 +28,6 @@ export const exportJsonFile = ({
   const blob = new Blob([jsonString], { type: "application/json" });
   exportFile({ blob, filename: filename + ".json" });
 };
+
+export const getFieldName = (field: FieldType): string =>
+  field.name ?? field.type;

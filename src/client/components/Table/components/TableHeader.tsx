@@ -22,8 +22,8 @@ interface TableHeaderProps<T> {
   entity?: string;
   selectable?: boolean;
   settingColumnsEnabled?: boolean;
-  isExpanded?: boolean
-  isGroupBy?: boolean
+  isExpanded?: boolean;
+  isGroupBy?: boolean;
 }
 
 export const TableHeader = <T,>({
@@ -41,9 +41,10 @@ export const TableHeader = <T,>({
   selectable,
   settingColumnsEnabled = true,
   isExpanded,
-  isGroupBy
+  isGroupBy,
 }: TableHeaderProps<T>) => {
   const { openModal, closeModal } = useModalStore();
+  console.log("getHeaderGroups()", getHeaderGroups());
   return (
     <thead className="bg-[#2c3a54] text-xs text-gray-50 uppercase dark:bg-gray-700 dark:text-gray-400 sticky top-0">
       {getHeaderGroups().map((headerGroup) => (
@@ -91,8 +92,8 @@ export const TableHeader = <T,>({
                         ? header.column.getNextSortingOrder() === "asc"
                           ? "Sort ascending"
                           : header.column.getNextSortingOrder() === "desc"
-                            ? "Sort descending"
-                            : "Clear sort"
+                          ? "Sort descending"
+                          : "Clear sort"
                         : undefined
                     }
                   >
@@ -101,8 +102,12 @@ export const TableHeader = <T,>({
                         header.column.columnDef.header,
                         header.getContext()
                       )}
-                      {!isGroupBy && header.column.getIsSorted() === "asc" && <FaSortUp />}
-                      {!isGroupBy && header.column.getIsSorted() === "desc" && <FaSortDown />}
+                      {!isGroupBy && header.column.getIsSorted() === "asc" && (
+                        <FaSortUp />
+                      )}
+                      {!isGroupBy && header.column.getIsSorted() === "desc" && (
+                        <FaSortDown />
+                      )}
                     </div>
                   </div>
                 )}
@@ -130,6 +135,7 @@ export const TableHeader = <T,>({
                       columns={columns}
                       schema={schema}
                       entity={entity}
+                      setSelectedColumns={setSelectedColumns}
                     />,
                     {
                       title: "Change columns visible",

@@ -14,11 +14,11 @@ import _ from "lodash";
 import useStore from "../../store";
 import { TableFieldType, TableOrdering } from "./types";
 import { useColumnStorage } from "./hooks/useColumnStorage";
-import { useTranslatedColumns } from "./hooks/useTranslatedColumns";
 import { TableToolbar } from "./components/TableToolbar";
 import { DateTime } from "luxon";
 import { TableHeader } from "./components/TableHeader";
 import { TableBody } from "./components/TableBody";
+import { useProcessedColumns } from "./hooks/useProcessedColumns";
 
 interface TableProps<T> {
   tableConfigKey: string;
@@ -34,7 +34,7 @@ interface TableProps<T> {
   deleteRecord?: (guid: string) => Promise<void>;
   fetchNextPage?: () => Promise<void>;
   hasMore?: boolean;
-  multiUpdate?: (guids: string[], data: Partial<any>) => Promise<void>;
+  multiUpdate?: (guids: string[], data: Partial<T>) => Promise<void>;
   fullTextSearchEnabled?: boolean;
   settingColumnsEnabled?: boolean;
   rowMenuEnabled?: boolean;
@@ -82,16 +82,9 @@ const Table = <T, _>({
     columns.map((c) => (typeof c === "string" ? c : c.field))
   );
 
-  const filteredColumns = selectedColumns
-    .map((field) =>
-      columns.find((c) =>
-        typeof c === "string" ? c === field : c.field === field
-      )
-    )
-    .filter(Boolean);
-
-  const translatedColumns = useTranslatedColumns({
-    columns: filteredColumns,
+  const { translatedColumns } = useProcessedColumns({
+    columns,
+    selectedColumns,
     schema,
     entity,
     columnSizing,
@@ -188,12 +181,12 @@ const Table = <T, _>({
     setFilters(dataFilter);
   };
 
-  const cleatFilters = () => {
+  const clearFilters = () => {
     setFilters({});
     setFullTextSearch("");
   };
 
-  const applyFullTextSeacrh = (textSearch: string) => {
+  const applyFullTextSearch = (textSearch: string) => {
     setFullTextSearch(textSearch);
   };
 
@@ -217,8 +210,8 @@ const Table = <T, _>({
         columns={translatedColumns}
         applyFilters={applyFilters}
         filters={filters}
-        clearFilters={cleatFilters}
-        applyFullTextSeacrh={applyFullTextSeacrh}
+        clearFilters={clearFilters}
+        applyFullTextSeacrh={applyFullTextSearch}
         fullTextSearch={fullTextSearch}
         selectedRows={selectedRows}
         setSelectedRows={setSelectedRows}

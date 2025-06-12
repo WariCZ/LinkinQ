@@ -32,9 +32,9 @@ interface BpmnDiagramProps {
 function mapFieldPrimitiveToFormType(
   type: FieldPrimitiveType
 ): FormFieldType["type"] {
-  if (type.startsWith("link(")) return "select";
-  if (type.startsWith("nlink(")) return "select";
-  if (type.startsWith("lov")) return "select";
+  if (type?.startsWith("link(")) return "select";
+  if (type?.startsWith("nlink(")) return "select";
+  if (type?.startsWith("lov")) return "select";
   if (type === "boolean") return "checkbox";
   if (type === "integer" || type === "bigint") return "number";
   if (type === "datetime") return "datetime";
@@ -50,15 +50,16 @@ export function transformAttributesToFormFields(
 ): FormFieldType[] {
   return Object.entries(attributes).map(([key, value]) => {
     const meta = schema?.[entity]?.fields?.[key];
-    const base: FormFieldType = {
-      ...meta,
+
+    const base = {
       type: mapFieldPrimitiveToFormType(meta?.type),
       field: key,
       label: meta?.label ?? key,
       default: value,
       required: false,
     };
-    return base;
+
+    return base as FormFieldType;
   });
 }
 
@@ -96,7 +97,6 @@ const BpmnDiagram = ({
         container: containerRef.current,
         moddleExtensions: {
           camunda: CustomCamundaModdle,
-          linkinq: {},
           linkinq: {},
         },
         additionalModules: [

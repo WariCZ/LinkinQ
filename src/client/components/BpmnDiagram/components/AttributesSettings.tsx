@@ -3,11 +3,11 @@ import { Button, Label } from "flowbite-react";
 import DynamicForm from "../../DynamicForm";
 import { FormFieldType } from "../../../types/DynamicForm/types";
 import { useModalStore } from "../../Modal/modalStore";
-import { AddField } from "../../DynamicForm/config/components/AddField";
 import { FieldType } from "../../../../lib/entity/types";
 import { FaPlus } from "react-icons/fa";
 import { AppButton } from "../../common/AppButton";
 import { MdDelete } from "react-icons/md";
+import { FieldSelector } from "../../FieldSelector";
 
 interface AttributesSettingsProps {
   entity: string;
@@ -48,7 +48,8 @@ export function AttributesSettings({
           icon={<FaPlus />}
           onClick={() =>
             openModal(
-              <AddField
+              <FieldSelector
+                allowNested={false}
                 fields={availableFields}
                 onAdd={(field) => {
                   const key = field.name ?? "";
