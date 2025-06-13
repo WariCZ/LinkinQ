@@ -199,3 +199,10 @@ div:has(> span > span.errorHighlight) {
 div.datetimepicker {
   min-width: auto !important;
 }
+
+.djs-element.selected .djs-visual > :first-child {
+  stroke: #0e7490 !important;
+  stroke-width: 3px;
+  stroke-opacity: 1;
+  filter: drop-shadow(0 0 3px rgba(14, 116, 144, 0.6));
+}

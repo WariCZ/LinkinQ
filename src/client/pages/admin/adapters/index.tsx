@@ -66,7 +66,7 @@ const Adapters = () => {
               value={searchValue}
               onChange={searchEntity}
               className="w-full"
-              placeholder="Hledat..."
+              placeholder="Search..."
             />
           </div>
           <div>

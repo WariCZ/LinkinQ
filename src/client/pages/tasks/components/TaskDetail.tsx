@@ -18,7 +18,7 @@ export const TaskDetail = (props: TaskDetailProps) => {
     <>
       <div className="flex items-center justify-between px-4 bg-gray-100">
         {data?.guid && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 mt-2">
             <span>ID: </span> <TextInput value={data.guid} readOnly disabled />
           </div>
         )}

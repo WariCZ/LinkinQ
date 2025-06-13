@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import useStore from "../../store";
 import { Button } from "flowbite-react";
 import useDataTable from "../../hooks/useDataTable";
@@ -11,6 +11,7 @@ import { TaskDetail } from "./components/TaskDetail";
 import Table from "../../components/Table";
 import useDataDetail from "../../hooks/useDataDetail";
 import ButtonExecuteBpmn from "../../components/ButtonExecuteBpmn";
+import { useColumnStorage } from "../../components/Table/hooks/useColumnStorage";
 
 const entity = "tasks";
 
@@ -25,88 +26,107 @@ const Tasks = () => {
     null
   );
   const schema = useStore((state) => state.schema);
+  const ready = !!schema[entity]; // ждем пока schema.tasks подгрузится
 
-  const fieldKeys = [
-    "caption",
-    "createtime",
-    "updatetime",
-    "createdby.fullname",
-    "updatedby.fullname",
-    "workflowInstance.name",
-    "workflowInstance.source",
-    "workflowInstance.items",
-    ...(schema[entity]
-      ? Object.keys(schema[entity].fields)
-          .filter((f) => !schema[entity].fields[f].system)
-          .map((f) => {
-            const link = schema[entity].fields[f].link;
-            return link
-              ? link === "users"
-                ? f + ".fullname"
-                : f + ".caption"
-              : f;
-          })
-      : []),
-    "status",
-  ];
+  if (!ready) return null;
+  const allFields = useMemo(() => {
+    if (!schema[entity]) return [];
+    return Object.entries(schema[entity].fields)
+      .filter(
+        ([_, meta]) =>
+          !meta.system || ["caption", "description"].includes(meta.name)
+      )
+      .map(([name, meta]) => {
+        const link = meta.link;
+        return link
+          ? `${name}.${link === "users" ? "fullname" : "caption"}`
+          : name;
+      });
+  }, [schema]);
 
-  const fields = Object.keys(schema[entity].fields).filter((f) => {
-    return (
-      !schema[entity].fields[f].system || f === "caption" || f === "description"
-    );
+  const defaultFieldKeys = useMemo(
+    () => [
+      "caption",
+      "createtime",
+      "updatetime",
+      "createdby.fullname",
+      "updatedby.fullname",
+      "workflowInstance.name",
+      "workflowInstance.source",
+      "workflowInstance.items",
+      "status",
+    ],
+    []
+  );
+  
+  const validDefaultFieldKeys = defaultFieldKeys.filter((key) => {
+    const fieldName = key.split(".")[0];
+    return schema[entity]?.fields?.[fieldName];
   });
+
+  const { selectedColumns } = useColumnStorage("tasks", validDefaultFieldKeys);
+
+  const tableColumns = useMemo(() => {
+    return selectedColumns.map((key) => {
+      const base = schema[entity]?.fields?.[key?.split(".")[0]];
+      return {
+        field: key,
+        label: base?.label ?? key,
+      };
+    });
+  }, [selectedColumns, schema]);
+
+  console.log("selectedColumns", selectedColumns);
+  const columns = useMemo(
+    () => [
+      ...tableColumns,
+      {
+        field: "actions",
+        label: "Actions",
+        cell: ({ row }) => (
+          <td onClick={(e) => e.stopPropagation()}>
+            <ButtonExecuteBpmn
+              showBtnSchema={false}
+              status={row.original.status}
+              wf={row.original.workflowInstance}
+              refresh={refreshDetail}
+            />
+          </td>
+        ),
+      },
+    ],
+    [tableColumns]
+  );
 
   const [
     dataDetail,
-    setDataDataDetail,
-    {
-      loading: loadingDetail,
-      setRecord,
-      refreshDetail,
-      multiUpdate,
-      getSingleRecord,
-    },
+    _setDataDetail,
+    { loading: loadingDetail, setRecord, refreshDetail, multiUpdate },
   ] = useDataDetail(
     {
-      entity: entity,
+      entity,
       guid: guidDetail,
       fields: [
-        ...fields,
-        "workflowInstance.name",
-        "workflowInstance.source",
-        "workflowInstance.items",
-        "status",
-        "createtime",
-        "createdby",
-        "updatetime",
-        "updatedby",
-        "attachments.caption",
+        ...new Set([
+          ...selectedColumns.map((k) => k.split(".")[0]),
+          "workflowInstance.name",
+          "workflowInstance.source",
+          "workflowInstance.items",
+          "status",
+          "createtime",
+          "createdby",
+          "updatetime",
+          "updatedby",
+          "attachments.caption",
+        ]),
       ],
     },
     {} as any
   );
 
-  const columns = [
-    ...fieldKeys,
-    {
-      field: "actions",
-      label: "Actions",
-      cell: ({ row }) => (
-        <td onClick={(e) => e.stopPropagation()}>
-          <ButtonExecuteBpmn
-            showBtnSchema={false}
-            status={row.original.status}
-            wf={row.original.workflowInstance}
-            refresh={refreshDetail}
-          />
-        </td>
-      ),
-    },
-  ];
-
   const [
     data,
-    setData,
+    _setData,
     {
       loading,
       refresh,
@@ -120,8 +140,8 @@ const Tasks = () => {
     },
   ] = useDataTable(
     {
-      entity: entity,
-      fields: fieldKeys,
+      entity,
+      fields: selectedColumns,
       ordering: [{ id: "createtime", desc: true }],
       filter: filters,
     },
@@ -157,6 +177,9 @@ const Tasks = () => {
     }
   }, [modalRequestedGuid, loadingDetail, dataDetail]);
 
+  console.log("🧩 selectedColumns:", selectedColumns);
+  console.log("🧩 allFields:", allFields);
+  console.log("🧩 schema[entity]:", schema[entity]);
   return (
     <div className="mx-3">
       <div className="flex items-center justify-between my-3">

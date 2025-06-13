@@ -210,11 +210,12 @@ function useDataTable<T, U>(
   };
 
   const actualizeData = async ({ guid }: { guid: string }) => {
+    // BE vraci jenom []
     const response = await getSingleRecord({
       entity,
       guid,
-      fields: param.fields?.join() ?? "*",
-      filter: param.filter,
+      // fields: param.fields?.join() ?? "*",
+      // filter: param.filter,
     });
 
     setData((prevData) => {
@@ -241,7 +242,7 @@ function useDataTable<T, U>(
       return [...response.data];
     });
 
-    setTimeout(() => setHighlightedRow([]), 700);
+    setTimeout(() => setHighlightedRow([]), 500);
   };
 
   useEffect(() => {

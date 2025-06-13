@@ -42,6 +42,7 @@ export const EntityDetail = ({
           onClick={() => {
             openModal(<FieldDetail entity={entity} />, {
               title: "Add new field",
+              modalSingle: true
             });
           }}
           size={"xs"}
@@ -61,6 +62,7 @@ export const EntityDetail = ({
             onClick={() => {
               openModal(<DeleteEntity entity={entity} />, {
                 title: "Delete entity",
+                modalSingle: true
               });
             }}
             size="xs"
@@ -77,7 +79,10 @@ export const EntityDetail = ({
           tableConfigKey="entity"
           data={fieldsArray}
           rowClick={(data) =>
-            openModal(<FieldDetail data={data} entity={entity} />)
+            openModal(<FieldDetail data={data} entity={entity} />, {
+              title: "Detail entity",
+              modalSingle: true
+            })
           }
           columns={[
             { field: "name", className: "font-bold" },

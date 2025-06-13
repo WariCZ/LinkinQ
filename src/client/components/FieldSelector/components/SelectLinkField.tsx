@@ -1,8 +1,8 @@
-import { useModalStore } from "../../../../components/Modal/modalStore";
-import useStore from "../../../../store";
-import { FieldType } from "../../../../../lib/entity/types";
+import { useModalStore } from "../../Modal/modalStore";
+import useStore from "../../../store";
+import { FieldType } from "../../../../lib/entity/types";
 import { FiArrowRight } from "react-icons/fi";
-import { getFieldName } from "../../utils/getFieldName";
+import { getFieldName } from "../../../utils";
 
 type SelectLinkFieldProps = {
   entityName: string;

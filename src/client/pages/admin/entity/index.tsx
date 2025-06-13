@@ -39,7 +39,10 @@ const Entity = () => {
             <AppButton
               icon={<FaPlus />}
               onClick={() => {
-                openModal(<AddEntity />, { title: "Add new entity" });
+                openModal(<AddEntity />, {
+                  title: "Add new entity",
+                  modalSingle: true,
+                });
               }}
             >
               Add
@@ -50,7 +53,7 @@ const Entity = () => {
               value={searchValue}
               onChange={searchEntity}
               className="w-full"
-              placeholder="Hledat..."
+              placeholder="Search..."
             />
           </div>
           <div>

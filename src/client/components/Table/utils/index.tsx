@@ -8,10 +8,10 @@ interface GetLabelArgs {
 }
 
 export const getLabel = ({ field, schema, entity }: GetLabelArgs): string => {
-  const ids = field.split(".");
+  const ids = field?.split(".");
   const label: string[] = [];
 
-  ids.forEach((id) => {
+  ids?.forEach((id) => {
     const fieldDef = schema[entity]?.fields?.[id];
     if (!fieldDef) return;
     label.push(fieldDef.label);

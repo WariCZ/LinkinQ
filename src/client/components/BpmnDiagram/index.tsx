@@ -1,59 +1,109 @@
 import React, { useEffect, useRef, useState } from "react";
 import BpmnViewer from "bpmn-js";
 import BpmnModeler from "bpmn-js/lib/Modeler";
-import ContextPadProvider from "./customContextPadProvider";
 import CustomCamundaModdle from "camunda-bpmn-moddle/resources/camunda";
+import { useModalStore } from "../Modal/modalStore";
+import { SettingsWorkflow } from "./components/SettingsWorkflow";
+import { IoSettingsOutline } from "react-icons/io5";
+import { Button } from "flowbite-react";
+import ContextPadProvider from "./customContextPadProvider";
+import { AttributesSettings } from "./components/AttributesSettings";
+import Modeler from "bpmn-js/lib/Modeler";
+import Viewer from "bpmn-js";
+import { defaultDiagram } from "./defaultDiagram";
+import { ModdleElement, Shape } from "bpmn-js/lib/model/Types";
+import { AppButton } from "../common/AppButton";
+import { FaDownload, FaPlus, FaSave } from "react-icons/fa";
+import { EntitySchema, FieldPrimitiveType } from "../../../lib/entity/types";
+import { FormFieldType } from "../../types/DynamicForm/types";
+import useStore from "../../store";
+import "bpmn-js/dist/assets/diagram-js.css";
+import "bpmn-js/dist/assets/bpmn-font/css/bpmn.css";
 
-const defaultDiagram = `
-<?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                  xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
-                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
-                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
-                  xmlns:camunda="http://camunda.org/schema/1.0/bpmn"
-                  xmlns:linkinq="http://linkinq.physter.com"
-                  id="Definitions_1"
-                  targetNamespace="http://bpmn.io/schema/bpmn">
-  <bpmn:process id="Process_1" isExecutable="false" />
-  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1" />
-  </bpmndi:BPMNDiagram>
-</bpmn:definitions>
-`;
+type BpmnCanvas = ReturnType<Modeler["get"]>;
+type BpmnDiagram = Modeler | Viewer;
+interface BpmnDiagramProps {
+  xml: string;
+  onSave?: (xml: string) => void;
+  handleShown?: (canvas: BpmnCanvas, diagram?: Modeler | Viewer) => void;
+  editor?: boolean;
+}
+
+function mapFieldPrimitiveToFormType(
+  type: FieldPrimitiveType
+): FormFieldType["type"] {
+  if (type?.startsWith("link(")) return "select";
+  if (type?.startsWith("nlink(")) return "select";
+  if (type?.startsWith("lov")) return "select";
+  if (type === "boolean") return "checkbox";
+  if (type === "integer" || type === "bigint") return "number";
+  if (type === "datetime") return "datetime";
+  if (type === "password") return "password";
+  if (type === "richtext") return "text";
+  return "text";
+}
+
+export function transformAttributesToFormFields(
+  attributes: Record<string, string>,
+  schema: EntitySchema,
+  entity: string
+): FormFieldType[] {
+  return Object.entries(attributes).map(([key, value]) => {
+    const meta = schema?.[entity]?.fields?.[key];
+
+    const base = {
+      type: mapFieldPrimitiveToFormType(meta?.type),
+      field: key,
+      label: meta?.label ?? key,
+      default: value,
+      required: false,
+    };
+
+    return base as FormFieldType;
+  });
+}
 
 const BpmnDiagram = ({
   xml,
   onSave,
   handleShown,
   editor,
-}: {
-  xml: string;
-  onSave?: (xml: string) => void;
-  handleShown?: (canvas: any, diagram: any) => void;
-  editor?: boolean;
-}) => {
+}: BpmnDiagramProps) => {
+  const { openModal } = useModalStore();
   const containerRef = useRef(null);
   const diagramRef = useRef(null);
+
   const [selectedTask, setSelectedTask] = useState(null);
-  const [attributes, setAttributes] = useState({
-    status: "",
-    assignee: "",
-    formKey: "",
+  const [attributes, setAttributes] = useState<Record<string, string>>({});
+
+  const schema = useStore((state) => state.schema);
+
+  const [settings, setSettings] = useState({
+    filter: "",
+    entity: "",
+    default: false,
   });
 
   useEffect(() => {
+    setSelectedTask(null);
+    setSettings({
+      filter: "",
+      entity: "",
+      default: false,
+    });
+
     if (editor) {
       diagramRef.current = new BpmnModeler({
         container: containerRef.current,
         moddleExtensions: {
           camunda: CustomCamundaModdle,
+          linkinq: {},
         },
         additionalModules: [
-          // Odstraníme paletu
+          // deleted palets
           {
-            __init__: ["contextPadProvider"], // ✅ musí existovat v další řádce
-            contextPadProvider: ["type", ContextPadProvider], // ✅ přetížení defaultního
-            // customContextPadProvider: ["type", ],
+            __init__: ["contextPadProvider"],
+            contextPadProvider: ["type", ContextPadProvider],
             paletteProvider: ["value", null],
           },
         ],
@@ -67,39 +117,84 @@ const BpmnDiagram = ({
           const canvas = diagramRef.current.get("canvas");
           canvas.zoom("fit-viewport");
           handleShown?.(canvas, diagramRef.current);
+
+          const elementRegistry = diagramRef.current.get("elementRegistry");
+          const processElement = elementRegistry.get("Process_1");
+
+          if (processElement) {
+            const attrs = processElement.businessObject.$attrs || {};
+
+            setSettings({
+              filter: attrs["linkinq:filter"] || "",
+              default: attrs["linkinq:default"] === "true",
+              entity: attrs["linkinq:entity"] || "",
+            });
+          }
         })
-        .catch((err) => {
-          console.error("Chyba při importu diagramu:", err);
+        .catch(() => {
+          console.error("Chyba při importu diagramu");
         });
 
-      // Kliknutí na element (Task)
-      diagramRef.current.on("element.click", (event) => {
-        const element = event.element;
-        if (element.type === "bpmn:Task" || element.type === "bpmn:UserTask") {
-          setSelectedTask(element);
-          setAttributes({
-            status: element.businessObject.$attrs["linkinq:status"] || "",
-            assignee: element.businessObject.$attrs["linkinq:assignee"] || "",
-            formKey: element.businessObject.$attrs["camunda:formKey"] || "",
-          });
-        } else {
-          setSelectedTask(null);
-          // setAttributes({});
+      // Click on an element (Task)
+      diagramRef.current.on(
+        "element.click",
+        (event: { element: Shape & { businessObject: ModdleElement } }) => {
+          const element = event.element;
+
+          if (
+            element.type === "bpmn:Task" ||
+            element.type === "bpmn:UserTask"
+          ) {
+            setSelectedTask(element);
+
+            const attrs = element.businessObject.$attrs || {};
+            const newAttributes: Record<string, string> = {};
+
+            Object.entries(attrs as Record<string, string>).forEach(
+              ([key, value]) => {
+                if (key.startsWith("linkinq:") || key === "camunda:formKey") {
+                  const shortKey = key
+                    .replace("linkinq:", "")
+                    .replace("camunda:", "");
+                  newAttributes[shortKey] = value;
+                }
+              }
+            );
+            setAttributes(newAttributes);
+          } else if (element.type === "bpmn:StartEvent") {
+            setSelectedTask(element);
+
+            const attrs = element.businessObject.$attrs || {};
+            const newAttributes: Record<string, string> = {};
+
+            Object.entries(attrs as Record<string, string>).forEach(
+              ([key, value]) => {
+                if (key.startsWith("linkinq:") || key === "camunda:formKey") {
+                  const shortKey = key
+                    .replace("linkinq:", "")
+                    .replace("camunda:", "");
+                  newAttributes[shortKey] = value;
+                }
+              }
+            );
+            setAttributes(newAttributes);
+          } else {
+            setSelectedTask(null);
+          }
         }
-      });
+      );
 
       return () => {
         diagramRef.current?.destroy();
         diagramRef.current = null;
       };
     } else {
-      // Inicializace vieweru
+      // Viewer initialization
       diagramRef.current = new BpmnViewer({
         container: containerRef.current,
       });
 
-      debugger;
-      // Načtení diagramu
+      // Diagram loading
       if (xml) {
         diagramRef.current
           .importXML(xml)
@@ -108,12 +203,12 @@ const BpmnDiagram = ({
             canvas.zoom("fit-viewport");
             handleShown?.(canvas, diagramRef.current);
           })
-          .catch((err) => {
-            console.error("Chyba při načítání diagramu:", err);
+          .catch(() => {
+            console.error("Chyba při načítání diagramu:");
           });
       }
 
-      // Úklid při unmountu
+      // Cleanup on unmount
       return () => {
         if (diagramRef.current) {
           diagramRef.current.destroy();
@@ -135,73 +230,179 @@ const BpmnDiagram = ({
 
   const handleSave = async () => {
     try {
-      debugger;
+      const modeling = diagramRef.current.get("modeling");
+      const elementRegistry = diagramRef.current.get("elementRegistry");
+
+      const processElement = elementRegistry.get("Process_1");
+
+      if (processElement) {
+        const newAttributes = {
+          "linkinq:filter": settings.filter || "",
+          "linkinq:default": settings.default ? "true" : "false",
+        };
+
+        modeling.updateProperties(processElement, newAttributes);
+      }
+
       const { xml } = await diagramRef.current.saveXML({ format: true });
+
       onSave?.(xml);
     } catch (err) {
       console.error("Chyba při ukládání:", err);
     }
   };
 
-  const handleAttributeChange = (e) => {
-    setAttributes({
-      ...attributes,
-      [e.target.name]: e.target.value,
+  const handleExport = async () => {
+    try {
+      if (!diagramRef.current) return;
+
+      const { xml } = await diagramRef.current.saveXML({ format: true });
+      const blob = new Blob([xml], { type: "application/xml" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "diagram.bpmn";
+      a.click();
+
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Export error:", err);
+    }
+  };
+
+  const handleAttributesChange = (data: Record<string, any>) => {
+    setAttributes((prev) => {
+      const merged = { ...prev, ...data };
+
+      if (selectedTask && diagramRef.current) {
+        const modeling = diagramRef.current.get("modeling");
+        const currentAttrs = selectedTask.businessObject.$attrs || {};
+        const newAttrs = { ...currentAttrs };
+
+        for (const [name, value] of Object.entries(data)) {
+          const key =
+            name === "formKey" ? "camunda:formKey" : `linkinq:${name}`;
+          if (value !== undefined && value !== "") {
+            newAttrs[key] = value;
+          } else {
+            delete newAttrs[key];
+          }
+        }
+
+        modeling.updateProperties(selectedTask, newAttrs);
+      }
+
+      return merged;
     });
   };
 
+  const removeAttribute = (fieldKey: string) => {
+    if (!selectedTask || !diagramRef.current) return;
+
+    const modeling = diagramRef.current.get("modeling");
+    const bo = selectedTask.businessObject;
+
+    const fullKey =
+      fieldKey === "formKey" ? "camunda:formKey" : `linkinq:${fieldKey}`;
+
+    if (bo.$attrs && bo.$attrs[fullKey]) {
+      delete bo.$attrs[fullKey];
+    }
+
+    modeling.updateProperties(selectedTask, {
+      [fullKey]: undefined,
+    });
+
+    setAttributes((prev) => {
+      const updated = { ...prev };
+      delete updated[fieldKey];
+      return updated;
+    });
+  };
   return (
     <div>
       {editor ? (
         <div style={{ marginBottom: "1rem" }}>
-          <button onClick={handleAddTask}>➕ Přidat Task</button>
-          <button onClick={handleSave} style={{ marginLeft: "1rem" }}>
-            💾 Uložit XML
-          </button>
+          <div className="flex justify-between items-center">
+            <div className="flex gap-2">
+              <AppButton
+                icon={<FaPlus />}
+                iconPosition="left"
+                color="light"
+                outline
+                onClick={handleAddTask}
+              >
+                Add Task
+              </AppButton>
+              <AppButton
+                icon={<FaSave />}
+                iconPosition="left"
+                color="light"
+                outline
+                onClick={handleSave}
+              >
+                Save XML
+              </AppButton>
+              <AppButton
+                icon={<FaDownload />}
+                iconPosition="left"
+                color="light"
+                outline
+                onClick={handleExport}
+              >
+                Export BPMN
+              </AppButton>
+            </div>
+            <Button
+              color="light"
+              onClick={() => {
+                openModal(
+                  <SettingsWorkflow
+                    setSettings={setSettings}
+                    defaultValues={settings}
+                  />,
+                  { title: "Settings workflow" }
+                );
+                openModal(
+                  <SettingsWorkflow
+                    setSettings={setSettings}
+                    defaultValues={settings}
+                  />,
+                  { title: "Settings workflow" }
+                );
+              }}
+            >
+              <IoSettingsOutline />
+            </Button>
+          </div>
         </div>
       ) : null}
       <div
         ref={containerRef}
-        style={{ width: "100%", height: "600px", border: "1px solid #ccc" }}
+        className="relative w-full border border-gray-300 cursor-pointer"
+        style={{
+          height: "65vh",
+          backgroundImage: "radial-gradient(#ccc 1px, transparent 0)",
+          backgroundSize: "20px 20px",
+          backgroundPosition: "center",
+        }}
       />
-      {/* Formulář pro editaci atributů */}
+
       {selectedTask && (
-        <div style={{ marginTop: "1rem" }}>
-          <h3>Editace atributů pro Task: {selectedTask.id}</h3>
-          <label>
-            Status:
-            <input
-              type="text"
-              name="status"
-              value={attributes.status}
-              onChange={handleAttributeChange}
-            />
-          </label>
-          <br />
-          <label>
-            Assignee:
-            <input
-              type="text"
-              name="assignee"
-              value={attributes.assignee}
-              onChange={handleAttributeChange}
-            />
-          </label>
-          <br />
-          <label>
-            Form Key:
-            <input
-              type="text"
-              name="formKey"
-              value={attributes.formKey}
-              onChange={handleAttributeChange}
-            />
-          </label>
-          <br />
-          {/* <button onClick={handleSaveAttributes} style={{ marginTop: "1rem" }}>
-            Uložit atributy
-          </button> */}
-        </div>
+        <AttributesSettings
+          entity={settings.entity}
+          attributes={attributes}
+          setAttributes={setAttributes}
+          fields={transformAttributesToFormFields(
+            attributes,
+            schema as unknown as EntitySchema,
+            settings.entity
+          )}
+          onChange={handleAttributesChange}
+          selectedTask={selectedTask}
+          removeAttribute={removeAttribute}
+        />
       )}
     </div>
   );

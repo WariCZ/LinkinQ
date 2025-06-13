@@ -1,9 +1,9 @@
 import { Button } from "flowbite-react";
 import { useModalStore } from "../../Modal/modalStore";
-import { AddField } from "../config/components/AddField";
 import { FormFieldType, SectionType } from "../../../types/DynamicForm/types";
 import { FieldPrimitiveType, FieldType } from "../../../../lib/entity/types";
 import { useFormConfigStore } from "../_store";
+import { FieldSelector } from "../../FieldSelector";
 
 type AddFieldModalProps = {
   fields: FieldType[];
@@ -17,6 +17,7 @@ export const AddFieldModal = ({ fields }: AddFieldModalProps) => {
     type: FieldPrimitiveType
   ): FormFieldType["type"] {
     if (type.startsWith("link(")) return "select";
+    if (type.startsWith("nlink(")) return "select";
     if (type === "boolean") return "checkbox";
     if (type === "integer" || type === "bigint") return "number";
     if (type === "datetime") return "datetime";
@@ -30,7 +31,7 @@ export const AddFieldModal = ({ fields }: AddFieldModalProps) => {
       color="alternative"
       onClick={() =>
         openModal(
-          <AddField
+          <FieldSelector
             fields={fields}
             onAdd={(field) => {
               const newField = {

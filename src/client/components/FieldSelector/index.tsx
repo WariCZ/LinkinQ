@@ -1,18 +1,24 @@
-import { useModalStore } from "../../../../components/Modal/modalStore";
-import { FieldType } from "../../../../../lib/entity/types";
 import { TextInput } from "flowbite-react";
 import { useState } from "react";
-import { SelectLinkField } from "./SelectLinkField";
 import { FiArrowRight } from "react-icons/fi";
-import { getFieldName } from "../../utils/getFieldName";
+import { FieldType } from "../../../lib/entity/types";
+import { useModalStore } from "../Modal/modalStore";
+import { SelectLinkField } from "./components/SelectLinkField";
+import { getFieldName } from "../../utils";
 
-interface AddFieldProps {
+interface FieldSelectorProps {
   fields: FieldType[];
   onAdd?: (field: FieldType) => void;
   usedFields?: Set<string>;
+  allowNested?: boolean;
 }
 
-export const AddField = ({ fields, onAdd, usedFields }: AddFieldProps) => {
+export const FieldSelector = ({
+  fields,
+  onAdd,
+  usedFields,
+  allowNested = true,
+}: FieldSelectorProps) => {
   const { openModal, closeModal } = useModalStore();
   const [search, setSearch] = useState("");
 
@@ -33,7 +39,7 @@ export const AddField = ({ fields, onAdd, usedFields }: AddFieldProps) => {
     const newPath = [...path, field.name ?? ""];
     const newLabelParts = [...labelParts, field.label ?? ""];
 
-    if (isLink && entityName) {
+    if (isLink && entityName && allowNested) {
       openModal(
         <SelectLinkField
           entityName={entityName}
@@ -77,7 +83,7 @@ export const AddField = ({ fields, onAdd, usedFields }: AddFieldProps) => {
         className="w-full"
         placeholder="Search..."
       />
-      {availableFields.map((field, index) => (
+      {availableFields.map((field) => (
         <button
           key={field.name}
           className="border rounded px-3 py-2 hover:bg-blue-50 text-left w-full"
@@ -88,9 +94,11 @@ export const AddField = ({ fields, onAdd, usedFields }: AddFieldProps) => {
               <div className="font-semibold">{field.label}</div>
               <div className="text-sm text-gray-500">{field.description}</div>
             </div>
-            {field.type.startsWith("link(") && (
-              <FiArrowRight className="text-gray-400 text-lg" />
-            )}
+            {allowNested &&
+              (field.type.startsWith("link(") ||
+                field.type.startsWith("nlink(")) && (
+                <FiArrowRight className="text-gray-400 text-lg" />
+              )}
           </div>
         </button>
       ))}

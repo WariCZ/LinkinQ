@@ -22,7 +22,7 @@ interface TableRowProps<T> {
   highlightedRow?: string[];
   deleteRecord?: (guid: string) => Promise<void>;
   selectable?: boolean;
-  rowMenuEnabled?: boolean
+  rowMenuEnabled?: boolean;
 }
 
 export const TableRow = <T,>({
@@ -34,7 +34,7 @@ export const TableRow = <T,>({
   highlightedRow = [],
   deleteRecord,
   selectable,
-  rowMenuEnabled = true
+  rowMenuEnabled = true,
 }: TableRowProps<T>) => {
   const guid = row.original?.guid;
   const isSelected = selectedRows.includes(guid);
@@ -45,8 +45,9 @@ export const TableRow = <T,>({
       onClick={() => rowClick && rowClick(row.original)}
       key={row.id + "-" + i}
       data-guid={guid}
-      className={`hover:bg-gray-100 dark:hover:bg-gray-600 ${isHighlighted ? "highlight" : ""
-        }`}
+      className={`hover:bg-gray-100 dark:hover:bg-gray-600 ${
+        isHighlighted ? "highlight" : ""
+      }`}
     >
       {selectable ? (
         <td className="px-4">
@@ -71,74 +72,81 @@ export const TableRow = <T,>({
       {row?.getVisibleCells().map((cell) => (
         <td
           key={cell.id}
-          style={{ paddingLeft: `${row.depth * 20}px` }}
-          className="px-4 py-2 whitespace-nowrap text-ellipsis overflow-hidden max-w-80 cursor-pointer"
+          // style={{ paddingLeft: `${row.depth * 20}px` }}
+          className="px-2 py-2 whitespace-nowrap text-ellipsis overflow-hidden max-w-80 cursor-pointer"
           onClick={() => rowClick?.(row.original)}
         >
-          {cell.column.id === 'expander' && row.getCanExpand() ? (
+          {cell.column.id === "expander" && row.getCanExpand() ? (
             <button onClick={row.getToggleExpandedHandler()} className="mr-2">
-              {row.getIsExpanded() ? '▼' : '▶'}
+              {row.getIsExpanded() ? "▼" : "▶"}
             </button>
           ) : null}
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </td>
       ))}
-      {rowMenuEnabled ? (<td className="px-4 pt-2 text-right" onClick={(e) => e.stopPropagation()}>
-        <RowMenu
-          key={row.id + "-" + i}
-          onColorSelect={(color) => console.log("color", color)}
-          menuItems={[
-            {
-              label: "Duplikovat…",
-              icon: <FaCopy />,
-              onSelect: () => console.log("Duplikovat…"),
-            },
-            {
-              label: "Úkoly",
-              icon: <FaTasks />,
-              subItems: [
-                {
-                  label: "Nový úkol…",
-                  icon: <FaPlus />,
-                  onSelect: () => console.log("new"),
-                },
-                {
-                  label: "Hromadné úkoly…",
-                  onSelect: () => console.log("Hromadné"),
-                },
-                {
-                  label: "Přiřazené úkoly…",
-                  onSelect: () => console.log("Přiřazené"),
-                },
-              ],
-            },
-            {
-              label: "Všechny přílohy…",
-              icon: <FaPaperclip />,
-              onSelect: () => console.log("přílohy…"),
-            },
-            {
-              label: "Sdílet…",
-              icon: <FaShare />,
-            },
-            {
-              label: "Exportovat…",
-              icon: <FaFileExport />,
-            },
-            {
-              label: "Odstranit",
-              icon: <FaTrash />,
-              danger: true,
-              onSelect: async () => {
-                if (deleteRecord) {
-                  await deleteRecord(guid);
-                  setSelectedRows((prev) => prev.filter((id) => id !== guid));
-                }
+      {rowMenuEnabled ? (
+        <td
+          className="px-4 pt-2 text-right"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <RowMenu
+            key={row.id + "-" + i}
+            onColorSelect={(color) => console.log("color", color)}
+            menuItems={[
+              {
+                label: "Duplikovat…",
+                icon: <FaCopy />,
+                onSelect: () => console.log("Duplikovat…"),
               },
-            },
-          ]}
-        />
-      </td>) : <td></td>}
+              {
+                label: "Úkoly",
+                icon: <FaTasks />,
+                subItems: [
+                  {
+                    label: "Nový úkol…",
+                    icon: <FaPlus />,
+                    onSelect: () => console.log("new"),
+                  },
+                  {
+                    label: "Hromadné úkoly…",
+                    onSelect: () => console.log("Hromadné"),
+                  },
+                  {
+                    label: "Přiřazené úkoly…",
+                    onSelect: () => console.log("Přiřazené"),
+                  },
+                ],
+              },
+              {
+                label: "Všechny přílohy…",
+                icon: <FaPaperclip />,
+                onSelect: () => console.log("přílohy…"),
+              },
+              {
+                label: "Sdílet…",
+                icon: <FaShare />,
+              },
+              {
+                label: "Exportovat…",
+                icon: <FaFileExport />,
+              },
+              {
+                label: "Odstranit",
+                icon: <FaTrash />,
+                danger: true,
+                onSelect: async () => {
+                  if (deleteRecord) {
+                    await deleteRecord(guid);
+                    setSelectedRows((prev) => prev.filter((id) => id !== guid));
+                  }
+                },
+              },
+            ]}
+          />
+        </td>
+      ) : (
+        <td></td>
+      )}
     </tr>
   );
 };
