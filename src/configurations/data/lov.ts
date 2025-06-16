@@ -34,6 +34,12 @@ const defaultData = ({ env }) => ({
     },
     {
       guid: uuid(),
+      caption: "Menu",
+      value: 3,
+      lov: "appConfigurationsKind",
+    },
+    {
+      guid: uuid(),
       caption: "Nizka",
       value: 1,
       lov: "tasksPriority",

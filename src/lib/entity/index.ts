@@ -236,7 +236,8 @@ export class Entity {
         } else if (columnDef.type == "datetime") {
           column = table.datetime(columnName);
         } else if (columnDef.type == "richtext") {
-          column = table.specificType(columnName, "jsonb[]");
+          // column = table.specificType(columnName, "jsonb[]");
+          column = table.jsonb(columnName);
         } else if (columnDef.type == "jsonb") {
           column = table.jsonb(columnName);
         } else if (columnDef.type == "boolean") {
@@ -488,6 +489,7 @@ export class Entity {
       }
     } catch (e) {
       debugger;
+      throw e;
     }
   }
 

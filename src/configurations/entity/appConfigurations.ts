@@ -16,6 +16,17 @@ const entityFields: EntitySchema = {
         label: "Key",
         description: "Key",
       },
+      default: {
+        type: "boolean",
+        label: "Default",
+        description: "Default",
+      },
+      active: {
+        type: "boolean",
+        label: "Active",
+        description: "Active",
+        default: true,
+      },
     },
   },
 };

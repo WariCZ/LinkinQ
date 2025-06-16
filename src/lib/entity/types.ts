@@ -42,7 +42,7 @@ export type FieldType = {
   name?: string;
   description?: string;
   isRequired?: boolean;
-  default?: string | number;
+  default?: string | number | boolean;
   isRelation?: string;
   isArray?: boolean;
   isUnique?: boolean;

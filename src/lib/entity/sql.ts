@@ -202,7 +202,7 @@ export class Sql {
           const gl = await this.getLinks(entity, dataItem);
           let joinsIds = gl.joinsIds;
           dataItem = gl.dataItem;
-          //
+
           const ret: any = await this.#db(entity)
             .addParams({ data: gl.data })
             .insert(dataItem);

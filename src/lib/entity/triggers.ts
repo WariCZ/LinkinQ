@@ -279,6 +279,11 @@ export class Triggers {
               if (fields[f].type == "password") {
                 d[f] = await hashPassword(d[f]);
               }
+              if (fields[f].type == "jsonb" || fields[f].type == "richtext") {
+                if (Array.isArray(d[f])) {
+                  d[f] = JSON.stringify(d[f]);
+                }
+              }
             }
           }
         }
