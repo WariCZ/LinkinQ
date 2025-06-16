@@ -737,6 +737,7 @@ export const getData = async ({
   }
 
   if (structure) {
+    const PARENT_FIELD = "parent";
     const ids = data.map((d) => d.id);
 
     const treeList = await knex
@@ -745,23 +746,31 @@ export const getData = async ({
         // ROOT: najdi všechny tasky bez parenta, ale v daném projektu
         cte
           .setUser({ id: 1 })
-          .select("id", "parent", knex.raw("1 as depth").setUser({ id: 1 }))
-          .from("tasks")
-          .whereIn("id", ids)
-          .whereNull("parent")
+          .select(
+            MAIN_ID,
+            PARENT_FIELD,
+            knex.raw("1 as depth").setUser({ id: 1 })
+          )
+          .from(entity)
+          .whereIn(MAIN_ID, ids)
+          .whereNull(PARENT_FIELD)
 
           // REKURZE: najdi childy k uzlům ze stromu
           .unionAll(function () {
             this.select(
-              "t.id",
-              "t.parent",
+              `${MAIN_TABLE_ALIAS}.${MAIN_ID}`,
+              `${MAIN_TABLE_ALIAS}.${PARENT_FIELD}`,
               knex.raw("alias_tree.depth + 1").setUser({ id: 1 })
             )
-              .from("tasks as t")
-              .join("alias_tree", "t.parent", "alias_tree.id");
+              .from(`${entity} as ${MAIN_TABLE_ALIAS}`)
+              .join(
+                "alias_tree",
+                `${MAIN_TABLE_ALIAS}.${PARENT_FIELD}`,
+                "alias_tree.id"
+              );
           });
       })
-      .select("*")
+      .select([MAIN_ID, PARENT_FIELD, "depth"])
       .from("alias_tree")
       .orderBy("depth", "asc");
 
@@ -779,7 +788,7 @@ function buildTree(tree, fullData) {
 
   const roots = [];
 
-  for (const { id, parent } of tree) {
+  for (const { id, parent, depth } of tree) {
     const data: any = idToDataMap.get(id);
 
     if (!data) continue; // ochrana: pokud chybí fullData, přeskočíme
@@ -788,6 +797,7 @@ function buildTree(tree, fullData) {
       ...data,
       childrenLength: 0,
       children: [],
+      depth: depth,
     };
 
     idToNode.set(id, node);

@@ -190,6 +190,7 @@ const useStore = create<StoreState>((set, get) => ({
         },
         {}
       );
+
       set({ appConfigurations: configMap });
     } catch (error) {
       console.error("Failed to fetch app configurations", error);

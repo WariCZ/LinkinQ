@@ -1,6 +1,6 @@
-import useDataTable from "../../hooks/useDataTable";
+import useDataTable from "../../../hooks/useDataTable";
 
-export function TreeExample() {
+export default function TreeExample() {
   const [
     data,
     setData,
@@ -18,7 +18,7 @@ export function TreeExample() {
   ] = useDataTable(
     {
       entity: "tasks",
-      fields: ["caption"],
+      fields: ["caption", "createdby.fullname"],
       ordering: [{ id: "createtime", desc: true }],
       structure: "topdown",
       //   filter: filters,
@@ -26,6 +26,7 @@ export function TreeExample() {
     []
   );
 
+  console.log("tree", data);
   return (
     <div>
       <TestTree data={data}></TestTree>
@@ -40,6 +41,7 @@ const TestTree = ({ data }: any) => {
         <li key={node.guid} data-guid={node.guid}>
           <div className="font-medium">
             {node.caption}{" "}
+            <span className="text-sm text-gray-500">({node.guid})</span>
             <span className="text-sm text-gray-500">({node.status})</span>
           </div>
           {node.children.length > 0 && <TestTree data={node.children} />}
