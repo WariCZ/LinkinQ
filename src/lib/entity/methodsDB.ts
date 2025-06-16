@@ -72,7 +72,8 @@ export const whereQueries = ({
         modelFields.fields &&
         modelFields.fields[f] &&
         modelFields.fields[f].link &&
-        !modelFields.fields[f].nlinkTable;
+        !modelFields.fields[f].nlinkTable &&
+        !modelFields.fields[f].lov;
 
       if (f && f.indexOf(".") == -1 && isLink) {
         const newF = f + ".guid";
