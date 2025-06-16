@@ -15,3 +15,9 @@ export type PageflowItemTypeClient = PageflowItemType & {
   path?: string;
   children?: PageflowRecordClient;
 };
+
+export type AggregateType = {
+  type: "sum" | "avg" | "max" | "min" | "count";
+  field: string;
+  alias?: string;
+};

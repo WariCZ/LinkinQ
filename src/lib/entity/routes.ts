@@ -10,6 +10,7 @@ import { addDefaultFields } from "./utils";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { AggregateType } from "../../types/share";
 
 export type ServerSideOutputType = {
   time: string;
@@ -23,6 +24,25 @@ const upload = multer(); // Ukládá soubory pouze do paměti
 export class EntityRoutes extends Entity {
   config(): Router {
     const router = express.Router();
+
+    const parseAggregateParam = (str): AggregateType[] => {
+      return str
+        .split(",")
+        .map((item) => {
+          const parts = item.split(":");
+
+          if (parts.length < 2) return null;
+
+          const [type, field, alias] = parts;
+
+          return {
+            type: type.trim().toLowerCase(),
+            field: field.trim(),
+            ...(alias ? { alias: alias.trim() } : {}),
+          };
+        })
+        .filter(Boolean); // odstraní null/undefined
+    };
 
     router.post("/run-code", async (req: Request, res: Response) => {
       try {
@@ -137,7 +157,9 @@ export class EntityRoutes extends Entity {
             });
 
             const fields = (
-              req.query.__fields ? req.query.__fields + ",guid,id" : "*"
+              req.query.__fields
+                ? req.query.__fields + (req.query.__aggregate ? "" : ",guid")
+                : "*"
             ).split(",");
 
             const orderBy =
@@ -162,6 +184,12 @@ export class EntityRoutes extends Entity {
               req.query.__structure ? req.query.__structure : undefined
             ) as "topdown" | undefined;
 
+            const aggregate = (
+              req.query.__aggregate
+                ? parseAggregateParam(req.query.__aggregate)
+                : undefined
+            ) as AggregateType[] | undefined;
+
             // const structure = "topdown" as "topdown" | undefined;
             if (!(!structure || structure === "topdown")) {
               throw `Query with structure ${structure} is not supported `;
@@ -175,6 +203,7 @@ export class EntityRoutes extends Entity {
               limit,
               offset,
               structure,
+              aggregate,
               where: _.omit(req.query as any, [
                 "entity",
                 "__fields",
@@ -183,6 +212,7 @@ export class EntityRoutes extends Entity {
                 "__limit",
                 "__offset",
                 "__structure",
+                "__aggregate",
               ]),
             });
 

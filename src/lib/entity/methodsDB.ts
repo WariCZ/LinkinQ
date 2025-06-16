@@ -4,6 +4,7 @@ import { EntitySchema, Rule } from "./types";
 import { Knex } from "knex";
 import { dbType } from "./sql";
 import { User } from "../auth";
+import { AggregateType } from "../../types/share";
 
 type SelectEntityType = {
   entity: string;
@@ -19,6 +20,8 @@ type SelectEntityType = {
   limit?: number;
   offset?: number;
   structure?: "topdown";
+  aliases?: Record<string, string>;
+  aggregate?: AggregateType[];
 };
 
 export const whereQueries = ({
@@ -170,9 +173,18 @@ export const getQueries = ({
       throw new Error(`Entity ${entity} not found in Metamodel`);
     }
     const queries: Record<string, SelectEntityType> = {};
+    const aliases = {};
+
+    fieldsArr.map((f) => {
+      const fa = /(.*):(.*)/gm.exec(fieldsArr[0]);
+      if (fa && fa[1] && fa[2]) {
+        aliases[fa[1]] = fa[2];
+      }
+    });
 
     let fieldsArrSel = fieldsArr
       .map((f) => {
+        f = f.replace(/(.*):.*/gm, "$1"); // Sloupec ma alias
         let onlyIds = false;
         const isNlink =
           f &&
@@ -263,9 +275,9 @@ export const getQueries = ({
       .filter((f) => f);
     // odfiltruju nlinky
     fieldsArrSel = _.uniq(fieldsArrSel);
-    return { entity, fieldsArr: fieldsArrSel, where, queries, user };
+    return { entity, fieldsArr: fieldsArrSel, where, queries, user, aliases };
   } else {
-    return { entity, fieldsArr, where, user };
+    return { entity, fieldsArr, where, user, aliases: {} };
   }
 };
 
@@ -526,6 +538,96 @@ const addWhereToQuery = ({ query, conditions }: any) => {
   });
 };
 
+const applyAggregate = (
+  aggregate: AggregateType[],
+  query: Knex.QueryBuilder
+) => {
+  // let { type, field, alias } = aggregate;
+  aggregate.forEach(({ type, field, alias }) => {
+    alias = alias || `${type}_${field}`;
+
+    switch (type) {
+      case "sum":
+        query.sum(`${MAIN_TABLE_ALIAS}.${field} as ${alias}`);
+        break;
+      case "avg":
+        query.avg(`${MAIN_TABLE_ALIAS}.${field} as ${alias}`);
+        break;
+      case "max":
+        query.max(`${MAIN_TABLE_ALIAS}.${field} as ${alias}`);
+        break;
+      case "min":
+        query.min(`${MAIN_TABLE_ALIAS}.${field} as ${alias}`);
+        break;
+      case "count":
+        query.count(`${MAIN_TABLE_ALIAS}.${field} as ${alias}`);
+        break;
+      // case 'raw':
+      //   query.select(knex.raw(`${field} as ${alias}`)); // např. field = 'SUM(price + tax)'
+      //   break;
+      default:
+        throw new Error(`Unsupported aggregate type: ${type}`);
+    }
+  });
+};
+const getGroup = ({
+  schema,
+  query,
+  groupField,
+  entity,
+  i,
+}: {
+  schema: EntitySchema;
+  query: Knex.QueryBuilder<any, any>;
+  groupField: string;
+  entity: string;
+  i: number;
+}) => {
+  if (groupField.indexOf(".") > -1) {
+    const modelFields = schema[entity];
+    let oSplit = groupField.split(".");
+    const field = oSplit[0];
+    oSplit.shift();
+
+    const isNlink =
+      field &&
+      modelFields.fields &&
+      modelFields.fields[field] &&
+      modelFields.fields[field].type &&
+      modelFields.fields[field].type.indexOf("nlink(") > -1;
+    if (isNlink) {
+      throw "Groupby with type nlink is not supported";
+    }
+    const fieldType = modelFields.fields[field];
+
+    const alias = `group_${groupField.replace(/\./g, "_")}_${i}`;
+
+    // query.join(`users as order`, `t.createdby`, `order.id`);
+    // query.orderBy("u.fullname", isDesc ? "desc" : "asc");
+
+    query.join(
+      `${fieldType.link} as ${alias}`,
+      `${MAIN_TABLE_ALIAS}.${field}`,
+      `${alias}.id`
+    );
+
+    if (oSplit.length > 1) {
+      getGroup({
+        schema,
+        query,
+        entity: fieldType.link,
+        groupField: oSplit.join("."),
+        i,
+      });
+    } else {
+      query.groupBy(`${MAIN_TABLE_ALIAS}.${field}`);
+      query.groupBy(`${alias}.${oSplit[0]}`);
+    }
+  } else {
+    query.groupBy(`${MAIN_TABLE_ALIAS}.${groupField}`);
+  }
+};
+
 const getOrder = ({
   schema,
   query,
@@ -596,6 +698,7 @@ export const getData = async ({
   fieldsArr,
   queries,
   where,
+  aliases,
   nJoin,
   nJoinDirection,
   orderBy,
@@ -605,6 +708,7 @@ export const getData = async ({
   offset,
   structure,
   knex,
+  aggregate,
 }: SelectEntityType & { knex: Knex; db: dbType; schema: EntitySchema }) => {
   let query: Knex.QueryBuilder;
 
@@ -624,7 +728,15 @@ export const getData = async ({
         .whereIn(nJoin + ".source", where ? (where.id as any) : [-1]);
     }
   } else {
-    query = db(entity).select(fieldsArr.map((f) => `${MAIN_TABLE_ALIAS}.${f}`));
+    query = db(entity).select(
+      fieldsArr.map((f) => {
+        if (aliases && aliases[f]) {
+          return `${MAIN_TABLE_ALIAS}.${f} as ${aliases[f]}`;
+        } else {
+          return `${MAIN_TABLE_ALIAS}.${f}`;
+        }
+      })
+    );
 
     if (orderBy) {
       orderBy.map((o, i) => {
@@ -639,16 +751,35 @@ export const getData = async ({
     }
 
     if (groupBy) {
-      groupBy.map((o, i) => {
-        getOrder({
-          entity,
-          orderField: o,
-          query,
-          schema,
-          i,
+      if (aggregate) {
+        debugger;
+        applyAggregate(aggregate, query);
+        groupBy.map((a, i) => {
+          getGroup({
+            entity,
+            groupField: a,
+            query,
+            schema,
+            i,
+          });
         });
-      });
-      // query.select(groupFields);
+        // applyAggregates(aggregate, query);
+        // query.groupBy([
+        //   "t.status",
+        //   "t.createdby",
+        //   "order_createdby_fullname_1.fullname",
+        // ]);
+      } else {
+        groupBy.map((o, i) => {
+          getOrder({
+            entity,
+            orderField: o,
+            query,
+            schema,
+            i,
+          });
+        });
+      }
     }
 
     if (limit) {
@@ -732,6 +863,9 @@ export const getData = async ({
   }
 
   if (groupBy) {
+    if (aggregate) {
+      return data;
+    }
     const groupedData = buildGroupBy(data, groupBy);
     return groupedData;
   }

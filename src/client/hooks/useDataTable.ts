@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { httpRequest, getSingleRecord } from "../services/httpBase";
 import _ from "lodash";
 import { useDataCommon } from "./useDataCommon";
+import { AggregateType } from "../../types/share";
 
 const DEFAULT_LIMIT = 50;
 
@@ -11,8 +12,9 @@ function useDataTable<T, U>(
     fields?: string[];
     filter?: Object;
     limit?: number;
-    structure?: "topdown";
     groupby?: string[];
+    structure?: "topdown";
+    aggregate?: AggregateType[];
     ordering?: {
       id: string;
       desc: boolean;
@@ -56,6 +58,18 @@ function useDataTable<T, U>(
     return () => eventSource.close();
   }, []);
 
+  function stringifyAggregateParam(aggregates) {
+    if (!Array.isArray(aggregates)) return undefined;
+
+    return aggregates
+      .map(({ type, field, alias }) => {
+        if (!type || !field) return null;
+        return alias ? `${type}:${field}:${alias}` : `${type}:${field}`;
+      })
+      .filter(Boolean)
+      .join(",");
+  }
+
   const getTableRecords = ({
     entity,
     fields,
@@ -64,6 +78,7 @@ function useDataTable<T, U>(
     groupby,
     limit,
     structure,
+    aggregate,
     offset,
   }: {
     entity: string;
@@ -73,6 +88,7 @@ function useDataTable<T, U>(
     groupby?: string;
     limit?: number;
     structure?: "topdown";
+    aggregate?: AggregateType[];
     offset?: number;
   }) =>
     httpRequest({
@@ -85,6 +101,7 @@ function useDataTable<T, U>(
         __limit: limit,
         __offset: offset,
         __structure: structure,
+        __aggregate: stringifyAggregateParam(aggregate),
         ...filter,
       },
     });
@@ -97,6 +114,7 @@ function useDataTable<T, U>(
     groupby,
     limit,
     structure,
+    aggregate,
     offset,
   }: {
     entity: string;
@@ -104,6 +122,7 @@ function useDataTable<T, U>(
     filter?: Object;
     limit?: number;
     structure?: "topdown";
+    aggregate?: AggregateType[];
     groupby?: string[];
     offset?: number;
     ordering?: {
@@ -120,6 +139,7 @@ function useDataTable<T, U>(
         ordering: ordering?.map((o) => o.id + (o.desc ? "-" : "")).join(","),
         groupby: groupby.join(","),
         limit: limit || DEFAULT_LIMIT,
+        aggregate: aggregate,
         structure: structure,
         offset: offset,
       });
@@ -149,6 +169,7 @@ function useDataTable<T, U>(
     entity?: string;
     limit?: number;
     structure?: "topdown";
+    aggregate?: AggregateType[];
     offset?: number;
     groupby?: string[];
     ordering?: {
@@ -171,6 +192,7 @@ function useDataTable<T, U>(
       groupby: params?.groupby || groupby,
       limit: params?.limit || param.limit,
       structure: params?.structure || param.structure,
+      aggregate: params?.aggregate || param.aggregate,
       offset: params?.offset,
     });
   };
@@ -189,6 +211,7 @@ function useDataTable<T, U>(
       groupby,
       limit: param.limit || DEFAULT_LIMIT,
       structure: param.structure,
+      aggregate: param.aggregate,
       offset,
     });
 

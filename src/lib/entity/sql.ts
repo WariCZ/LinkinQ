@@ -4,6 +4,7 @@ import { EntitySchema } from "./types";
 import { User } from "../auth";
 import _ from "lodash";
 import { MAIN_ID, MAIN_TABLE_ALIAS } from "../knex";
+import { AggregateType } from "../../types/share";
 
 export type dbType = (table: string) => Knex.QueryBuilder<any, unknown[]>;
 export class Sql {
@@ -37,6 +38,7 @@ export class Sql {
     limit,
     offset,
     structure,
+    aggregate,
   }: {
     entity: string;
     fields?: string[];
@@ -46,9 +48,11 @@ export class Sql {
     limit?: number;
     offset?: number;
     structure?: "topdown";
+    aggregate?: AggregateType[];
   }) => {
     if (entity) {
       if (this.#schema[entity]) {
+        if (entity === "tasks") debugger;
         const fieldsArr = _.uniq([...(fields || ["*"]), ...(groupBy || [])]);
 
         const queries = getQueries({
@@ -69,6 +73,7 @@ export class Sql {
           offset: offset,
           structure: structure,
           groupBy: groupBy,
+          aggregate: aggregate,
         });
 
         return ret;
