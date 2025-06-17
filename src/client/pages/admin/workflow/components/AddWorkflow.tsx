@@ -2,8 +2,11 @@ import Form from "../../../../../client/components/DynamicForm";
 import { ModalPropsType } from "../../../../../client/types/common/ModalPropsType";
 import useDataDetail from "../../../../../client/hooks/useDataDetail";
 import useStore from "../../../../store";
+import { useTranslation } from "react-i18next";
 
-const getDefaultXml = (entity: string) => `<?xml version="1.0" encoding="UTF-8"?>
+const getDefaultXml = (
+  entity: string
+) => `<?xml version="1.0" encoding="UTF-8"?>
 <bpmn2:definitions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL"
   xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
@@ -29,6 +32,8 @@ const getDefaultXml = (entity: string) => `<?xml version="1.0" encoding="UTF-8"?
 export const AddWorkflow = (
   props: ModalPropsType & { refresh: () => void }
 ) => {
+  const { t } = useTranslation();
+  const { t: tWorkflows } = useTranslation("workflows");
   const [data, setData, { setRecord }] = useDataDetail(
     {
       entity: "wf_models",
@@ -50,18 +55,18 @@ export const AddWorkflow = (
           entity: data.entity,
           source: getDefaultXml(data.entity),
         });
-        props.refresh()
+        props.refresh();
         props.closeModal && props.closeModal();
       }}
       formFields={[
         {
-          label: "Workflow name",
+          label: tWorkflows("labels.name"),
           field: "name",
           required: true,
           type: "text",
         },
         {
-          label: "Entity",
+          label: t("labels.entity"),
           field: "entity",
           required: true,
           type: "select",

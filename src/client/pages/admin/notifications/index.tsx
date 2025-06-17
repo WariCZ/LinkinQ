@@ -4,8 +4,10 @@ import useDataTable from "../../../hooks/useDataTable";
 import { useModalStore } from "../../../components/Modal/modalStore";
 import { NotificationDetail } from "./components/NotificationDetail";
 import { TableFieldType } from "../../../components/Table/types";
+import { useTranslation } from "react-i18next";
 
 const Notifications: React.FC = () => {
+  const { t } = useTranslation();
   const { openModal } = useModalStore();
   const [
     data,
@@ -47,7 +49,7 @@ const Notifications: React.FC = () => {
     <div className="h-full">
       <h1></h1>
       <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
-        <span className="font-bold">Notifications</span>
+        <span className="font-bold">{t("sidebar.admin.notifications")}</span>
       </div>
       <div className="p-2">
         <Table

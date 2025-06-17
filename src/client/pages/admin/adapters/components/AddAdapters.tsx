@@ -3,9 +3,11 @@ import { ModalPropsType } from "../../../../types/common/ModalPropsType";
 import axios from "axios";
 import _ from "lodash";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export const AddAdapters = (props: ModalPropsType) => {
   const [adapters, setAdapters] = useState([]);
+  const { t } = useTranslation();
   const [selectedAdapter, setSelectedAdapter] = useState(undefined as any);
   const getRoutes = async () => {
     const ret = await axios.get("/adapters/adaptersType");
@@ -30,7 +32,7 @@ export const AddAdapters = (props: ModalPropsType) => {
         {
           type: "select",
           field: "type",
-          label: "Type",
+          label: t("labels.type"),
           required: true,
           options: _.keys(adapters)?.map((item) => ({
             value: item,

@@ -2,7 +2,6 @@ import { useModalStore } from "../../Modal/modalStore";
 import useStore from "../../../store";
 import { FieldType } from "../../../../lib/entity/types";
 import { FiArrowRight } from "react-icons/fi";
-import { getFieldName } from "../../../utils";
 
 type SelectLinkFieldProps = {
   entityName: string;
@@ -16,25 +15,28 @@ export const SelectLinkField = ({
   usedFields,
 }: SelectLinkFieldProps) => {
   const schema = useStore((state) => state.schema);
-  const fields = Object.values(schema[entityName]?.fields ?? {});
+  const fields = Object.entries(schema[entityName]?.fields ?? {}).map(
+    ([name, meta]) => ({ ...meta, name })
+  );
   const { openModal, closeModal } = useModalStore();
 
   const handleSelect = (field: FieldType, pathPrefix = "") => {
-    const isLink = field.type.startsWith("link(");
-    const nestedEntity = isLink ? field.type.slice(5, -1) : null;
-    const newPrefix = [pathPrefix, field.name].filter(Boolean).join(".");
+    const isLink =
+      field.type.startsWith("link(") || field.type.startsWith("nlink(");
+    const linkedEntity = field.type.match(/\(([^)]+)\)/)?.[1];
+    const newPrefix = pathPrefix
+      ? `${pathPrefix}.${field.name}`
+      : field.name ?? "";
 
-    if (isLink && nestedEntity) {
+    if (isLink && linkedEntity) {
       openModal(
         <SelectLinkField
-          entityName={nestedEntity}
+          entityName={linkedEntity}
           usedFields={usedFields}
           onSelect={(nestedField) => {
             const newField = {
               ...nestedField,
-              name: [newPrefix, getFieldName(nestedField)]
-                .filter(Boolean)
-                .join("."),
+              name: `${newPrefix}.${nestedField.name}`,
               label: nestedField.label,
             };
             closeModal();
@@ -42,12 +44,13 @@ export const SelectLinkField = ({
           }}
         />,
         {
-          title: `Choose nested field from "${nestedEntity}"`,
+          modalSingle: false,
+          title: `Select a field from "${field.label ?? linkedEntity}"`,
           hideSuccessButton: true,
         }
       );
     } else {
-      onSelect(field);
+      onSelect({ ...field, name: newPrefix });
     }
   };
 
@@ -57,15 +60,17 @@ export const SelectLinkField = ({
         <button
           key={field.name}
           className="border rounded px-3 py-2 hover:bg-blue-50 text-left w-full"
-          onClick={() => handleSelect(field, field.name)}
+          onClick={() => handleSelect(field, "")}
         >
           <div className="flex justify-between items-center">
             <div>
               <div className="font-semibold">{field.label}</div>
               <div className="text-sm text-gray-500">{field.description}</div>
-              <div className="text-sm text-gray-500">{field.type}</div>
+              <div className="text-sm text-gray-500">Type: {field.type}</div>
+              <div className="text-sm text-gray-500">Name: {field.name}</div>
             </div>
-            {field.type.startsWith("link(") && (
+            {(field.type.startsWith("link(") ||
+              field.type.startsWith("nlink(")) && (
               <FiArrowRight className="text-gray-400 text-lg" />
             )}
           </div>

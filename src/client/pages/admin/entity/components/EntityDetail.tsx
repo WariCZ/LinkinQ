@@ -7,6 +7,7 @@ import { DeleteEntity } from "./DeleteEntity";
 import { FaFileExport, FaPlus } from "react-icons/fa";
 import Table from "../../../../components/Table";
 import { AppButton } from "../../../../components/common/AppButton";
+import { useTranslation } from "react-i18next";
 
 export const EntityDetail = ({
   entity,
@@ -15,6 +16,8 @@ export const EntityDetail = ({
   entity?: string;
   definition?: EntityType;
 }) => {
+  const { t } = useTranslation();
+  const { t: tEntity } = useTranslation("entity");
   const { openModal } = useModalStore();
   const fieldsArray = definition?.fields
     ? Object.entries(definition?.fields).map(([key, value]) => ({
@@ -30,24 +33,25 @@ export const EntityDetail = ({
     });
   };
 
-  if (!entity) return <div className="p-2 w-[65vw]">Not selected</div>;
+  if (!entity)
+    return <div className="p-2 w-[65vw]">{t("labels.notSelected")}</div>;
 
   return (
     <div className="p-2 w-full overflow-auto">
       <div className="flex w-full">
-        <span className="pr-2">Entity:</span>
+        <span className="pr-2">{tEntity("entity")}:</span>
         <span className="font-bold pr-2">{entity}</span>
         <AppButton
           icon={<FaPlus />}
           onClick={() => {
             openModal(<FieldDetail entity={entity} />, {
-              title: "Add new field",
-              modalSingle: true
+              title: tEntity("labels.addNewField"),
+              modalSingle: true,
             });
           }}
           size={"xs"}
         >
-          Add Field
+          {tEntity("labels.addField")}
         </AppButton>
         <span className="ml-auto"></span>
         <span className="ml-auto">
@@ -61,13 +65,13 @@ export const EntityDetail = ({
             color="failure"
             onClick={() => {
               openModal(<DeleteEntity entity={entity} />, {
-                title: "Delete entity",
-                modalSingle: true
+                title: tEntity("labels.deleteEntity"),
+                modalSingle: true,
               });
             }}
             size="xs"
           >
-            Delete Entity
+            {tEntity("labels.deleteEntity")}
           </Button>
         </span>
       </div>
@@ -80,8 +84,8 @@ export const EntityDetail = ({
           data={fieldsArray}
           rowClick={(data) =>
             openModal(<FieldDetail data={data} entity={entity} />, {
-              title: "Detail entity",
-              modalSingle: true
+              title: tEntity("labels.detailEntity"),
+              modalSingle: true,
             })
           }
           columns={[
@@ -91,8 +95,6 @@ export const EntityDetail = ({
             "description",
             "default",
           ]}
-          // loading={loading}
-          // ordering={[{ id: "name" }]}
         />
       </div>
     </div>

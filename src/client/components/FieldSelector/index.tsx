@@ -33,8 +33,11 @@ export const FieldSelector = ({
     path: string[] = [],
     labelParts: string[] = []
   ) => {
-    const isLink = field.type.startsWith("link(");
-    const entityName = isLink ? field.type.slice(5, -1) : null;
+    const isLink =
+      field.type.startsWith("link(") || field.type.startsWith("nlink(");
+    const entityName = isLink
+      ? field.type.match(/\(([^)]+)\)/)?.[1] ?? null
+      : null;
 
     const newPath = [...path, field.name ?? ""];
     const newLabelParts = [...labelParts, field.label ?? ""];
@@ -47,7 +50,10 @@ export const FieldSelector = ({
           onSelect={(targetField) => {
             const fullName = [...newPath, getFieldName(targetField)].join(".");
 
-            if (targetField.type.startsWith("link(")) {
+            if (
+              targetField.type.startsWith("link(") ||
+              targetField.type.startsWith("nlink(")
+            ) {
               handleAddClick(targetField, newPath, newLabelParts);
             } else {
               onAdd?.({
@@ -62,7 +68,7 @@ export const FieldSelector = ({
         />,
         {
           modalSingle: false,
-          title: `Select a field from "${entityName}"`,
+          title: `Select a field from "${field.label ?? field.name}"`,
           hideSuccessButton: true,
         }
       );

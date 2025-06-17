@@ -34,10 +34,10 @@ export function useFormConfigManager(
 
     if (saved) {
       setLocalFields(saved);
-      setEditingFields(_.cloneDeep(saved)); // ключевой момент
+      setEditingFields(_.cloneDeep(saved));
     } else {
       setLocalFields(onlyFields ?? []);
-      setEditingFields(_.cloneDeep(onlyFields ?? [])); // тоже клонируем
+      setEditingFields(_.cloneDeep(onlyFields ?? []));
     }
   }, [configKey]);
 

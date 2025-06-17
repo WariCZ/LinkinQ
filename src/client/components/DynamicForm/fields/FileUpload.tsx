@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useState, useCallback, forwardRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
+import { useTranslation } from "react-i18next";
 import { debug } from "winston";
 
 interface UploadedFile {
@@ -16,6 +17,7 @@ const FileUpload = forwardRef(
     value: any;
     disabled?: boolean;
   }) => {
+    const { t } = useTranslation();
     const [files, setFiles] = useState<UploadedFile[]>([]);
 
     useEffect(() => {
@@ -102,7 +104,7 @@ const FileUpload = forwardRef(
           <div className="flex flex-wrap items-center gap-2" style={{}}>
             {files.length === 0 && (
               <p className="text-gray-500 text-sm">
-                Přetáhněte soubory sem nebo klikněte pro výběr
+                {t("labels.uploadInstruction")}
               </p>
             )}
             {files.map(({ id, file }) => (

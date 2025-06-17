@@ -1,0 +1,14 @@
+{
+    "title": "Editor triggerů",
+    "listTitle": "Triggery",
+    "labels": {
+        "addNewTrigger": "Přidat nový trigger",
+        "addTrigger": "Přidat trigger",
+        "editorPlaceholder": "// Začněte psát svůj kód zde...",
+        "caption": "Titulek",
+        "method": "Metoda",
+        "before": "Před",
+        "after": "Po",
+        "insert": "Vložit"
+    }
+}

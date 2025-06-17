@@ -2,9 +2,12 @@ import Form from "../../../../components/DynamicForm";
 import { ModalPropsType } from "../../../../types/common/ModalPropsType";
 import useStore from "../../../../store";
 import { httpRequest } from "../../../../services/httpBase";
+import { useTranslation } from "react-i18next";
 
 export const AddEntity = (props: ModalPropsType) => {
+  const { t } = useTranslation();
   const getSchema = useStore((state) => state.getSchema);
+
   return (
     <Form
       onSubmit={async ({ data }) => {
@@ -21,7 +24,7 @@ export const AddEntity = (props: ModalPropsType) => {
       }}
       formFields={[
         {
-          label: "Entity",
+          label: t("labels.entity"),
           field: "entity",
           required: true,
           type: "text",

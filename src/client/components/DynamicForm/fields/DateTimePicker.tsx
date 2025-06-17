@@ -6,6 +6,7 @@ import {
   Popover,
 } from "flowbite-react";
 import { DateTime } from "luxon";
+import { useTranslation } from "react-i18next";
 
 const DateTimePicker = (
   props: DatepickerProps & {
@@ -15,6 +16,7 @@ const DateTimePicker = (
     isReadonly?: boolean;
   }
 ) => {
+  const { t } = useTranslation();
   const popoverRef = useRef(null);
 
   const getDatetime = (date?: Date, time?: string) => {
@@ -124,13 +126,13 @@ const DateTimePicker = (
                   onClick={handleCancel}
                   className="px-4 py-2 text-sm font-semibold text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
                 >
-                  Zrušit
+                  {t("labels.cancel")}
                 </button>
                 <button
                   onClick={handleConfirm}
                   className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded hover:bg-blue-700"
                 >
-                  Potvrdit
+                  {t("labels.confirm")}
                 </button>
               </div>
             )}
@@ -140,7 +142,7 @@ const DateTimePicker = (
         <TextInput
           type="text"
           value={inputValue}
-          placeholder="Vyberte datum a čas"
+          placeholder={t("labels.selectDateTime")}
           readOnly
           onClick={() => {
             if (props.isReadonly !== true) setIsOpen(!isOpen);

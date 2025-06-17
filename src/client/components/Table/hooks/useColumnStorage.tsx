@@ -78,9 +78,6 @@ export const useColumnStorage = (
     setConfig(updated);
   };
 
-  console.log("initial", initial)
-  console.log("selectedColumns", selectedColumns)
-
   return {
     selectedColumns,
     columnSizing: tempSizing,

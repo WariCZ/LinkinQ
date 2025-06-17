@@ -1,0 +1,7 @@
+{
+    "title": "Skripty na straně serveru",
+    "labels": {
+        "runCode": "Spustit kód",
+        "editorPlaceholder": "// Začněte psát svůj kód zde..."
+    }
+}

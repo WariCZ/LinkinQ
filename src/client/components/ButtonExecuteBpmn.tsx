@@ -96,7 +96,7 @@ const ButtonExecuteBpmn = ({
           );
         })}
         {flows.length == 0 ? (
-          <Dropdown.Item>{t("nomove")}</Dropdown.Item>
+          <Dropdown.Item>{t("labels.nomove")}</Dropdown.Item>
         ) : null}
       </Dropdown>
     </span>
@@ -113,7 +113,6 @@ const BPMNInstance = ({
   items: [];
 }) => {
   const handleShown = (canvas: any, diagram: any) => {
-    console.log(items);
     items?.map((item: any) => {
       if (item.status === "end") {
         canvas.addMarker(item.elementId, "Completed");

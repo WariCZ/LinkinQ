@@ -4,7 +4,6 @@ import {
   Route,
   Routes,
   Navigate,
-  Outlet,
 } from "react-router-dom";
 import useStore from "./store";
 import { Flowbite, Spinner } from "flowbite-react";

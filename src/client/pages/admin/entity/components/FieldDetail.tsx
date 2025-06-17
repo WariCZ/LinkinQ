@@ -3,10 +3,12 @@ import React from "react";
 import Form from "../../../../components/DynamicForm";
 import { httpRequest } from "../../../../services/httpBase";
 import { ModalPropsType } from "../../../../types/common/ModalPropsType";
+import { useTranslation } from "react-i18next";
 
 export const FieldDetail = (
   props: { entity: string; data?: object } & ModalPropsType
 ) => {
+  const { t } = useTranslation();
   const getSchema = useStore((state) => state.getSchema);
   return (
     <Form
@@ -40,20 +42,20 @@ export const FieldDetail = (
       columns={1}
       formFields={[
         {
-          label: "Name",
+          label: t("labels.name"),
           field: "name",
           required: true,
           type: "text",
         },
         {
-          label: "Label",
+          label: t("labels.label"),
           field: "label",
           required: true,
           type: "text",
         },
         {
           field: "type",
-          label: "Type",
+          label: t("labels.type"),
           type: "select",
           required: true,
           options: [
@@ -64,7 +66,7 @@ export const FieldDetail = (
         },
         {
           field: "entity",
-          label: "Entity",
+          label: t("labels.entity"),
           type: "select",
           required: true,
           options: [
@@ -86,7 +88,7 @@ export const FieldDetail = (
           ],
         },
         {
-          label: "Description",
+          label: t("labels.description"),
           field: "description",
           type: "text",
         },

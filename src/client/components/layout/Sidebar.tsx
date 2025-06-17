@@ -64,42 +64,42 @@ export default function DashboardSidebar(props: { sidebar?: string }) {
 
   const menuAdmin: MenuItemType[] = [
     {
-      label: "Journal",
+      label: t("sidebar.admin.journal"),
       to: "/admin/journal",
       icon: FaBuffer,
     },
     {
-      label: "Workflows",
+      label: t("sidebar.admin.workflows"),
       to: "/admin/workflow",
       icon: FaProjectDiagram,
     },
     {
-      label: "Server side script",
+      label: t("sidebar.admin.serverScript"),
       to: "/admin/serverScript",
       icon: FaCode,
     },
     {
-      label: "Entity",
+      label: t("sidebar.admin.entity"),
       to: "/admin/entity",
       icon: FaDatabase,
     },
     {
-      label: "Triggers",
+      label: t("sidebar.admin.triggers"),
       to: "/admin/triggers",
       icon: FaHubspot,
     },
     {
-      label: "Query builder",
+      label: t("sidebar.admin.queryBuilder"),
       to: "/admin/querybuilder",
       icon: FaTable,
     },
     {
-      label: "Adapters",
+      label: t("sidebar.admin.adapters"),
       to: "/admin/adapters",
       icon: FaSitemap,
     },
     {
-      label: "Notifications",
+      label: t("sidebar.admin.notifications"),
       to: "/admin/notifications",
       icon: FaMailBulk,
     },
