@@ -97,7 +97,6 @@ export const ManualColumnInput = ({
               <FieldSelector
                 fields={topLevelFields}
                 onAdd={(field) => {
-                  console.log("field", field);
                   const name = field.name ?? "";
                   if (name && !selected.includes(name)) {
                     onChange([...selected, name]);
