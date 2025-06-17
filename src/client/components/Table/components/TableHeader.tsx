@@ -40,11 +40,10 @@ export const TableHeader = <T,>({
   entity,
   selectable,
   settingColumnsEnabled = true,
-  isExpanded,
   isGroupBy,
 }: TableHeaderProps<T>) => {
   const { openModal, closeModal } = useModalStore();
-  console.log("getHeaderGroups()", getHeaderGroups());
+
   return (
     <thead className="bg-[#2c3a54] text-xs text-gray-50 uppercase dark:bg-gray-700 dark:text-gray-400 sticky top-0">
       {getHeaderGroups().map((headerGroup) => (

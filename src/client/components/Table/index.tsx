@@ -40,6 +40,7 @@ interface TableProps<T> {
   rowMenuEnabled?: boolean;
   isGroupBy?: boolean;
   isExpanded?: boolean;
+  showAttributesSelector?: boolean;
 }
 
 const Table = <T, _>({
@@ -62,6 +63,7 @@ const Table = <T, _>({
   rowMenuEnabled,
   isGroupBy,
   isExpanded,
+  showAttributesSelector = false,
 }: TableProps<T>) => {
   const schema = useStore((state) => state.schema);
   const columnSelectorRef = useRef<any>(null);
@@ -154,21 +156,16 @@ const Table = <T, _>({
     columns: translatedColumns,
     data: filteredData,
     getCoreRowModel: getCoreRowModel(),
-    // getSortedRowModel: getSortedRowModel(),
-    // ...(isGroupBy && groupBy ? { getGroupedRowModel: getGroupedRowModel() } : {}),
     ...(isExpanded ? { getExpandedRowModel: getExpandedRowModel() } : {}),
     getSubRows: (row) => row.children || [],
-    // isGroupBy ? row.original?.children ?? [] :
     onSortingChange: (o: any) => {
       setOrdering && setOrdering(o());
     },
-    // ...(isGroupBy && groupBy ? { onGroupingChange: setGrouping } : {}),
     ...(isExpanded ? { onExpandedChange: setExpanded } : {}),
     manualSorting: true,
     columnResizeMode: "onChange",
     enableColumnResizing: true,
     state: {
-      // ...(isGroupBy && groupBy ? { grouping } : {}),
       ...(isExpanded ? { expanded } : {}),
       sorting: ordering?.map((o) => ({ ...o, desc: o.desc || false })),
       columnSizing: columnSizing,
@@ -223,6 +220,10 @@ const Table = <T, _>({
         }}
         multiUpdate={multiUpdate}
         fullTextSearchEnabled={fullTextSearchEnabled}
+        selectedColumns={selectedColumns}
+        setSelectedColumns={setSelectedColumns}
+        entity={entity}
+        showAttributesSelector={showAttributesSelector}
       />
       <div
         className="overflow-auto rounded-md"

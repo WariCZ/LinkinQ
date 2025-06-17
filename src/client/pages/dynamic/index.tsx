@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const DynamicComponent = (/*{ name }: { name: string } */) => {
   const [Component, setComponent] = useState<React.ComponentType | null>(null);
-
+  const { t } = useTranslation();
   const name = "xxx";
   useEffect(() => {
     import(/* @vite-ignore */ `/pageflow/dynamic/${name}.js`)
@@ -12,7 +13,12 @@ const DynamicComponent = (/*{ name }: { name: string } */) => {
       });
   }, [name]);
 
-  if (!Component) return <div>Načítám komponentu {name}...</div>;
+  if (!Component)
+    return (
+      <div>
+        {t("status.loadingComponent")} {name}...
+      </div>
+    );
   return <Component />;
 };
 

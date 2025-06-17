@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import useStore from "../../../store";
-import { TextInput } from "flowbite-react";
 import Table from "../../../components/Table";
 import useDataTable from "../../../hooks/useDataTable";
 import { useModalStore } from "../../../components/Modal/modalStore";
@@ -15,6 +14,8 @@ import { AppButton } from "../../../components/common/AppButton";
 
 const QueryBuilder = () => {
   const { t } = useTranslation();
+  const { t: tQuery } = useTranslation("query");
+
   const location = useLocation();
   const filters = location?.state?.filter;
   const header = location?.state?.header;
@@ -23,7 +24,6 @@ const QueryBuilder = () => {
   const { openModal } = useModalStore();
 
   const [columns, setColumns] = useState(initColumns);
-  const [columnsInput, setColumnsInput] = useState(initColumns.join());
   const [entity, setEntity] = useState("tasks" as string);
 
   const [
@@ -68,14 +68,14 @@ const QueryBuilder = () => {
             onClick={() =>
               openModal(
                 <QueryBuilderDetail entity={entity} refresh={refresh} />,
-                { title: "Query Create" }
+                { title: tQuery("labels.queryCreate") }
               )
             }
           >
-            {t("add")}
+            {t("labels.add")}
           </AppButton>
           <AppButton icon={<IoReload />} onClick={() => refresh()}>
-            Reload
+            {t("labels.reload")}
           </AppButton>
         </div>
       </div>
@@ -96,7 +96,7 @@ const QueryBuilder = () => {
           }}
         />
 
-        <TextInput
+        {/* <TextInput
           className="inline-block w-[calc(100%-16rem)] pl-3"
           onChange={(e) => {
             setColumnsInput(e.target.value);
@@ -107,7 +107,7 @@ const QueryBuilder = () => {
           }}
           onKeyDown={(e) => handleKeyPressEnter(e)}
           value={columnsInput}
-        />
+        /> */}
       </div>
       <div className="p-2 pt-0">
         <Table
@@ -123,7 +123,7 @@ const QueryBuilder = () => {
                 data={data}
                 entity={entity}
               />,
-              { title: "Query detail" }
+              { title: tQuery("queryDetail") }
             )
           }
           columns={fields}
@@ -132,6 +132,7 @@ const QueryBuilder = () => {
           ordering={ordering}
           setOrdering={setOrdering}
           fullTextSearchEnabled={false}
+          showAttributesSelector
         />
       </div>
     </div>

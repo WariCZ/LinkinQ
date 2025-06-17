@@ -1,0 +1,13 @@
+{
+    "title": "Modely workflow",
+    "listTitle": "Workflowy",
+    "addNew": "Přidat nové workflow",
+    "selectPrompt": "Vyberte workflow",
+    "labels": {
+        "name": "Název workflow",
+        "addTask": "Přidat úkol",
+        "saveXml": "Uložit XML",
+        "exportBpmn": "Exportovat BPMN",
+        "setting": "Nastavení workflow"
+    }
+}

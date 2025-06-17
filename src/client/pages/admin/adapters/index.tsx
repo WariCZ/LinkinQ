@@ -8,8 +8,12 @@ import _ from "lodash";
 import { AddAdapters } from "./components/AddAdapters";
 import { EditAdapters } from "./components/EditAdapters";
 import { AppButton } from "../../../components/common/AppButton";
+import { useTranslation } from "react-i18next";
 
 const Adapters = () => {
+  const { t: tAdapters } = useTranslation("adapters");
+  const { t } = useTranslation();
+
   const schema = useStore((state) => state.schema);
   const entities: string[] = useMemo(() => Object.keys(schema), [schema]);
   const [selectedAdapter, setSelectedAdapter] = useState(
@@ -39,7 +43,7 @@ const Adapters = () => {
   return (
     <div className="h-full">
       <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
-        <span className="font-bold">Adapters</span>
+        <span className="font-bold">{tAdapters("title")}</span>
         {/* <HiRefresh
           className="inline-block mx-3 cursor-pointer"
           // onClick={() => getEntity(true)}
@@ -49,16 +53,16 @@ const Adapters = () => {
         <div className="w-1/3 max-w-sm min-w-[240px] px-3 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
           <div className="pt-1 flex justify-between items-center my-1 gap-2">
             <div>
-              <span className="font-bold">Adapters</span>
+              <span className="font-bold">{tAdapters("title")}</span>
               <span className="float-end">({data.length})</span>
             </div>
             <AppButton
               icon={<FaPlus />}
               onClick={() => {
-                openModal(<AddAdapters />, { title: "Add new addapters" });
+                openModal(<AddAdapters />, { title: tAdapters("addNew") });
               }}
             >
-              Add
+              {t("labels.add")}
             </AppButton>
           </div>
           <div className="pt-1">
@@ -66,7 +70,7 @@ const Adapters = () => {
               value={searchValue}
               onChange={searchEntity}
               className="w-full"
-              placeholder="Search..."
+              placeholder={t("labels.search")}
             />
           </div>
           <div>

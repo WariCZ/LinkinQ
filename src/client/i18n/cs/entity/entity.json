@@ -1,0 +1,18 @@
+{
+    "entityEditor": "Editor entit",
+    "entity": "Entita",
+    "addNewEntity": "Přidat novou entitu",
+    "labels": {
+        "writeEntityName": "Zadejte název entity",
+        "addNewField": "Přidat nové pole",
+        "addField": "Přidat pole",
+        "deleteEntity": "Smazat entitu",
+        "detailEntity": "Detail entity"
+    },
+    "toasts": {
+        "succses": {},
+        "erros": {
+            "namesAreNotEqual": "Názvy nejsou stejné"
+        }
+    }
+}

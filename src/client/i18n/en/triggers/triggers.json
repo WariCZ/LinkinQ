@@ -1,0 +1,14 @@
+{
+    "title": "Triggers editor",
+    "listTitle": "Triggers",
+    "labels": {
+        "addNewTrigger": "Add new trigger",
+        "addTrigger": "Add trigger",
+        "editorPlaceholder": "// Start writing your code here...",
+        "caption": "Caption",
+        "method": "Method",
+        "before": "Before",
+        "after": "After",
+        "insert": "Insert"
+    }
+}

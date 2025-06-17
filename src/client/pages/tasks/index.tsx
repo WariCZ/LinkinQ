@@ -17,6 +17,7 @@ const entity = "tasks";
 
 const Tasks = () => {
   const { t } = useTranslation();
+  const { t: tTasks } = useTranslation("task");
   const location = useLocation();
   const { openModal } = useModalStore();
   const filters = location?.state?.filter;
@@ -26,9 +27,10 @@ const Tasks = () => {
     null
   );
   const schema = useStore((state) => state.schema);
-  const ready = !!schema[entity]; // ждем пока schema.tasks подгрузится
+  const ready = !!schema[entity];
 
   if (!ready) return null;
+
   const allFields = useMemo(() => {
     if (!schema[entity]) return [];
     return Object.entries(schema[entity].fields)
@@ -58,13 +60,13 @@ const Tasks = () => {
     ],
     []
   );
-  
+
   const validDefaultFieldKeys = defaultFieldKeys.filter((key) => {
     const fieldName = key.split(".")[0];
     return schema[entity]?.fields?.[fieldName];
   });
 
-  const { selectedColumns } = useColumnStorage("tasks", validDefaultFieldKeys);
+  const { selectedColumns, setSelectedColumns } = useColumnStorage("tasks", validDefaultFieldKeys);
 
   const tableColumns = useMemo(() => {
     return selectedColumns.map((key) => {
@@ -76,13 +78,12 @@ const Tasks = () => {
     });
   }, [selectedColumns, schema]);
 
-  console.log("selectedColumns", selectedColumns);
   const columns = useMemo(
     () => [
       ...tableColumns,
       {
         field: "actions",
-        label: "Actions",
+        label: t("labels.actions"),
         cell: ({ row }) => (
           <td onClick={(e) => e.stopPropagation()}>
             <ButtonExecuteBpmn
@@ -168,7 +169,7 @@ const Tasks = () => {
           setRecord={setRecord}
         />,
         {
-          title: t("Detail task"),
+          title: tTasks("detailTitle"),
           size: "xl",
           modalSingle: true,
         }
@@ -177,9 +178,6 @@ const Tasks = () => {
     }
   }, [modalRequestedGuid, loadingDetail, dataDetail]);
 
-  console.log("🧩 selectedColumns:", selectedColumns);
-  console.log("🧩 allFields:", allFields);
-  console.log("🧩 schema[entity]:", schema[entity]);
   return (
     <div className="mx-3">
       <div className="flex items-center justify-between my-3">
@@ -193,7 +191,7 @@ const Tasks = () => {
                   setRecord={setRecord}
                 />,
                 {
-                  title: t("Create task"),
+                  title: tTasks("createTitle"),
                   size: "xl",
                   modalSingle: true,
                 }
@@ -201,7 +199,7 @@ const Tasks = () => {
             }
           >
             <FaPlus className="ml-0 m-1 h-3 w-3" />
-            {t("add")}
+            {t("labels.add")}
           </Button>
           <h1 className="text-2xl font-bold">{header || t("page.tasks")}</h1>
         </div>

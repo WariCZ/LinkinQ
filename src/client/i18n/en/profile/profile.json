@@ -1,0 +1,8 @@
+{
+    "title": "Profile Settings",
+    "language": "Language",
+    "english": "English",
+    "czech": "Čeština",
+    "dateFormat": "Date Format",
+    "dateFormatPlaceholder": "Select date format"
+}

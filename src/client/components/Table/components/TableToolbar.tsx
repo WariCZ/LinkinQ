@@ -9,6 +9,7 @@ import { useFilterFields } from "../hooks/useFilterFields";
 import { MdCancel } from "react-icons/md";
 import { Dispatch, SetStateAction } from "react";
 import { useEditableTextFields } from "../hooks/useEditableTextFields";
+import { ManualColumnInput } from "./ManualColumnInput";
 
 interface TableToolbarProps {
   filters: Record<string, any>;
@@ -22,6 +23,10 @@ interface TableToolbarProps {
   deleteSelected?: () => void;
   multiUpdate?: (guids: string[], data: Partial<any>) => Promise<void>;
   fullTextSearchEnabled?: boolean;
+  selectedColumns: string[];
+  setSelectedColumns: Dispatch<SetStateAction<string[]>>;
+  entity: string;
+  showAttributesSelector: boolean;
 }
 
 export const TableToolbar = ({
@@ -35,6 +40,10 @@ export const TableToolbar = ({
   deleteSelected,
   multiUpdate,
   fullTextSearchEnabled = true,
+  selectedColumns,
+  setSelectedColumns,
+  entity,
+  showAttributesSelector,
 }: TableToolbarProps) => {
   const { t } = useTranslation();
   const { openModal, closeModal } = useModalStore();
@@ -148,6 +157,14 @@ export const TableToolbar = ({
 
   return (
     <>
+      {showAttributesSelector && (
+        <ManualColumnInput
+          selected={selectedColumns}
+          onChange={setSelectedColumns}
+          entity={entity}
+        />
+      )}
+
       <div className="flex justify-between mb-2">
         <div
           className={`flex items-center gap-3 transition-opacity duration-200 ${

@@ -1,6 +1,4 @@
 {
-  "nomove": "Koncový stav",
-  "add": "Přidat",
   "header": {
     "profile": "Profil",
     "administration": "Administrace",
@@ -17,6 +15,17 @@
       "my": "Moje úkoly",
       "new": "Nové úkoly",
       "attn": "Úkoly k pozornosti"
+    },
+    "examples": "Příklady",
+    "admin": {
+      "journal": "Záznamy",
+      "workflows": "Workflowy",
+      "serverScript": "Skripty na straně serveru",
+      "entity": "Entity",
+      "triggers": "Triggery",
+      "queryBuilder": "Tvorba dotazů",
+      "adapters": "Adaptéry",
+      "notifications": "Notifikace"
     }
   },
   "modal.close": "Zavřít",
@@ -27,6 +36,9 @@
     "reset": "Obnovit",
     "selectedColumns": "Vybrané sloupce"
   },
+  "status": {
+    "loadingComponent": "Načítám komponentu"
+  },
   "labels": {
     "apply": "Aplikovat",
     "addManualTask": "Přidat manuální úkol",
@@ -34,6 +46,30 @@
     "file": "Soubor",
     "history": "Historie",
     "prices": "Ceny",
-    "indication": "Indikace"
+    "indication": "Indikace",
+    "fullTextSearch": "Fulltextové hledání",
+    "reset": "Obnovit",
+    "confirm": "Potvrdit",
+    "add": "Přidat",
+    "cancel": "Zrušit",
+    "selectRange": "Vybrat rozsah",
+    "from": "Od",
+    "to": "Do",
+    "actions": "Akce",
+    "search": "Hledat...",
+    "type": "Typ",
+    "save": "Uložit",
+    "entity": "Entita",
+    "notSelected": "Nevybráno",
+    "description": "Popis",
+    "name": "Název",
+    "label": "Popisek",
+    "reload": "Znovu načíst",
+    "active": "Aktivní",
+    "delete": "Smazat",
+    "update": "Aktualizovat",
+    "nomove": "Koncový stav",
+    "selectDateTime": "Vyberte datum a čas",
+    "uploadInstruction": "Přetáhněte soubory sem nebo klikněte pro výběr"
   }
 }

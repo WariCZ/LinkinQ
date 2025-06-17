@@ -1,0 +1,9 @@
+{
+    "labels": {
+        "addColumn": "Přidat sloupec",
+        "placeholderAddColumn": "Přidat sloupec...",
+        "noSuggestions": "Nenalezeno",
+        "noData": "Žádná data k zobrazení",
+        "attributes": "Atributy"
+    }
+}

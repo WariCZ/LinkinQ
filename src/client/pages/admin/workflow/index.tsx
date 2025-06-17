@@ -7,11 +7,13 @@ import { AddWorkflow } from "./components/AddWorkflow";
 import BpmnDiagram from "../../../../client/components/BpmnDiagram/";
 import { AppButton } from "../../../components/common/AppButton";
 import { IoReload } from "react-icons/io5";
+import { useTranslation } from "react-i18next";
 
 type WorkflowType = { name: string; source: string; guid: string };
 
 export const Workflow = () => {
-  // const workflows: string[] = useMemo(() => [], []);
+  const { t: tWorkflows } = useTranslation("workflows");
+  const { t } = useTranslation();
   const [searchValue, setSearchValue] = useState("");
   const [selectedWorkflow, setSelectedWorkflow] = useState({} as WorkflowType);
   const [tableWorkflows, setTableWorkflows] = useState<WorkflowType[] | []>([]);
@@ -47,34 +49,34 @@ export const Workflow = () => {
   return (
     <div className="h-full">
       <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 flex justify-between items-center">
-        <span className="font-bold">Workflow models</span>
+        <span className="font-bold">{tWorkflows("title")}</span>
         <AppButton icon={<IoReload />} onClick={() => refresh()}>
-          Reload
+          {t("labels.reload")}
         </AppButton>
       </div>
       <div className="flex items-start h-full justify-between">
         <div className="w-1/3 max-w-sm min-w-[240px] px-3 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
           <div className="pt-1 flex justify-between items-center my-1">
             <div>
-              <span className="font-bold pr-1">Workflows</span>
+              <span className="font-bold pr-1">{tWorkflows("listTitle")}</span>
               <span className="float-end">({workflows?.length})</span>
             </div>
             <AppButton
               icon={<FaPlus />}
               onClick={() => {
                 openModal(<AddWorkflow refresh={refresh} />, {
-                  title: "Add new workflow",
+                  title: tWorkflows("addNew"),
                 });
               }}
             >
-              Add
+              {t("labels.add")}
             </AppButton>
           </div>
           <TextInput
             value={searchValue}
             onChange={searchWorkflow}
             className="w-full"
-            placeholder="Search..."
+            placeholder={t("labels.search")}
           />
           <ul className="mt-2">
             {tableWorkflows.map((workflows: WorkflowType, i: number) => (
@@ -100,7 +102,10 @@ export const Workflow = () => {
               />
             ) : (
               <div className="flex items-center justify-center h-full w-full">
-                <span className="text-gray-500 text-lg">Select workflow</span>
+                <span className="text-gray-500 text-lg">
+                  {" "}
+                  {tWorkflows("selectPrompt")}
+                </span>
               </div>
             )}
           </div>

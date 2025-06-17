@@ -17,6 +17,7 @@ const dateFormatOptions = [
 
 const Profile = () => {
   const { i18n } = useTranslation();
+  const { t } = useTranslation("profile");
   const userConfigurations = useStore((state) => state.userConfigurations);
   const profileSettings =
     userConfigurations["profileSettings"]?.definition ?? {};
@@ -46,13 +47,12 @@ const Profile = () => {
       <div className="flex flex-col gap-8">
         <div>
           <h1 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">
-            Profile Settings
+            {t("title")}
           </h1>
-
           <div className="flex flex-col gap-4">
             <div>
               <label className="block text-sm font-semibold mb-1 text-gray-600 dark:text-gray-400">
-                Language
+                {t("language")}
               </label>
               <div className="flex gap-3">
                 {["en", "cs"].map((lang) => (
@@ -65,7 +65,7 @@ const Profile = () => {
                     size="sm"
                     className="w-28"
                   >
-                    {lang === "en" ? "English" : "Čeština"}
+                    {lang === "en" ? t("english") : t("czech")}
                   </Button>
                 ))}
               </div>
@@ -73,7 +73,7 @@ const Profile = () => {
 
             <div>
               <label className="block text-sm font-semibold mb-1 text-gray-600 dark:text-gray-400">
-                Date Format
+                {t("dateFormat")}
               </label>
               <AppSelect
                 id="date-format"
@@ -82,7 +82,7 @@ const Profile = () => {
                   label: opt.label || opt.value,
                   value: opt.value,
                 }))}
-                placeholder="Select date format"
+                placeholder={t("dateFormatPlaceholder")}
                 onChange={(value) => changeDateFormat(value)}
                 className="w-full"
               />

@@ -4,8 +4,10 @@ import * as monaco from "monaco-editor";
 import axios from "axios";
 import { Button } from "flowbite-react";
 import { ServerSideOutputType } from "../../../../lib/entity/routes";
+import { useTranslation } from "react-i18next";
 
 const ServerScript = () => {
+  const { t } = useTranslation("serverScript");
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [decorationId, setDecorationId] = useState(null);
 
@@ -64,9 +66,9 @@ const ServerScript = () => {
   return (
     <div className="h-full">
       <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-        <span className="font-bold">Server side scripts</span>
+        <span className="font-bold">{t("title")}</span>
         <Button className="absolute top-2 right-3" onClick={runCode}>
-          Spustit kód
+          {t("labels.runCode")}
         </Button>
       </div>
       <div className="border rounded-md">
@@ -74,7 +76,7 @@ const ServerScript = () => {
           value={code}
           height="60vh"
           defaultLanguage="javascript"
-          defaultValue="// Začni psát svůj kód zde..."
+          defaultValue={t("labels.editorPlaceholder")}
           theme="light"
           onMount={handleEditorDidMount}
           onChange={handleCodeChange}

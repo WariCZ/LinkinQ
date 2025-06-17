@@ -1,0 +1,18 @@
+{
+    "entityEditor": "Entity editor",
+    "entity": "Entity",
+    "addNewEntity": "Add new entity",
+    "labels": {
+        "writeEntityName": "Write entity name",
+        "addNewField": "Add new field",
+        "addField": "Add Field",
+        "deleteEntity": "Delete entity",
+        "detailEntity": "Detail entity"
+    },
+    "toasts": {
+        "succses": {},
+        "erros": {
+            "namesAreNotEqual": "Names are not the same"
+        }
+    }
+}

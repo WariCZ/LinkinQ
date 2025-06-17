@@ -28,6 +28,7 @@ import { FiX } from "react-icons/fi";
 import { useTranslation } from "react-i18next";
 import { useModalStore } from "../../Modal/modalStore";
 import { FieldSelector } from "../../FieldSelector";
+
 interface SortableItemProps {
   id: string;
   label: string;
@@ -92,7 +93,7 @@ export const ColumnSelector = forwardRef<
   const { openModal, closeModal } = useModalStore();
   const [localColumns, setLocalColumns] = useState<string[]>(initialColumns);
   const [visibleColumns, setVisibleColumns] = useState<Set<string>>(() => {
-    return new Set(initialColumns); // ✅ на первом рендере используем initial
+    return new Set(initialColumns); 
   });
   const [searchTerm, setSearchTerm] = useState("");
 

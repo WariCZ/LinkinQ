@@ -19,6 +19,7 @@ import { FormFieldType } from "../../types/DynamicForm/types";
 import useStore from "../../store";
 import "bpmn-js/dist/assets/diagram-js.css";
 import "bpmn-js/dist/assets/bpmn-font/css/bpmn.css";
+import { useTranslation } from "react-i18next";
 
 type BpmnCanvas = ReturnType<Modeler["get"]>;
 type BpmnDiagram = Modeler | Viewer;
@@ -69,6 +70,7 @@ const BpmnDiagram = ({
   handleShown,
   editor,
 }: BpmnDiagramProps) => {
+  const { t: tWorkflows } = useTranslation("workflows");
   const { openModal } = useModalStore();
   const containerRef = useRef(null);
   const diagramRef = useRef(null);
@@ -333,7 +335,7 @@ const BpmnDiagram = ({
                 outline
                 onClick={handleAddTask}
               >
-                Add Task
+                {tWorkflows("labels.addTask")}
               </AppButton>
               <AppButton
                 icon={<FaSave />}
@@ -342,7 +344,7 @@ const BpmnDiagram = ({
                 outline
                 onClick={handleSave}
               >
-                Save XML
+                {tWorkflows("labels.saveXml")}
               </AppButton>
               <AppButton
                 icon={<FaDownload />}
@@ -351,7 +353,7 @@ const BpmnDiagram = ({
                 outline
                 onClick={handleExport}
               >
-                Export BPMN
+                {tWorkflows("labels.exportBpmn")}
               </AppButton>
             </div>
             <Button
@@ -362,14 +364,14 @@ const BpmnDiagram = ({
                     setSettings={setSettings}
                     defaultValues={settings}
                   />,
-                  { title: "Settings workflow" }
+                  { title: tWorkflows("labels.setting") }
                 );
                 openModal(
                   <SettingsWorkflow
                     setSettings={setSettings}
                     defaultValues={settings}
                   />,
-                  { title: "Settings workflow" }
+                  { title: tWorkflows("labels.setting") }
                 );
               }}
             >

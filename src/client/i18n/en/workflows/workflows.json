@@ -1,0 +1,13 @@
+{
+    "title": "Workflow models",
+    "listTitle": "Workflows",
+    "addNew": "Add new workflow",
+    "selectPrompt": "Select workflow",
+    "labels": {
+        "name": "Workflow name",
+        "addTask": "Add task",
+        "saveXml": "Save XML",
+        "exportBpmn": "Export BPMN",
+        "setting": "Settings workflow"
+    }
+}

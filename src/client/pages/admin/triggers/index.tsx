@@ -13,8 +13,12 @@ import _ from "lodash";
 import { AddTrigger } from "./components/AddTrigger";
 import { fieldFormTriggers } from "./utils/fieldFormTriggers";
 import { AppButton } from "../../../components/common/AppButton";
+import { useTranslation } from "react-i18next";
 
 const Triggers = () => {
+  const { t: tTriggers } = useTranslation("triggers");
+  const { t } = useTranslation();
+
   const schema = useStore((state) => state.schema);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [selectedTriggers, setSelectedTriggers] = useState({} as any);
@@ -72,27 +76,30 @@ const Triggers = () => {
   return (
     <div className="h-full">
       <div className="p-2 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 ">
-        <span className="font-bold">Triggers editor</span>
+        <span className="font-bold">{tTriggers("title")}</span>
       </div>
       <div className="flex items-start h-full gap-2">
         <div className="px-3 w-4/12 h-full overflow-y-auto border-r border-gray-200 dark:border-gray-700 overflow-x-hidden bg-gray-50 dark:bg-gray-800">
           <div className="pt-1 flex justify-between items-center my-1">
             <div>
-              <span className="font-bold">Triggers</span>
+              <span className="font-bold">{tTriggers("listTitle")}</span>
               <span className="float-end pl-1">({triggers.length})</span>
             </div>
             <AppButton
               icon={<FaPlus />}
               onClick={() => {
                 openModal(
-                  <AddTrigger modalLabel="Add trigger" modalSingle={true} />,
+                  <AddTrigger
+                    modalLabel={tTriggers("addTrigger")}
+                    modalSingle={true}
+                  />,
                   {
-                    title: "Add new trigger",
+                    title: tTriggers("addNewTrigger"),
                   }
                 );
               }}
             >
-              Add
+              {t("labels.add")}
             </AppButton>
           </div>
           <div>
@@ -118,7 +125,7 @@ const Triggers = () => {
                 }}
                 formFields={[
                   {
-                    label: "Active",
+                    label: t("labels.active"),
                     field: "active",
                     type: "checkbox",
                   },
@@ -127,7 +134,7 @@ const Triggers = () => {
               >
                 <div className="my-2">
                   <Button type="submit" className="inline-block">
-                    Ulozit
+                    {t("labels.save")}
                   </Button>
                   <Button
                     color="failure"
@@ -142,7 +149,7 @@ const Triggers = () => {
                       refresh();
                     }}
                   >
-                    Smazat
+                    {t("labels.delete")}
                   </Button>
                 </div>
               </Form>
@@ -152,7 +159,7 @@ const Triggers = () => {
               value={selectedTriggers.code}
               height="60vh"
               defaultLanguage="javascript"
-              defaultValue="// Začni psát svůj kód zde..."
+              defaultValue={tTriggers("labels.editorPlaceholder")}
               theme="light"
               onMount={handleEditorDidMount}
               onChange={(code) => {
