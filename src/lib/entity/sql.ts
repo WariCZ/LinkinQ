@@ -52,7 +52,6 @@ export class Sql {
   }) => {
     if (entity) {
       if (this.#schema[entity]) {
-        if (entity === "tasks") debugger;
         const fieldsArr = _.uniq([...(fields || ["*"]), ...(groupBy || [])]);
 
         const queries = getQueries({

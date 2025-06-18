@@ -158,7 +158,7 @@ export class EntityRoutes extends Entity {
 
             const fields = (
               req.query.__fields
-                ? req.query.__fields + (req.query.__aggregate ? "" : ",guid")
+                ? req.query.__fields + (req.query.__aggregate ? "" : ",id,guid")
                 : "*"
             ).split(",");
 
