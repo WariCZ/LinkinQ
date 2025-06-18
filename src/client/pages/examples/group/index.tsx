@@ -1,7 +1,7 @@
-import Table from "../../components/Table";
-import useDataTable from "../../hooks/useDataTable";
+import Table from "../../../components/Table";
+import useDataTable from "../../../hooks/useDataTable";
 
-export function GroupExample() {
+export default function GroupExample() {
   const [
     data,
     setData,
@@ -19,14 +19,13 @@ export function GroupExample() {
   ] = useDataTable(
     {
       entity: "tasks",
-      fields: ["caption"],
-      // ordering: [{ id: "createtime", desc: true }],
-      // ordering: [{ id: "createdby.fullname", desc: true }],
-      structure: "topdown",
-      // groupby: ["status"],
-      ordering: [{ id: "assignee", desc: true }],
-      // structure: "topdown",
-      groupby: ["status"],
+      fields: ["status", "createdby.createdby.fullname"],
+      aggregate: [
+        { type: "sum", field: "kind", alias: "moje_suma" },
+        { type: "avg", field: "kind", alias: "moje_avg" },
+        { type: "count", field: "kind", alias: "moje_count" },
+      ],
+      groupby: ["status", "createdby.createdby.fullname"],
       //   filter: filters,
     },
     []

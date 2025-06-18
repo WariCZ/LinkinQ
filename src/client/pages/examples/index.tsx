@@ -5,6 +5,7 @@ import { ManualTask } from "./components/ManualTask";
 import { FaDownload, FaPlus } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import { ConfigurableForm } from "./components/ConfigurableForm";
+import useDataTable from "../../hooks/useDataTable";
 
 const Examples = () => {
   const { t } = useTranslation();
