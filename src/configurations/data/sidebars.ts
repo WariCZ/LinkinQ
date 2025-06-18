@@ -1,6 +1,7 @@
 const defaultData = ({ env }) => ({
   appConfigurations: [
     {
+      key: "linkinq.default.menu",
       guid: "9500b584-fa8a-4a3c-1111-92f2221db78b",
       caption: "Default menu",
       kind: 3,
