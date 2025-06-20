@@ -1,5 +1,5 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { CiMenuBurger } from "react-icons/ci";
+import { IconChevronRight, IconMenu } from "../../Icons";
 interface MenuItemConfig {
   label: string;
   icon?: React.ReactNode;
@@ -23,7 +23,7 @@ export const RowMenu = ({
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild>
         <button className="hover:bg-gray-200 rounded p-2">
-          <CiMenuBurger />
+          <IconMenu />
         </button>
       </DropdownMenu.Trigger>
 
@@ -53,7 +53,9 @@ export const RowMenu = ({
                       {item.icon}
                       {item.label}
                     </div>
-                    <span className="text-xs">▶</span>
+                    <span className="text-xs">
+                      <IconChevronRight />
+                    </span>
                   </DropdownMenu.SubTrigger>
                   <DropdownMenu.Portal>
                     <DropdownMenu.SubContent

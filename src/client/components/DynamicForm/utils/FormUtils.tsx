@@ -5,7 +5,6 @@ import { FormSection } from "../elements/FormSection";
 import { FormTabs } from "../elements/FormTabs";
 import { FormField } from "../fields/FormField";
 import globalComponents from "../../globalComponents";
-// import { CollapsibleSection } from "../../CollapsibleSection";
 
 export const translateFormField = ({
   field,
@@ -115,6 +114,7 @@ export const renderItem = ({
   schema?: EntityType;
   readOnly?: boolean;
 }): React.ReactNode => {
+  console.log("formField renderItem", formField);
   if (formField.type === "Section") {
     return (
       <FormSection

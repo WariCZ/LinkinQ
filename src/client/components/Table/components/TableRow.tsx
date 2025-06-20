@@ -1,17 +1,18 @@
 import { Checkbox } from "flowbite-react";
 import { flexRender, Row } from "@tanstack/react-table";
 import { RowMenu } from "./RowMenu";
-import {
-  FaCopy,
-  FaTasks,
-  FaPlus,
-  FaPaperclip,
-  FaShare,
-  FaFileExport,
-  FaTrash,
-} from "react-icons/fa";
 import { Dispatch, SetStateAction } from "react";
 import React from "react";
+import {
+  IconTasks,
+  IconExport,
+  IconPlus,
+  IconPaperclip,
+  IconShare,
+  IconTrash,
+  IconCopy,
+  IconChevronRight,
+} from "../../Icons";
 
 interface TableRowProps<T> {
   row: Row<any>;
@@ -42,7 +43,7 @@ export const TableRow = <T,>({
 
   return (
     <tr
-      onClick={() => rowClick && rowClick(row.original)}
+      // onClick={() => rowClick && rowClick(row.original)}
       key={row.id + "-" + i}
       data-guid={guid}
       className={`hover:bg-gray-100 dark:hover:bg-gray-600 ${
@@ -78,7 +79,11 @@ export const TableRow = <T,>({
         >
           {cell.column.id === "expander" && row.getCanExpand() ? (
             <button onClick={row.getToggleExpandedHandler()} className="mr-2">
-              {row.getIsExpanded() ? "▼" : "▶"}
+              <IconChevronRight
+                className={`transform transition-transform duration-300 ${
+                  row.getIsExpanded() ? "rotate-90" : "rotate-0"
+                }`}
+              />
             </button>
           ) : null}
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -95,16 +100,16 @@ export const TableRow = <T,>({
             menuItems={[
               {
                 label: "Duplikovat…",
-                icon: <FaCopy />,
+                icon: <IconCopy />,
                 onSelect: () => console.log("Duplikovat…"),
               },
               {
                 label: "Úkoly",
-                icon: <FaTasks />,
+                icon: <IconTasks />,
                 subItems: [
                   {
                     label: "Nový úkol…",
-                    icon: <FaPlus />,
+                    icon: <IconPlus />,
                     onSelect: () => console.log("new"),
                   },
                   {
@@ -119,20 +124,20 @@ export const TableRow = <T,>({
               },
               {
                 label: "Všechny přílohy…",
-                icon: <FaPaperclip />,
+                icon: <IconPaperclip />,
                 onSelect: () => console.log("přílohy…"),
               },
               {
                 label: "Sdílet…",
-                icon: <FaShare />,
+                icon: <IconShare />,
               },
               {
                 label: "Exportovat…",
-                icon: <FaFileExport />,
+                icon: <IconExport />,
               },
               {
                 label: "Odstranit",
-                icon: <FaTrash />,
+                icon: <IconTrash />,
                 danger: true,
                 onSelect: async () => {
                   if (deleteRecord) {

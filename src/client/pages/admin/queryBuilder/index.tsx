@@ -115,7 +115,8 @@ const QueryBuilder = () => {
           tableConfigKey="queryBuilder"
           entity={entity}
           data={data}
-          rowClick={(data) =>
+          rowClick={(data) => {
+            debugger;
             openModal(
               <QueryBuilderDetail
                 refresh={refresh}
@@ -124,8 +125,8 @@ const QueryBuilder = () => {
                 entity={entity}
               />,
               { title: tQuery("queryDetail") }
-            )
-          }
+            );
+          }}
           columns={fields}
           loading={loading}
           highlightedRow={highlightedRow}

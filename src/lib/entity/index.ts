@@ -242,6 +242,8 @@ export class Entity {
           column = table.jsonb(columnName);
         } else if (columnDef.type == "boolean") {
           column = table.boolean(columnName);
+        } else if (columnDef.type == "decimal") {
+          column = table.decimal(columnName);
         } else if (columnDef.type == "password") {
           column = table.string(columnName);
         } else if (columnDef.type == "blob") {

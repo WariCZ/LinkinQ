@@ -6,6 +6,15 @@ import "react-tabs/style/react-tabs.css";
 import App from "./App";
 import "./localization";
 import { initLocalization } from "./localization";
+import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
+import useDataTable from "./hooks/useDataTable";
+import { useModalStore } from "./components/Modal/modalStore";
+import Table from "./components/Table";
+import { useColumnStorage } from "./components/Table/hooks/useColumnStorage";
+import useStore from "./store";
+import DynamicForm from "./components/DynamicForm";
+import useDataDetail from "./hooks/useDataDetail";
 
 const createLinkinqClient = async ({
   modules,
@@ -27,7 +36,6 @@ const createLinkinqClient = async ({
       ...moduleConf.localizations,
     };
   });
-
   await initLocalization({
     localizations: { ...modulesLocalizations, ...localizations },
   });
@@ -39,4 +47,17 @@ const createLinkinqClient = async ({
   );
 };
 
-export { createLinkinqClient, App, ModalContainer };
+export {
+  createLinkinqClient,
+  App,
+  ModalContainer,
+  useTranslation,
+  useDataTable,
+  useLocation,
+  useModalStore,
+  useColumnStorage,
+  Table,
+  useStore,
+  DynamicForm,
+  useDataDetail,
+};

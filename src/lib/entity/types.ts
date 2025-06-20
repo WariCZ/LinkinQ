@@ -26,6 +26,7 @@ export type FieldPrimitiveType =
   | "jsonb"
   | "boolean"
   | "password"
+  | "decimal"
   | "blob"
   | "text"
   | "bigint"
