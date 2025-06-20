@@ -67,14 +67,14 @@ export const QueryBuilderDetail = (
 
   const fields: FormFieldType[] = [
     {
-      type: "CollapsibleSection",
+      type: "Section",
       label: "System",
-      children: getFormFields({ fields: systemFields, entity, schema }),
+      fields: getFormFields({ fields: systemFields, entity, schema }),
     },
     {
-      type: "CollapsibleSection",
+      type: "Section",
       label: "Others",
-      children: getFormFields({ fields: nonSystemFields, entity, schema }),
+      fields: getFormFields({ fields: nonSystemFields, entity, schema }),
     },
   ];
 

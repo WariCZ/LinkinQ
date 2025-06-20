@@ -7,6 +7,7 @@ type IconProps = Omit<LucideIcons.LucideProps, "ref"> &
 function withDefaults(Icon: React.FC<IconProps>) {
   return (props: IconProps) => <Icon size={props.size ?? 15} {...props} />;
 }
+export type IconType = (props: IconProps) => JSX.Element;
 
 export const IconTasks = withDefaults(LucideIcons.LayoutList);
 export const IconExport = withDefaults(LucideIcons.ArrowRightFromLine);

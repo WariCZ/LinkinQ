@@ -1,5 +1,5 @@
 import { TextInputProps } from "flowbite-react";
-import { IconType } from "react-icons";
+import { IconType } from "../../components/Icons";
 
 type RuleType = "show" | "hide" | "required" | "optional";
 
@@ -57,6 +57,7 @@ export type SectionType = {
   columns?: 1 | 2 | 3 | 4 | 6 | 12;
   fields: (FormFieldType | SectionType)[];
   colSpan?: number;
+  icon?: IconType;
 } & FormFieldDefault;
 
 export type TabFormType = {
@@ -84,12 +85,6 @@ type FormFieldTextWithIcon = {
 } & FormFieldDefault &
   TextInputProps;
 
-type FormFieldCollapsibleSection = {
-  type: "CollapsibleSection";
-  icon?: IconType;
-  children: FormFieldType[];
-} & FormFieldDefault;
-
 type FormFieldDateRange = {
   type: "dateRangePicker";
 } & FormFieldDefault;
@@ -105,5 +100,4 @@ export type FormFieldType =
   | FormFieldComponent
   | FormFieldProgress
   | FormFieldTextWithIcon
-  | FormFieldCollapsibleSection
   | FormFieldDateRange;

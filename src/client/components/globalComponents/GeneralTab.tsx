@@ -1,7 +1,7 @@
-import { CollapsibleSection } from "../../components/CollapsibleSection";
 import { FormField } from "../../components/DynamicForm/fields/FormField";
 import { Button } from "flowbite-react";
 import { FaFolderOpen } from "react-icons/fa";
+import { FormSection } from "../DynamicForm/elements/FormSection";
 
 function GeneralTab(props) {
   return (
@@ -16,11 +16,7 @@ function GeneralTab(props) {
         readOnly={props.readOnly}
         control={props.control}
       />
-      <CollapsibleSection
-        title="Soubor ze SŘ"
-        className="mb-4"
-        icon={FaFolderOpen}
-      >
+      {/* <FormSection title="Soubor ze SŘ" className="mb-4" icon={FaFolderOpen}>
         <div>
           <h4 className="text-gray-700 font-semibold mb-1">Soubor ze SŘ:</h4>
           <p className="text-gray-500 italic mb-2">Nejsou žádné záznamy</p>
@@ -28,16 +24,16 @@ function GeneralTab(props) {
             + Zvolit...
           </Button>
         </div>
-      </CollapsibleSection>
+      </FormSection> */}
 
       <FormField
         readOnly={props.readOnly}
         formField={{
-          type: "CollapsibleSection",
+          type: "Section",
           field: "parentSR",
           label: "Nadrizene SR",
           icon: FaFolderOpen,
-          children: [
+          fields: [
             {
               type: "Section",
               className: "grid grid-cols-3 gap-4 items-center",

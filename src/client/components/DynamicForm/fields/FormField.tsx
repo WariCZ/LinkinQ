@@ -1,5 +1,5 @@
 import { Control, Controller, FieldValues } from "react-hook-form";
-import { FormFieldType, SectionType } from "../../../types/DynamicForm/types";
+import { FormFieldType } from "../../../types/DynamicForm/types";
 import { Checkbox, Label, TextInput } from "flowbite-react";
 import DateTimePicker from "./DateTimePicker";
 import Select from "./Select";
@@ -8,8 +8,6 @@ import SlateEditor from "../../SlateEditor";
 import TaskProgressInput from "./ProgressInput";
 import TextInputWithIcon from "./TextInputWithIcon";
 import { IconType } from "react-icons";
-import { CollapsibleSection } from "../../CollapsibleSection";
-import { FormSection } from "../elements/FormSection";
 import DateRangePicker from "../../globalComponents/DateRangePicker";
 
 export const FormField = ({
@@ -353,32 +351,6 @@ export const FormField = ({
             )}
           />
         </div>
-      );
-    case "CollapsibleSection":
-      return (
-        <CollapsibleSection
-          key={formField.label}
-          title={formField.label}
-          icon={formField.icon}
-        >
-          {formField.children?.map((childField, index) =>
-            childField.type === "Section" ? (
-              <FormSection
-                key={index}
-                section={childField as SectionType}
-                control={control}
-                readOnly={readOnly}
-              />
-            ) : (
-              <FormField
-                key={index}
-                formField={childField}
-                control={control}
-                readOnly={readOnly}
-              />
-            )
-          )}
-        </CollapsibleSection>
       );
     case "dateRangePicker":
       return (

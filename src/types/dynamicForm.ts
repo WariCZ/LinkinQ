@@ -84,12 +84,6 @@ type FormFieldTextWithIcon = {
 } & FormFieldDefault &
   TextInputProps;
 
-type FormFieldCollapsibleSection = {
-  type: "CollapsibleSection";
-  icon?: IconType;
-  children: FormFieldType[];
-} & FormFieldDefault;
-
 type FormFieldDateRange = {
   type: "dateRangePicker";
 } & FormFieldDefault;
@@ -105,5 +99,4 @@ export type FormFieldType =
   | FormFieldComponent
   | FormFieldProgress
   | FormFieldTextWithIcon
-  | FormFieldCollapsibleSection
   | FormFieldDateRange;

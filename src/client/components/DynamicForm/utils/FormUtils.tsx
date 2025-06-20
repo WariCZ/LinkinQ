@@ -59,8 +59,7 @@ export const translateFormField = ({
   if (
     field.type === "Section" ||
     field.type === "Tabs" ||
-    field.type === "Сomponent" ||
-    field.type === "CollapsibleSection"
+    field.type === "Сomponent"
   ) {
     return field;
   }
@@ -151,29 +150,6 @@ export const renderItem = ({
       />
     );
   }
-
-  // if (formField.type === "СollapsibleSection") {
-  //   return (
-  //     <CollapsibleSection
-  //       key={key}
-  //       title={formField.label}
-  //       icon={formField.icon}
-  //     >
-  //       {formField.children?.map((childField, index) =>
-  //         childField.type === "Section" ? (
-  //           <FormSection
-  //             key={index}
-  //             section={childField as SectionType}
-  //             control={control}
-  //             schema={schema}
-  //           />
-  //         ) : (
-  //           <FormField key={index} formField={childField} control={control} />
-  //         )
-  //       )}
-  //     </CollapsibleSection>
-  //   );
-  // }
 
   return (
     <FormField
