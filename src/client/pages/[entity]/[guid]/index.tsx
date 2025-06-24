@@ -7,9 +7,9 @@ const Page = () => {
   const { Component } = usePageflow({
     entity,
     guid,
-    onLoad: true,
+    onLoadDetail: true,
   });
-  return <>{Component ? <Component /> : null}</>;
+  return <>{Component ? <Component entity={entity} guid={guid} /> : null}</>;
 };
 
 export default Page;

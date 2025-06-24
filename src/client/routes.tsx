@@ -61,6 +61,7 @@ const getComponent = ({ componentPath, pages, type }) => {
       }
 
       if (!guid) return null;
+
       return <Component guid={guid} />;
     };
 

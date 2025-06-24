@@ -262,7 +262,7 @@ export class Pageflow {
           ...pf,
           type: "popup",
           urlPath: pfKey.replace("[guid]", "new"),
-          componentPath: pf.componentPath.replace("[guid]", "new"),
+          componentPath: pf.componentPath,
         };
       }
     }

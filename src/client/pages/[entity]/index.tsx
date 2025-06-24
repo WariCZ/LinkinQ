@@ -1,19 +1,16 @@
 import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useStore from "../../store";
+import { usePageflow } from "../../hooks/usePageflow";
 
 const Page = () => {
-  const { entita } = useParams();
-  const navigate = useNavigate();
-  const schema = useStore((state) => state.schema);
+  const { entity } = useParams();
   debugger;
-  useEffect(() => {
-    if (!schema[entita]) {
-      navigate("/");
-    }
-  }, [entita, navigate]);
-
-  return <div>Entita: {entita}</div>;
+  const { Component } = usePageflow({
+    entity,
+    onLoadList: true,
+  });
+  return <>{Component ? <Component entity={entity} /> : null}</>;
 };
 
 export default Page;
