@@ -12,6 +12,11 @@ const defaultData = ({ env }) => ({
           icon: "IoMdHome",
         },
         {
+          label: { cs: "Domů", en: "Home" },
+          to: "/",
+          icon: "IoMdHome",
+        },
+        {
           label: { cs: "Úkoly", en: "Tasks" },
           icon: "FaTasks",
           children: [

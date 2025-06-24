@@ -5,7 +5,6 @@ import { EntitySchema, FieldType } from "../../lib/entity/types";
 import { AppToastType } from "../components/Toast";
 import _ from "lodash";
 
-type GuiEntitySchema = Record<string, FieldType>;
 interface StoreState {
   logout: () => void;
   setLoading: (loading: boolean) => void;
@@ -33,7 +32,7 @@ interface StoreState {
   getAppConfigurations: () => Promise<void>;
 
   pageflow: any;
-  pageflowEntity: any;
+  // pageflowEntity: any;
   getPageflow: () => Promise<void>;
   getPublicPageflow: () => Promise<void>;
 
@@ -45,7 +44,7 @@ const useStore = create<StoreState>((set, get) => ({
   pages: {},
   schema: {},
   pageflow: {},
-  pageflowEntity: {},
+  // pageflowEntity: {},
   user: null,
   roles: [],
   loading: true,
@@ -122,22 +121,22 @@ const useStore = create<StoreState>((set, get) => ({
       if (response.data) {
         set({ pageflow: response.data });
 
-        const pageflowEntity = _.filter(response.data, { kind: "2" }).map(
-          (d) => {
-            return {
-              ...d,
-              filterFields: _.keys(d.filter),
-            };
-          }
-        );
-        set({ pageflowEntity: pageflowEntity });
+        // const pageflowEntity = _.filter(response.data, { kind: "2" }).map(
+        //   (d) => {
+        //     return {
+        //       ...d,
+        //       filterFields: _.keys(d.filter),
+        //     };
+        //   }
+        // );
+        // set({ pageflowEntity: pageflowEntity });
       } else {
         set({ pageflow: {} });
-        set({ pageflowEntity: {} });
+        // set({ pageflowEntity: {} });
       }
     } catch (error) {
       set({ pageflow: {} });
-      set({ pageflowEntity: {} });
+      // set({ pageflowEntity: {} });
     } finally {
       set({ loading: false });
     }

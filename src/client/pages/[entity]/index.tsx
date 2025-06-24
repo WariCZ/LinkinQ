@@ -9,7 +9,7 @@ const Page = () => {
   debugger;
   useEffect(() => {
     if (!schema[entita]) {
-      navigate("/", { replace: true });
+      navigate("/");
     }
   }, [entita, navigate]);
 

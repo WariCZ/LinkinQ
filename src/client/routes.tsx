@@ -1,10 +1,10 @@
-import React, { lazy, useEffect } from "react";
+import React, { lazy, useEffect, Suspense } from "react";
 import { Route, Navigate, Outlet } from "react-router-dom";
 import { DashboardHeader } from "./components/layout/Header";
 import DashboardSidebar from "./components/layout/Sidebar";
 import AppToast from "./components/Toast";
 import { User } from "../lib/auth";
-import { PageflowRecordClient } from "../types/share";
+import { useParams, useNavigate } from "react-router-dom";
 
 export type RouteEntry = {
   path?: string; // např. "/login" nebo "/admin"
@@ -34,7 +34,7 @@ const PrivateLayout = (props: {
   );
 };
 
-const getComponent = ({ componentPath, pages }) => {
+const getComponent = ({ componentPath, pages, type }) => {
   let cPath;
   if (componentPath.indexOf("client/") > -1) {
     cPath = componentPath.replace("client/", "./");
@@ -42,12 +42,30 @@ const getComponent = ({ componentPath, pages }) => {
     cPath = componentPath;
   }
 
-  const Component = lazy(async () => {
+  const Component: any = lazy(async () => {
     const loader = pages[cPath]; // path musí být klíč z objektu výše
     if (!loader) throw new Error(`Path "${cPath}" not found in glob.`);
     const module = await loader();
     return { default: module.default };
   });
+
+  if (type == "detail") {
+    const DetailWrapper = () => {
+      const { guid } = useParams();
+      const navigate = useNavigate();
+
+      if (!guid) {
+        useEffect(() => {
+          navigate("/", { replace: true });
+        }, [navigate]);
+      }
+
+      if (!guid) return null;
+      return <Component guid={guid} />;
+    };
+
+    return DetailWrapper;
+  }
 
   return Component;
 };
@@ -64,7 +82,8 @@ function generateRoutes({
   const routes: React.ReactNode[] = [];
 
   pageflow.map((pf) => {
-    const { path, componentPath, noLayout, to, sidebar, kind } = pf as any;
+    const { path, componentPath, noLayout, to, sidebar, kind, type } =
+      pf as any;
 
     if (kind != 1) return;
 
@@ -73,7 +92,7 @@ function generateRoutes({
         <Route key={path} path={path} element={<Navigate to={to} />} />
       );
     } else {
-      const Component = getComponent({ componentPath, pages });
+      const Component = getComponent({ componentPath, pages, type });
       if (noLayout) {
         routes.push(<Route key={path} path={path} element={<Component />} />);
       } else {

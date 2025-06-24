@@ -4,13 +4,9 @@ import authRoutes, { authenticate } from "../lib/auth";
 import path from "path";
 import fs from "fs";
 import { Knex } from "knex";
-import _, { update } from "lodash";
-import { DateTime } from "luxon";
-import EventEmitter from "events";
+import _ from "lodash";
 import { EntitySchema } from "./entity/types";
 import { dbType, Sql } from "./entity/sql";
-import { MAIN_GUID, MAIN_ID, MAIN_TABLE_ALIAS } from "./knex";
-import { hashPassword } from "./entity/utils";
 import { v5 } from "uuid";
 
 import { build } from "esbuild";
@@ -236,15 +232,53 @@ export class Pageflow {
       .setUser({ id: 1 })
       .select("*");
 
+    //   {
+    //     "path": "/cars/detail/:guid",
+    //     "componentPath": "./pages/cars/detail/[guid]/",
+    //     "source": "Autopark",
+    //     "noLayout": null,
+    //     "to": null,
+    //     "sidebar": null,
+    //     "kind": "1",
+    //     "type": "detail"
+    // }
+
+    // 37		"client/pages/cars/detail/[guid]/"		false	"Autopark"		"components"	"detail"		"/cars/detail/[guid]"	"b65fd9ab-972c-5983-a405-a26bf5d33f11"	1					"2025-06-24 13:41:03.197+02"	1	1	"2025-06-24 13:58:33.335+02"
+
+    for (const pfKey in initPageflowSorted) {
+      const pf = initPageflowSorted[pfKey];
+
+      if (
+        Array.isArray(pf.type) &&
+        pf.type.includes("detail") &&
+        pf.type.includes("popup") &&
+        pfKey.indexOf("[guid]") > -1
+      ) {
+        initPageflowSorted[`${pfKey}`] = {
+          ...pf,
+          type: "detail",
+        };
+        initPageflowSorted[`${pfKey.replace("[guid]", "new")}`] = {
+          ...pf,
+          type: "popup",
+          urlPath: pfKey.replace("[guid]", "new"),
+          componentPath: pf.componentPath.replace("[guid]", "new"),
+        };
+      }
+    }
+
     const existsGuids = [];
     for (const pfKey in initPageflowSorted) {
       const pf = initPageflowSorted[pfKey];
 
+      if (Object.keys(pf).length == 0) {
+        continue;
+      }
       const uuid = v5(pfKey, this.DNS_NAMESPACE);
       const dbPf = _.find(dbPageflow, { guid: uuid });
 
       const data = {
-        kind: pf.entity ? 2 : 1,
+        kind: 1,
         caption: pf.urlPath,
         componentPath: pf.componentPath,
         source: pf.source,
@@ -254,6 +288,7 @@ export class Pageflow {
         sidebar: pf.sidebar,
         entity: pf.entity,
         filter: pf.filter,
+        type: pf.type,
       };
       if (dbPf) {
         const t: any[] = await this.db("pageflow")
@@ -282,30 +317,35 @@ export class Pageflow {
 
   getRoutes(routes) {
     return routes.map((r) => {
-      if (r.kind == 1)
-        return {
-          path: r.caption.replace("/_public", "").replace(/\[(\w+)\]/g, ":$1"),
-          componentPath: r.componentPath
-            ? r.componentPath.replace("client/", "./")
-            : null,
-          source: r.source,
-          noLayout: r.noLayout,
-          to: r.to,
-          sidebar: r.sidebar,
-          kind: r.kind,
-        };
-
+      // if (r.kind == 1)
       return {
+        path: r.caption.replace("/_public", "").replace(/\[(\w+)\]/g, ":$1"),
         componentPath: r.componentPath
           ? r.componentPath.replace("client/", "./")
           : null,
         source: r.source,
         noLayout: r.noLayout,
+        to: r.to,
         sidebar: r.sidebar,
+        kind: r.kind,
+        type: r.type,
         entity: r.entity,
         filter: r.filter,
-        kind: r.kind,
       };
+
+      // return {
+      //   path: r.caption.replace(/\[(\w+)\]/g, ":$1"),
+      //   componentPath: r.componentPath
+      //     ? r.componentPath.replace("client/", "./")
+      //     : null,
+      //   source: r.source,
+      //   noLayout: r.noLayout,
+      //   sidebar: r.sidebar,
+      //   entity: r.entity,
+      //   filter: r.filter,
+      //   kind: r.kind,
+      //   type: r.type,
+      // };
     });
   }
   pageflowRouter(): Router {
@@ -324,6 +364,7 @@ export class Pageflow {
           "entity",
           "filter",
           "kind",
+          "type",
         ],
         where: {
           isPublic: true,
@@ -350,6 +391,7 @@ export class Pageflow {
             "entity",
             "filter",
             "kind",
+            "type",
           ],
           where: {
             "$neq;isPublic": true,

@@ -1,7 +1,11 @@
+import { LazyExoticComponent } from "react";
 import create from "zustand";
 
 interface ModalData {
-  content: React.ReactNode | ((props: any) => React.ReactNode);
+  content:
+    | React.ReactNode
+    | ((props: any) => React.ReactNode)
+    | LazyExoticComponent<any>;
   options?: {
     title?: string;
     size?:
@@ -24,7 +28,10 @@ interface ModalData {
 interface StoreState {
   modals: ModalData[];
   openModal: (
-    content: React.ReactNode | ((props: any) => React.ReactNode),
+    content:
+      | React.ReactNode
+      | ((props: any) => React.ReactNode)
+      | LazyExoticComponent<any>,
     options?: ModalData["options"]
   ) => void;
   closeModal: () => void;

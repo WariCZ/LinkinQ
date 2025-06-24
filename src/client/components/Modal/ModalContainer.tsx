@@ -1,9 +1,15 @@
-import React, { useRef } from "react";
+import React, {
+  ComponentType,
+  LazyExoticComponent,
+  Suspense,
+  useRef,
+} from "react";
 import { Button, Modal } from "flowbite-react";
 import { useModalStore } from "./modalStore";
 import Draggable from "react-draggable";
 import { useTranslation } from "react-i18next";
 import { IconType } from "react-icons";
+import DynamicComponent from "../../pages/dynamic";
 
 const ModalContainer = () => {
   const { modals, closeModal } = useModalStore();
@@ -25,6 +31,13 @@ const ModalContainer = () => {
         } else if (React.isValidElement(content)) {
           const validProps = { ...(content.props || {}), formRef, closeModal };
           ComponentWithProps = React.cloneElement(content, validProps);
+        } else if (typeof content === "object" && (content as any)?.$$typeof) {
+          const DynamicComponent: any = content;
+          ComponentWithProps = (
+            <Suspense>
+              <DynamicComponent formRef={formRef} closeModal={closeModal} />
+            </Suspense>
+          );
         } else {
           console.error("Invalid content type for modal:", content);
           return null;
