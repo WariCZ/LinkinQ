@@ -232,19 +232,6 @@ export class Pageflow {
       .setUser({ id: 1 })
       .select("*");
 
-    //   {
-    //     "path": "/cars/detail/:guid",
-    //     "componentPath": "./pages/cars/detail/[guid]/",
-    //     "source": "Autopark",
-    //     "noLayout": null,
-    //     "to": null,
-    //     "sidebar": null,
-    //     "kind": "1",
-    //     "type": "detail"
-    // }
-
-    // 37		"client/pages/cars/detail/[guid]/"		false	"Autopark"		"components"	"detail"		"/cars/detail/[guid]"	"b65fd9ab-972c-5983-a405-a26bf5d33f11"	1					"2025-06-24 13:41:03.197+02"	1	1	"2025-06-24 13:58:33.335+02"
-
     for (const pfKey in initPageflowSorted) {
       const pf = initPageflowSorted[pfKey];
 
@@ -289,6 +276,7 @@ export class Pageflow {
         entity: pf.entity,
         filter: pf.filter,
         type: pf.type,
+        options: pf.options,
       };
       if (dbPf) {
         const t: any[] = await this.db("pageflow")
@@ -317,7 +305,6 @@ export class Pageflow {
 
   getRoutes(routes) {
     return routes.map((r) => {
-      // if (r.kind == 1)
       return {
         path: r.caption.replace("/_public", "").replace(/\[(\w+)\]/g, ":$1"),
         componentPath: r.componentPath
@@ -331,21 +318,8 @@ export class Pageflow {
         type: r.type,
         entity: r.entity,
         filter: r.filter,
+        options: r.options,
       };
-
-      // return {
-      //   path: r.caption.replace(/\[(\w+)\]/g, ":$1"),
-      //   componentPath: r.componentPath
-      //     ? r.componentPath.replace("client/", "./")
-      //     : null,
-      //   source: r.source,
-      //   noLayout: r.noLayout,
-      //   sidebar: r.sidebar,
-      //   entity: r.entity,
-      //   filter: r.filter,
-      //   kind: r.kind,
-      //   type: r.type,
-      // };
     });
   }
   pageflowRouter(): Router {
@@ -365,6 +339,7 @@ export class Pageflow {
           "filter",
           "kind",
           "type",
+          "options",
         ],
         where: {
           isPublic: true,
@@ -392,6 +367,7 @@ export class Pageflow {
             "filter",
             "kind",
             "type",
+            "options",
           ],
           where: {
             "$neq;isPublic": true,

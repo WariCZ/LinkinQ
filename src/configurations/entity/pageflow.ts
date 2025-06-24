@@ -57,6 +57,12 @@ const entityFields: EntitySchema = {
         description: "Filter",
         isRequired: false,
       },
+      options: {
+        type: "jsonb",
+        label: "Options",
+        description: "Options",
+        isRequired: false,
+      },
     },
   },
 };

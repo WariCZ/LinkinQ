@@ -67,18 +67,34 @@ export function usePageflow(props?: {
   const getComponentDetail = async ({ entity, guid, type = "popup" }) => {
     if (!schema[entity]) {
       navigate("/");
-      return;
+      return {};
     }
 
     if (guid && !isValidGuid(guid)) {
       navigate("/");
-      return;
+      return {};
     }
 
-    const pageflows = _.filter(pageflow, {
+    let pageflows = _.filter(pageflow, {
       entity: entity,
       ...(type ? { type } : {}),
     });
+
+    if (pageflows.length == 0) {
+      if (type == "popup") {
+        pageflows = _.filter(pageflow, {
+          entity: entity,
+          type: "detail",
+        });
+        if (pageflows.length == 0) {
+          navigate("/");
+          return {};
+        }
+      } else {
+        navigate("/");
+        return {};
+      }
+    }
     const fields = _.uniq(
       _.flatten(
         pageflows.map((pf) => {
@@ -114,7 +130,7 @@ export function usePageflow(props?: {
       // setError(err.message);
       console.error(err.response?.statusText || err.message || err);
       navigate("/");
-      return;
+      return {};
     }
   };
 
